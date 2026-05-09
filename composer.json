@@ -1,0 +1,8 @@
+{
+  "name": "exam-management/system",
+  "description": "Examination Management System dependencies",
+  "type": "project",
+  "require": {
+    "dompdf/dompdf": "^3.1"
+  }
+}

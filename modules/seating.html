@@ -3,8 +3,158 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Seating | Exam Management</title>
+<title>Seating Plan | Exam Management</title>
 <link rel="stylesheet" href="../css/style.css">
+<style>
+  /* Critical fallback styles for seating plan rendering */
+  #seating-plan .room-layout { border: 2px solid #a8b7cc; border-radius: 10px; padding: 14px; background: #fff; }
+  #seating-plan .layout-front { text-align: center; font-weight: 700; font-size: 14px; padding: 9px 10px; border: 2px dashed #6f8fb0; border-radius: 8px; background: #dfeeff; color: #1f3a56; margin-bottom: 12px; }
+  #seating-plan .seat-grid { display: grid; gap: 8px; }
+  #seating-plan .seat-box { border: 1px solid #9fb2c9; border-radius: 8px; padding: 6px; min-height: 74px; display: flex; flex-direction: column; }
+  #seating-plan .seat-empty { background: #f4f4f4; border-style: dashed; color: #777; }
+  #seating-plan .seat-no { font-size: 10px; font-weight: 700; color: #46566a; margin-bottom: 3px; text-transform: uppercase; }
+  #seating-plan .seat-roll { font-size: 11px; color: #3d4c5f; line-height: 1.2; }
+  #seating-plan .seat-group {
+    margin-bottom: 14px;
+    border: 1px solid #d8e4f1;
+    border-radius: 10px;
+    background: #fbfdff;
+    overflow: hidden;
+  }
+  #seating-plan .seat-group-head {
+    padding: 8px 10px;
+    background: #edf5ff;
+    color: #173b7a;
+    font-size: 12px;
+    font-weight: 700;
+    border-bottom: 1px solid #d8e4f1;
+  }
+  #seating-plan .seat-row {
+    display: grid;
+    gap: 8px;
+    padding: 10px;
+  }
+  #seating-plan .matrix-grid {
+    display: grid;
+    gap: 8px;
+  }
+  #seating-plan .matrix-note {
+    margin: 0 0 10px;
+    color: #4b6279;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  #seating-plan .invigilator-strip { margin: 0 0 10px 0; padding: 8px 10px; border: 1px solid #cfe0f3; border-radius: 8px; background: #f4f9ff; color: #1f3a56; font-size: 12px; }
+  #seating-plan .invigilator-strip strong { color: #153656; }
+  #seating-plan .seat-blocked {
+    background: #f3f6fb;
+    border-style: dashed;
+    color: #7b8794;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .plan-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .plan-stat {
+    border: 1px solid #d8e4f1;
+    background: #f8fbff;
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .plan-stat .label {
+    font-size: 12px;
+    color: #61758a;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+  .plan-stat .value {
+    font-size: 24px;
+    font-weight: 800;
+    color: #173b7a;
+    line-height: 1;
+  }
+  .plan-stat .hint {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #5f6f82;
+  }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 14px 0 18px;
+  }
+  .summary-panel {
+    border: 1px solid #d8e4f1;
+    background: #fff;
+    border-radius: 14px;
+    padding: 14px;
+  }
+  .summary-panel h3 {
+    margin: 0 0 10px;
+    font-size: 16px;
+    color: #153656;
+  }
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .summary-table th,
+  .summary-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #edf2f7;
+    text-align: left;
+  }
+  .summary-table th {
+    background: #f7f9fd;
+    color: #42546f;
+  }
+  .summary-empty {
+    color: #6b7280;
+    font-size: 13px;
+    padding: 10px 0 4px;
+  }
+  .table-responsive {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  #manual-seat-table {
+    width: max-content;
+    min-width: 100%;
+  }
+  #manual-seat-table th,
+  #manual-seat-table td {
+    white-space: nowrap;
+  }
+  .room-layout-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+  #seating-plan .room-layout,
+  #seating-plan .seat-grid {
+    min-width: max-content;
+  }
+  @media (max-width: 1100px) {
+    .plan-stats,
+    .summary-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
 </head>
 <body>
 <div class="app-wrapper">
@@ -12,12 +162,12 @@
     <div class="sidebar-header"><h2>Exam System</h2><p id="user-label"></p></div>
     <nav class="nav-links">
       <a href="../dashboard.html"><i>⊞</i> Dashboard</a>
-      <a href="students.html"><i>👥</i> Students</a>
+       <a href="students.html"><i>👥</i> Students</a>
       <a href="faculty.html"><i>👨‍🏫</i> Faculty</a>
       <a href="rooms.html"><i>🚪</i> Rooms</a>
       <a href="schedule.html"><i>📅</i> Schedule</a>
-      <a href="seating.html" class="active"><i>💺</i> Seating</a>
       <a href="invigilation.html"><i>📋</i> Invigilation</a>
+      <a href="seating.html" class="active"><i>💺</i> Seating</a>
       <a href="attendance.html"><i>✅</i> Attendance</a>
       <a href="replacement.html"><i>🔄</i> Replacement</a>
       <a href="reports.html"><i>📊</i> Reports</a>
@@ -25,43 +175,94 @@
       <a href="#" onclick="logout()"><i>🚪</i> Logout</a>
     </nav>
   </aside>
+
   <main class="main-content">
-    <header class="top-bar">
+    <header class="top-bar no-print">
       <button onclick="toggleSidebar()" class="menu-btn">☰</button>
-      <h1>Seating Allocation</h1>
+      <h1>Classroom Seating Plan</h1>
     </header>
-    <div class="page-body">
-      <!-- Exam Selector -->
-      <div class="card mb-4">
-        <div class="card-body row-flex">
+
+    <div class="page-body seating-plan-page">
+      <div class="card mb-4 no-print">
+        <div class="card-body row-flex gap-2 flex-wrap">
           <div class="form-group mb-0 flex-1">
-            <label>Select Exam</label>
-            <select id="exam-select" onchange="loadChart()">
-              <option value="">-- Select Exam --</option>
+            <label>Exam Type</label>
+            <select id="exam-type-select">
+              <option value="">-- Select Exam Type --</option>
             </select>
           </div>
-          <div class="btn-group ml-auto">
-            <button class="btn btn-primary" onclick="allocate()">🔧 Auto Allocate</button>
-            <button class="btn btn-danger" onclick="clearSeating()">🗑 Clear</button>
-            <button class="btn btn-success" onclick="exportCSV()">⬇ Export</button>
-            <button class="btn btn-secondary" onclick="window.print()">🖨 Print</button>
+          <div class="form-group mb-0 flex-1">
+            <label>Date</label>
+            <input id="exam-date-input" type="date" class="form-control" disabled />
+          </div>
+          <div class="form-group mb-0 flex-1">
+            <label>Shift</label>
+            <select id="shift-select" disabled>
+              <option value="">-- Select Shift --</option>
+            </select>
+          </div>
+          <div class="form-group mb-0 flex-1">
+            <label>Room No</label>
+            <select id="room-select" disabled>
+              <option value="">-- Select Room --</option>
+            </select>
+          </div>
+          <div class="btn-group ml-auto" style="align-self:flex-end">
+            <button class="btn btn-primary" onclick="generateSeatingPlan()">Generate Seating Plan</button>
+            <button class="btn btn-warning" onclick="toggleManualEditor()">Manual Edit</button>
+            <button class="btn btn-warning" onclick="saveManualChanges()">Save Changes</button>
+            <button class="btn btn-success" onclick="downloadPDF()">Download PDF</button>
           </div>
         </div>
       </div>
 
-      <!-- Seating Chart -->
       <div class="card">
-        <div class="card-header"><h2>Seating Chart</h2></div>
+        <div class="card-header">
+          <h2 id="plan-title">Select exam and room to generate a classroom seating layout</h2>
+        </div>
         <div class="card-body">
-          <table class="data-table" id="seating-table">
-            <thead>
-              <tr>
-                <th>Room</th><th>Building</th><th>Seat No</th><th>Row</th>
-                <th>Roll No</th><th>Name</th><th>Branch</th><th>Semester</th><th>Section</th>
-              </tr>
-            </thead>
-            <tbody id="seating-tbody"><tr><td colspan="9" class="text-center">Select an exam to view seating.</td></tr></tbody>
-          </table>
+          <div id="plan-summary" class="text-muted mb-2">No plan generated yet.</div>
+          <div id="plan-details" class="summary-panel mb-3"></div>
+          <div id="plan-stats" class="plan-stats"></div>
+          <div id="seat-summary" class="summary-grid"></div>
+          <div id="branch-legend" class="branch-legend"></div>
+          <div id="manual-editor" class="card mt-3" style="display:none">
+            <div class="card-header"><h3>Manual Seat Editing</h3></div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="data-table" id="manual-seat-table">
+                  <thead>
+                    <tr>
+                      <th>Roll No</th>
+                      <th>Seat No</th>
+                      <th>Row No</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div id="seating-plan" class="room-layout-wrap">
+            <div class="room-layout" id="print-area">
+              <div class="layout-front">Whiteboard / Teacher Area</div>
+              <div class="seat-grid" style="display:grid; gap:8px; grid-template-columns: repeat(6, minmax(120px, 1fr));">
+                <div class="seat-box seat-empty"><div class="seat-no">Seat 1</div><div class="seat-roll">Roll Number</div><div class="seat-branch">Branch</div><div class="seat-year">Year</div></div>
+                <div class="seat-box seat-empty"><div class="seat-no">Seat 2</div><div class="seat-roll">Roll Number</div><div class="seat-branch">Branch</div><div class="seat-year">Year</div></div>
+                <div class="seat-box seat-empty"><div class="seat-no">Seat 3</div><div class="seat-roll">Roll Number</div><div class="seat-branch">Branch</div><div class="seat-year">Year</div></div>
+                <div class="seat-box seat-empty"><div class="seat-no">Seat 4</div><div class="seat-roll">Roll Number</div><div class="seat-branch">Branch</div><div class="seat-year">Year</div></div>
+                <div class="seat-box seat-empty"><div class="seat-no">Seat 5</div><div class="seat-roll">Roll Number</div><div class="seat-branch">Branch</div><div class="seat-year">Year</div></div>
+                <div class="seat-box seat-empty"><div class="seat-no">Seat 6</div><div class="seat-roll">Roll Number</div><div class="seat-branch">Branch</div><div class="seat-year">Year</div></div>
+                <div class="seat-box seat-empty"><div class="seat-no">Seat 7</div><div class="seat-roll">Roll Number</div><div class="seat-branch">Branch</div><div class="seat-year">Year</div></div>
+                <div class="seat-box seat-empty"><div class="seat-no">Seat 8</div><div class="seat-roll">Roll Number</div><div class="seat-branch">Branch</div><div class="seat-year">Year</div></div>
+                <div class="seat-box seat-empty"><div class="seat-no">Seat 9</div><div class="seat-roll">Roll Number</div><div class="seat-branch">Branch</div><div class="seat-year">Year</div></div>
+                <div class="seat-box seat-empty"><div class="seat-no">Seat 10</div><div class="seat-roll">Roll Number</div><div class="seat-branch">Branch</div><div class="seat-year">Year</div></div>
+                <div class="seat-box seat-empty"><div class="seat-no">Seat 11</div><div class="seat-roll">Roll Number</div><div class="seat-branch">Branch</div><div class="seat-year">Year</div></div>
+                <div class="seat-box seat-empty"><div class="seat-no">Seat 12</div><div class="seat-roll">Roll Number</div><div class="seat-branch">Branch</div><div class="seat-year">Year</div></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -69,73 +270,771 @@
 </div>
 
 <div id="toast" class="toast"></div>
+
 <script src="../js/script.js"></script>
 <script>
-const API = '../api/seating.php';
+const API = '../api/seating-plan.php';
+let latestPlan = null;
+let availableDates = [];
 
 (async () => {
-  const res  = await fetch('../api/auth.php?action=check');
-  const auth = await res.json();
-  if (!auth.logged_in) { window.location.href = '../index.html'; return; }
+  const auth = await apiGet('../api/auth.php?action=check');
+  if (!auth || !auth.logged_in) {
+    window.location.href = '../index.html';
+    return;
+  }
   document.getElementById('user-label').textContent = auth.username + ' (' + auth.role + ')';
-  loadExams();
+
+  document.getElementById('exam-type-select').addEventListener('change', onExamTypeChange);
+  document.getElementById('exam-date-input').addEventListener('change', onExamDateChange);
+  document.getElementById('shift-select').addEventListener('change', onShiftChange);
+  await loadExamTypes();
 })();
 
-async function loadExams() {
-  const res  = await fetch(API + '?action=list_exams');
-  const data = await res.json();
-  const sel  = document.getElementById('exam-select');
-  if (data.data) data.data.forEach(e => {
-    const opt = document.createElement('option');
-    opt.value = e.exam_id;
-    opt.textContent = `${e.exam_name} (${e.date} – ${e.session})`;
-    sel.appendChild(opt);
+async function apiGet(url) {
+  const res = await fetch(url, { cache: 'no-store' });
+  const text = await res.text();
+  if (!text) throw new Error('Server returned an empty response');
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    throw new Error('Invalid JSON from server: ' + text.slice(0, 140));
+  }
+}
+
+async function loadExamTypes() {
+  try {
+    const data = await apiGet(API + '?action=list_exam_types');
+    const sel = document.getElementById('exam-type-select');
+    if (data.success && Array.isArray(data.data)) {
+      data.data.forEach(e => {
+        const opt = document.createElement('option');
+        opt.value = e.value;
+        opt.textContent = e.label;
+        sel.appendChild(opt);
+      });
+    }
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+function resetDateSelect() {
+  const input = document.getElementById('exam-date-input');
+  input.value = '';
+  input.min = '';
+  input.max = '';
+  input.disabled = true;
+  availableDates = [];
+}
+
+function resetRoomSelect() {
+  const sel = document.getElementById('room-select');
+  sel.innerHTML = '<option value="">-- Select Room --</option>';
+  sel.disabled = true;
+}
+
+function resetShiftSelect() {
+  const sel = document.getElementById('shift-select');
+  sel.innerHTML = '<option value="">-- Select Shift --</option>';
+  sel.disabled = true;
+}
+
+async function onExamTypeChange() {
+  resetDateSelect();
+  resetShiftSelect();
+  resetRoomSelect();
+  document.getElementById('manual-editor').style.display = 'none';
+
+  const examType = document.getElementById('exam-type-select').value;
+  if (!examType) return;
+
+  try {
+    const data = await apiGet(`${API}?action=list_dates&exam_type=${encodeURIComponent(examType)}`);
+    const input = document.getElementById('exam-date-input');
+    if (data.success && Array.isArray(data.data)) {
+      availableDates = data.data.filter(Boolean).sort();
+      if (availableDates.length > 0) {
+        input.min = availableDates[0];
+        input.max = availableDates[availableDates.length - 1];
+        input.value = availableDates[0];
+        input.disabled = false;
+        await onExamDateChange();
+      }
+    }
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+async function onExamDateChange() {
+  resetShiftSelect();
+  resetRoomSelect();
+  document.getElementById('manual-editor').style.display = 'none';
+
+  const examType = document.getElementById('exam-type-select').value;
+  const examDate = document.getElementById('exam-date-input').value;
+  if (!examType || !examDate) return;
+
+  if (availableDates.length > 0 && !availableDates.includes(examDate)) {
+    showToast('Please select a valid exam date for this exam type.', 'error');
+    return;
+  }
+
+  try {
+    const shiftsData = await apiGet(`${API}?action=list_shifts&exam_type=${encodeURIComponent(examType)}&date=${encodeURIComponent(examDate)}`);
+    const shiftSel = document.getElementById('shift-select');
+
+    if (shiftsData.success && Array.isArray(shiftsData.data) && shiftsData.data.length > 0) {
+      shiftsData.data.forEach((shiftValue) => {
+        const opt = document.createElement('option');
+        opt.value = shiftValue;
+        opt.textContent = shiftValue;
+        shiftSel.appendChild(opt);
+      });
+      shiftSel.disabled = false;
+
+      if (shiftsData.data.length === 1) {
+        shiftSel.value = shiftsData.data[0];
+        await onShiftChange();
+      }
+    }
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+async function onShiftChange() {
+  resetRoomSelect();
+  document.getElementById('manual-editor').style.display = 'none';
+
+  const examType = document.getElementById('exam-type-select').value;
+  const examDate = document.getElementById('exam-date-input').value;
+  const shift = document.getElementById('shift-select').value;
+  if (!examType || !examDate || !shift) return;
+
+  try {
+    const data = await apiGet(`${API}?action=list_rooms&exam_type=${encodeURIComponent(examType)}&date=${encodeURIComponent(examDate)}&shift=${encodeURIComponent(shift)}`);
+    const sel = document.getElementById('room-select');
+    if (data.success && Array.isArray(data.data)) {
+      data.data.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.room_id;
+        opt.textContent = `${r.room_no} (${r.building}, cap ${r.capacity})`;
+        sel.appendChild(opt);
+      });
+      sel.disabled = false;
+    }
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+function branchClassName(branch) {
+  const val = (branch || 'other').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  return 'seat-branch-' + val;
+}
+
+function buildBranchPalette(branches) {
+  const colors = [
+    '#fff4cc', '#dff5ff', '#e9e3ff', '#dcffe4', '#ffe5d8',
+    '#f5e7d7', '#f9dcf2', '#e4f0d8', '#f0ecff', '#d9f7f0'
+  ];
+  const map = {};
+  branches.forEach((branch, idx) => {
+    map[branch] = colors[idx % colors.length];
+  });
+  return map;
+}
+
+function getSeatGridCols(capacity) {
+  const root = Math.ceil(Math.sqrt(Math.max(capacity, 1)));
+  return Math.min(8, Math.max(4, root));
+}
+
+function parsePositiveInt(value, fallback) {
+  const parsed = parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function renderSeatCard(student, seatNo, blocked = false, bg = '#eef4ff', spacer = false) {
+  if (blocked) {
+    return `
+      <div class="seat-box seat-empty seat-blocked">
+        <div class="seat-no">Seat ${seatNo}</div>
+        <div class="seat-roll">Blocked</div>
+      </div>
+    `;
+  }
+
+  if (spacer) {
+    return `
+      <div class="seat-box seat-empty seat-spacer" aria-hidden="true"></div>
+    `;
+  }
+
+  if (!student) {
+    return `
+      <div class="seat-box seat-empty">
+        <div class="seat-no">Seat ${seatNo}</div>
+        <div class="seat-roll">Unassigned</div>
+        <div class="seat-branch">Branch</div>
+        <div class="seat-year">Year</div>
+      </div>
+    `;
+  }
+
+  const year = getYearFromSemester(student.semester);
+  const branchText = escapeHtml(student.branch || 'Unknown');
+  const yearText = year ? `Year ${year}` : 'Year N/A';
+  return `
+    <div class="seat-box ${branchClassName(student.branch)}" style="border:1px solid #9fb2c9; border-radius:8px; padding:6px; min-height:74px; display:flex; flex-direction:column; background:${bg}">
+      <div class="seat-no">Seat ${seatNo}</div>
+      <div class="seat-roll">Roll: ${escapeHtml(student.roll_no || '-')}</div>
+      <div class="seat-branch">Branch: ${branchText}</div>
+      <div class="seat-year">Year: ${yearText}</div>
+    </div>
+  `;
+}
+
+function getYearFromSemester(semester) {
+  const sem = parseInt(semester, 10);
+  if (Number.isNaN(sem) || sem <= 0) return null;
+  return Math.ceil(sem / 2);
+}
+
+function getBranchYearKey(student) {
+  const branch = String(student.branch || 'Unknown').trim() || 'Unknown';
+  const year = getYearFromSemester(student.semester);
+  const yearLabel = year ? `Year ${year}` : 'Year N/A';
+  return { branch, yearLabel, key: `${yearLabel}__${branch}` };
+}
+
+function groupStudentsByBranchYear(students) {
+  const groups = new Map();
+  students.forEach((student) => {
+    const { branch, yearLabel, key } = getBranchYearKey(student);
+    if (!groups.has(key)) {
+      groups.set(key, { branch, yearLabel, students: [] });
+    }
+    groups.get(key).students.push(student);
+  });
+
+  return [...groups.values()].sort((a, b) => {
+    const yearCompare = a.yearLabel.localeCompare(b.yearLabel);
+    if (yearCompare !== 0) return yearCompare;
+    return a.branch.localeCompare(b.branch);
   });
 }
 
-async function loadChart() {
-  const eid = document.getElementById('exam-select').value;
-  if (!eid) return;
-  const res  = await fetch(`${API}?action=get_chart&exam_id=${eid}`);
-  const data = await res.json();
-  const tbody = document.getElementById('seating-tbody');
-  tbody.innerHTML = data.data && data.data.length
-    ? data.data.map(s => `
-        <tr>
-          <td>${s.room_no}</td><td>${s.building}</td><td>${s.seat_no}</td><td>${s.row_no}</td>
-          <td>${s.roll_no}</td><td>${s.name}</td><td>${s.branch}</td>
-          <td>${s.semester}</td><td>${s.section}</td>
-        </tr>`).join('')
-    : '<tr><td colspan="9" class="text-center">No seating allocated yet.</td></tr>';
+function summarizeStudents(students) {
+  const branchMap = new Map();
+  const yearMap = new Map();
+
+  students.forEach((student) => {
+    const branch = String(student.branch || 'Unknown').trim() || 'Unknown';
+    const year = getYearFromSemester(student.semester);
+    const yearLabel = year ? `Year ${year}` : 'Year N/A';
+
+    if (!branchMap.has(branch)) {
+      branchMap.set(branch, { label: branch, students: 0, papers: 0, sheets: 0 });
+    }
+    if (!yearMap.has(yearLabel)) {
+      yearMap.set(yearLabel, { label: yearLabel, students: 0, papers: 0, sheets: 0 });
+    }
+
+    branchMap.get(branch).students += 1;
+    branchMap.get(branch).papers += 1;
+    branchMap.get(branch).sheets += 1;
+
+    yearMap.get(yearLabel).students += 1;
+    yearMap.get(yearLabel).papers += 1;
+    yearMap.get(yearLabel).sheets += 1;
+  });
+
+  return {
+    branchRows: [...branchMap.values()].sort((a, b) => a.label.localeCompare(b.label)),
+    yearRows: [...yearMap.values()].sort((a, b) => a.label.localeCompare(b.label))
+  };
 }
 
-async function allocate() {
-  const eid = document.getElementById('exam-select').value;
-  if (!eid) { showToast('Select an exam first.', 'error'); return; }
-  if (!confirm('Auto-allocate seats for this exam?')) return;
-  showToast('Allocating...', 'info');
-  const res  = await fetch(API, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'allocate', exam_id: eid}) });
-  const data = await res.json();
-  showToast(data.message, data.success ? 'success' : 'error');
-  if (data.success) loadChart();
+function renderSummaryPanels(students, roomCapacity, serverBranchSummary = [], serverYearSummary = []) {
+  const statsHost = document.getElementById('plan-stats');
+  const summaryHost = document.getElementById('seat-summary');
+  const totalStudents = students.length;
+  const totalPapers = totalStudents;
+  const totalSheets = totalStudents;
+  const fallback = summarizeStudents(students);
+  const branchRows = Array.isArray(serverBranchSummary) && serverBranchSummary.length
+    ? serverBranchSummary.map(r => ({
+        label: r.group || '-',
+        subject: formatSubjectLabel(r.subject_name, r.subject_code),
+        students: Number(r.students_count || 0),
+        papers: Number(r.question_papers || 0),
+        sheets: Number(r.answer_sheets || 0)
+      }))
+    : fallback.branchRows.map(r => ({ ...r, subject: '-' }));
+  const yearRows = Array.isArray(serverYearSummary) && serverYearSummary.length
+    ? serverYearSummary.map(r => ({
+        label: r.year_group || '-',
+        students: Number(r.students_count || 0),
+        papers: Number(r.question_papers || 0),
+        sheets: Number(r.answer_sheets || 0)
+      }))
+    : fallback.yearRows;
+
+  statsHost.innerHTML = `
+    <div class="plan-stat"><div class="label">Students Seated</div><div class="value">${totalStudents}</div><div class="hint">Across selected room</div></div>
+    <div class="plan-stat"><div class="label">Question Papers</div><div class="value">${totalPapers}</div><div class="hint">1 per seated student</div></div>
+    <div class="plan-stat"><div class="label">Answer Sheets</div><div class="value">${totalSheets}</div><div class="hint">1 per seated student</div></div>
+    <div class="plan-stat"><div class="label">Room Capacity</div><div class="value">${Number(roomCapacity || 0)}</div><div class="hint">Declared room capacity</div></div>
+  `;
+
+  const renderBranchTable = (rows) => `
+    <div class="summary-panel">
+      <h3>Branch Summary</h3>
+      ${rows.length ? `
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th>Group (Branch)</th>
+              <th>Subject</th>
+              <th>Students</th>
+              <th>Question Papers</th>
+              <th>Answer Sheets</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(row => `
+              <tr>
+                <td>${escapeHtml(row.label)}</td>
+                <td>${escapeHtml(row.subject || '-')}</td>
+                <td>${row.students}</td>
+                <td>${row.papers}</td>
+                <td>${row.sheets}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      ` : '<div class="summary-empty">No students seated in this room.</div>'}
+    </div>
+  `;
+
+  const renderYearTable = (rows) => `
+    <div class="summary-panel">
+      <h3>Year Summary</h3>
+      ${rows.length ? `
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th>Year group</th>
+              <th>Students</th>
+              <th>Question Papers</th>
+              <th>Answer Sheets</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(row => `
+              <tr>
+                <td>${escapeHtml(row.label)}</td>
+                <td>${row.students}</td>
+                <td>${row.papers}</td>
+                <td>${row.sheets}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      ` : '<div class="summary-empty">No students seated in this room.</div>'}
+    </div>
+  `;
+
+  summaryHost.innerHTML = [
+    renderBranchTable(branchRows),
+    renderYearTable(yearRows)
+  ].join('');
 }
 
-async function clearSeating() {
-  const eid = document.getElementById('exam-select').value;
-  if (!eid) { showToast('Select an exam first.', 'error'); return; }
-  if (!confirm('Clear all seating for this exam?')) return;
-  const res  = await fetch(API, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'clear', exam_id: eid}) });
-  const data = await res.json();
-  showToast(data.message, data.success ? 'success' : 'error');
-  if (data.success) loadChart();
+function formatSubjectLabel(subjectName, subjectCode) {
+  const name = String(subjectName || '').trim();
+  const code = String(subjectCode || '').trim();
+  if (!name && !code) return '-';
+  if (!code) return name;
+  if (!name) return code;
+  return `${name} (${code})`;
 }
 
-function exportCSV() { exportTableToCSV('seating-table', 'seating.csv'); }
+function buildColumnGroupedSeatMap(students, capacity, cols) {
+  const groups = {};
+
+  students.forEach(s => {
+    const year = getYearFromSemester(s.semester);
+    const yearLabel = year ? `Y${year}` : 'YNA';
+    const branch = (s.branch || 'Other').trim();
+    const key = `${yearLabel}__${branch}`;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(s);
+  });
+
+  const orderedGroupKeys = Object.keys(groups).sort((a, b) => a.localeCompare(b));
+  const columns = Array.from({ length: cols }, () => []);
+
+  orderedGroupKeys.forEach((key, idx) => {
+    const colIndex = idx % cols;
+    groups[key].sort((x, y) => {
+      const sx = Number(x.seat_no || 0);
+      const sy = Number(y.seat_no || 0);
+      if (sx !== sy) return sx - sy;
+      return String(x.roll_no || '').localeCompare(String(y.roll_no || ''));
+    });
+    columns[colIndex].push(...groups[key]);
+  });
+
+  const maxRows = Math.ceil(capacity / cols);
+  const seatMap = {};
+
+  for (let c = 0; c < cols; c++) {
+    for (let r = 0; r < maxRows; r++) {
+      const visualSeatNo = (r * cols) + c + 1;
+      if (visualSeatNo > capacity) break;
+      seatMap[visualSeatNo] = columns[c][r] || null;
+    }
+  }
+
+  return seatMap;
+}
+
+function shouldUseAlternatingColumns(students) {
+  if (!Array.isArray(students) || students.length === 0) return false;
+
+  const branches = new Set();
+  const semesters = new Set();
+  const sections = new Set();
+
+  students.forEach((student) => {
+    const branch = String(student.branch || '').trim();
+    if (branch) branches.add(branch);
+
+    const semester = String(student.semester || '').trim();
+    if (semester) semesters.add(semester);
+
+    const section = String(student.section || '').trim();
+    if (section) sections.add(section);
+  });
+
+  return branches.size === 1 && semesters.size === 1 && sections.size <= 1;
+}
+
+async function generateSeatingPlan() {
+  const examType = document.getElementById('exam-type-select').value;
+  const examDate = document.getElementById('exam-date-input').value;
+  const shift    = document.getElementById('shift-select').value;
+  const roomId   = document.getElementById('room-select').value;
+
+  if (!examType || !examDate || !shift || !roomId) {
+    showToast('Please select exam type, date, shift and room.', 'error');
+    return;
+  }
+
+  try {
+    // ── Step 1: fetch current plan (or create exam record if missing) ─────────
+    let data = await apiGet(
+      `${API}?exam_type=${encodeURIComponent(examType)}&date=${encodeURIComponent(examDate)}&shift=${encodeURIComponent(shift)}&room_id=${encodeURIComponent(roomId)}`
+    );
+
+    if (!data.success) {
+      showToast(data.message || 'Unable to load seating data.', 'error');
+      return;
+    }
+
+    const examId = Number(data.exam_id || 0);
+    if (examId <= 0) {
+      showToast('No exam record found for this slot. Add the exam to the datesheet first.', 'warning');
+      return;
+    }
+
+    const students = Array.isArray(data.students) ? data.students : [];
+
+    // ── Step 2: re-allocate if:
+    //   a) no students seated yet, OR
+    //   b) seated count exceeds declared capacity (stale/wrong allocation)
+    const needsAllocation = students.length === 0 || data.warning;
+
+    if (needsAllocation) {
+      const allocation = await requestAutoAllocation(examId);
+      if (!allocation.success) {
+        // Show whatever is in DB even if allocation failed, with a warning
+        showToast(allocation.message || 'Auto-allocation failed. Showing existing data.', 'warning');
+      } else {
+        // Reload fresh data after successful allocation
+        data = await apiGet(
+          `${API}?exam_type=${encodeURIComponent(examType)}&date=${encodeURIComponent(examDate)}&shift=${encodeURIComponent(shift)}&room_id=${encodeURIComponent(roomId)}`
+        );
+        if (!data.success) {
+          showToast(data.message || 'Unable to reload seating plan.', 'error');
+          return;
+        }
+      }
+    }
+
+    // ── Step 3: render ────────────────────────────────────────────────────────
+    latestPlan = data;
+    renderPlan(data);
+    renderManualEditor(data.students || []);
+    document.getElementById('manual-editor').style.display = 'none';
+
+    if (data.warning) {
+      showToast(data.warning, 'warning');
+    } else if ((data.students || []).length === 0) {
+      showToast('No students are seated in this room for the selected slot.', 'info');
+    } else {
+      showToast('Seating plan generated.', 'success');
+    }
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+async function requestAutoAllocation(examId) {
+  try {
+    const res = await fetch('../api/seating.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'allocate', exam_id: Number(examId) })
+    });
+    const text = await res.text();
+    let data = {};
+    try { data = JSON.parse(text || '{}'); } catch (_) {}
+    return {
+      success:           !!data.success,
+      message:           data.message || '',
+      partial_allocation: !!data.partial_allocation,
+      unallocated:       Number(data.unallocated_students || 0),
+    };
+  } catch (err) {
+    return { success: false, message: 'Unable to auto-allocate seats: ' + err.message };
+  }
+}
+
+function renderPlan(data) {
+  const planTitle = document.getElementById('plan-title');
+  const summary = document.getElementById('plan-summary');
+  const detailHost = document.getElementById('plan-details');
+  const planWrap = document.getElementById('seating-plan');
+  const legend = document.getElementById('branch-legend');
+  const invigilators = Array.isArray(data.invigilators) ? data.invigilators : [];
+
+  const invigilatorSummary = invigilators.length
+    ? invigilators.map(i => `${escapeHtml(i.name || '-')}${i.duty_type ? ' (' + escapeHtml(i.duty_type) + ')' : ''}`).join(', ')
+    : 'Not assigned yet';
+
+  const students = Array.isArray(data.students) ? data.students : [];
+
+  // Build seat-number → student map
+  const bySeat = {};
+  const branchSet = new Set();
+  students.forEach(s => {
+    bySeat[Number(s.seat_no)] = s;
+    if (s.branch) branchSet.add(s.branch);
+  });
+  const branches = [...branchSet];
+
+  const branchPalette = buildBranchPalette(branches);
+
+  // Legend
+  legend.innerHTML = branches.length
+    ? branches.map(b => `<div class="legend-item"><span class="legend-dot" style="background:${branchPalette[b]}"></span><span>${escapeHtml(b)}</span></div>`).join('')
+    : '<div class="legend-item"><span class="legend-dot" style="background:#f1f1f1"></span><span>No branch grouping</span></div>';
+
+  const highestSeatNo    = students.reduce((m, s) => Math.max(m, Number(s.seat_no || 0)), 0);
+  const declaredCapacity = Number(data.capacity || 0);
+  const capacity         = Math.max(declaredCapacity, students.length, highestSeatNo, 1);
+  const matrixRows       = parsePositiveInt(data.matrix_rows, Math.ceil(capacity / getSeatGridCols(capacity)));
+  const matrixCols       = parsePositiveInt(data.matrix_cols, getSeatGridCols(capacity));
+  const blockedSeats     = new Set(
+    (Array.isArray(data.blocked_seats) ? data.blocked_seats : []).map(s => String(s || '').toUpperCase())
+  );
+
+  renderSummaryPanels(
+    students,
+    declaredCapacity,
+    Array.isArray(data.branch_summary) ? data.branch_summary : [],
+    Array.isArray(data.year_summary) ? data.year_summary : []
+  );
+
+  // Build seat grid cells — always use bySeat lookup (works for 1 or N branches)
+  const matrixCells = [];
+  for (let rowNo = 1; rowNo <= matrixRows; rowNo++) {
+    for (let colNo = 1; colNo <= matrixCols; colNo++) {
+      // Seat numbering: column-first (seat 1 = col1/row1, seat 2 = col1/row2, …)
+      const seatNo  = ((colNo - 1) * matrixRows) + rowNo;
+      const seatKey = `R${rowNo}C${colNo}`;
+      const blocked = blockedSeats.has(seatKey);
+      const student = (!blocked && seatNo <= capacity) ? (bySeat[seatNo] || null) : null;
+      const bg      = blocked ? '#f3f6fb' : (student ? (branchPalette[student.branch] || '#eef4ff') : '#f7f9fd');
+      matrixCells.push(renderSeatCard(student, seatNo, blocked, bg, false));
+    }
+  }
+
+  planTitle.textContent = 'Seating Plan';
+  summary.innerHTML = '<strong>Seating Plan</strong>';
+
+  detailHost.innerHTML = `
+    <table class="summary-table">
+      <tbody>
+        <tr><th style="width:260px">Exam Name</th><td>${escapeHtml(data.exam_name || '-')}</td></tr>
+        <tr><th>Subject Name / Subject Code</th><td>${escapeHtml(formatSubjectLabel(data.subject_name, data.subject_code))}</td></tr>
+        <tr><th>Date</th><td>${escapeHtml(data.date || '-')}</td></tr>
+        <tr><th>Session</th><td>${escapeHtml(data.session || '-')}</td></tr>
+        <tr><th>Room</th><td>${escapeHtml(data.room_no || '-')} (${escapeHtml(data.building || '-')})</td></tr>
+        <tr><th>Invigilator(s) with roles</th><td>${invigilatorSummary}</td></tr>
+      </tbody>
+    </table>
+  `;
+
+  const wbLabel = 'Whiteboard (front) / Teacher Area';
+
+  planWrap.innerHTML = `
+    <div class="room-layout" id="print-area">
+      <div class="layout-front">${wbLabel}</div>
+      <div class="invigilator-strip"><strong>Assigned Invigilator(s):</strong> ${invigilatorSummary}</div>
+      ${data.layout_notes ? `<div class="matrix-note"><strong>Room Notes:</strong> ${escapeHtml(data.layout_notes)}</div>` : ''}
+      <div class="matrix-note">
+        Columns count: ${matrixCols} &nbsp;|&nbsp; Rows count: ${matrixRows} &nbsp;|&nbsp;
+        Seated count: ${students.length} &nbsp;|&nbsp; Capacity: ${declaredCapacity}
+        ${branches.length > 1 ? ' &nbsp;|&nbsp; <strong>Multi-branch: adjacent columns have different groups</strong>' : ''}
+      </div>
+      <div class="seat-grid matrix-grid" style="grid-template-columns: repeat(${matrixCols}, minmax(130px, 1fr));">
+        ${matrixCells.join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderManualEditor(students) {
+  const tbody = document.querySelector('#manual-seat-table tbody');
+  if (!tbody) return;
+
+  const sorted = [...students].sort((a, b) => Number(a.seat_no || 0) - Number(b.seat_no || 0));
+  tbody.innerHTML = sorted.map(s => `
+    <tr>
+      <td>${escapeHtml(s.roll_no || '-')}</td>
+      <td><input type="number" min="1" class="form-control manual-seat-no" data-roll="${escapeHtml(s.roll_no || '')}" value="${Number(s.seat_no || 1)}"></td>
+      <td><input type="number" min="1" class="form-control manual-row-no" data-roll="${escapeHtml(s.roll_no || '')}" value="${Number(s.row_no || 1)}"></td>
+    </tr>
+  `).join('');
+}
+
+function toggleManualEditor() {
+  if (!latestPlan) {
+    showToast('Generate a seating plan first.', 'error');
+    return;
+  }
+  const editor = document.getElementById('manual-editor');
+  editor.style.display = editor.style.display === 'none' ? 'block' : 'none';
+}
+
+async function saveManualChanges() {
+  if (!latestPlan) {
+    showToast('Generate a seating plan first.', 'error');
+    return;
+  }
+
+  const seatInputs = Array.from(document.querySelectorAll('.manual-seat-no'));
+  if (seatInputs.length === 0) {
+    showToast('No editable seats found.', 'error');
+    return;
+  }
+
+  const rowInputs = Array.from(document.querySelectorAll('.manual-row-no'));
+  const rowByRoll = {};
+  rowInputs.forEach((ri) => {
+    const key = ri.getAttribute('data-roll') || '';
+    rowByRoll[key] = ri;
+  });
+
+  const updates = seatInputs.map(input => {
+    const rollNo = input.getAttribute('data-roll') || '';
+    const rowInput = rowByRoll[rollNo] || null;
+    return {
+      roll_no: rollNo,
+      seat_no: Number(input.value || 0),
+      row_no: Number(rowInput ? rowInput.value : 1)
+    };
+  });
+
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'save_manual',
+        exam_id: latestPlan.exam_id,
+        room_id: latestPlan.room_id,
+        updates
+      })
+    });
+    const text = await res.text();
+    const data = JSON.parse(text || '{}');
+    if (!data.success) {
+      showToast(data.message || 'Failed to save changes.', 'error');
+      return;
+    }
+
+    showToast('Manual seating saved.', 'success');
+    await generateSeatingPlan();
+  } catch (err) {
+    showToast('Failed to save manual seating.', 'error');
+  }
+}
+
+function escapeHtml(input) {
+  const value = String(input ?? '');
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function downloadPDF() {
+  if (!latestPlan) {
+    showToast('Generate a seating plan first.', 'error');
+    return;
+  }
+
+  const examType = document.getElementById('exam-type-select').value;
+  const examDate = document.getElementById('exam-date-input').value;
+  const shift    = document.getElementById('shift-select').value;
+  const roomId   = document.getElementById('room-select').value;
+
+  if (!examType || !examDate || !shift || !roomId) {
+    showToast('Please select exam type, date, shift and room first.', 'error');
+    return;
+  }
+
+  // Download generated PDF from server-side DomPDF.
+  const params = new URLSearchParams({
+    exam_type: examType,
+    date:      examDate,
+    shift:     shift,
+    room_id:   roomId
+  });
+  window.open('../api/seating-pdf.php?' + params.toString(), '_blank');
+}
+
 async function logout() {
-  await fetch('../api/auth.php', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'logout'}) });
+  await fetch('../api/auth.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'logout' })
+  });
   window.location.href = '../index.html';
 }
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
 </script>
 </body>
 </html>

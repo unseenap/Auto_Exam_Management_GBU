@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Datesheet | Student Portal</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  .page-wrap { min-height: 100vh; }
+  .module-shell { border: 1px solid #d9e5f1; border-radius: 18px; background: rgba(255,255,255,0.94); box-shadow: 0 16px 36px rgba(22,43,66,.08); }
+  .module-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:18px 20px; border-bottom:1px solid #e5edf5; }
+  .module-head h1 { margin:0; font-size:24px; color:#143d66; }
+  .module-head p { margin:4px 0 0; color:#62758a; font-size:13px; }
+  .datesheet-meta { display:grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap:12px; margin-top:14px; }
+  .meta-box { border:1px solid #dbe6f2; border-radius:12px; background:#fff; padding:10px 12px; }
+  .meta-box label { display:block; font-size:11px; text-transform:uppercase; color:#6f8196; margin-bottom:4px; }
+  .meta-box span { font-weight:800; color:#153656; }
+  .matrix-note { margin: 14px 0 0; color:#5f6f82; font-size:12px; }
+  .matrix-section { margin-top: 18px; border:1px solid #dbe6f2; border-radius: 16px; overflow: hidden; background:#fff; }
+  .matrix-section-head { display:flex; justify-content:space-between; gap:12px; align-items:center; padding:14px 16px; background:linear-gradient(135deg, rgba(20,61,102,0.06), rgba(11,107,203,0.04)); border-bottom:1px solid #e5edf5; }
+  .matrix-section-head h2 { margin:0; font-size:18px; color:#143d66; }
+  .matrix-section-head p { margin:4px 0 0; font-size:12px; color:#62758a; }
+  .matrix-table-wrap { overflow:auto; }
+  .matrix-table { width:100%; border-collapse:separate; border-spacing:0; min-width: 900px; }
+  .matrix-table th, .matrix-table td { border-bottom:1px solid #edf2f7; border-right:1px solid #edf2f7; padding:10px 12px; vertical-align:top; background:#fff; }
+  .matrix-table thead th { position:sticky; top:0; z-index:2; background:#f8fbff; color:#24415f; font-size:12px; text-transform:uppercase; letter-spacing:0.03em; }
+  .matrix-table .sticky-left { position:sticky; left:0; z-index:1; }
+  .matrix-table .sticky-second { position:sticky; left: 130px; z-index:1; }
+  .matrix-table .sticky-third { position:sticky; left: 320px; z-index:1; }
+  .matrix-table .sticky-left,
+  .matrix-table .sticky-second,
+  .matrix-table .sticky-third { background:#fafdff; }
+  .matrix-table .shift-col { min-width: 130px; }
+  .matrix-table .branch-col { min-width: 190px; }
+  .matrix-table .sem-col { min-width: 150px; }
+  .matrix-table .date-col { min-width: 155px; }
+  .branch-name { font-weight:800; color:#153656; }
+  .branch-meta, .cell-note, .cell-time { font-size:11px; color:#6a7c90; }
+  .shift-pill { display:inline-flex; align-items:center; padding:5px 10px; border-radius:999px; background:#e6f2ff; color:#0f4f8a; font-weight:800; font-size:11px; }
+  .cell-card { display:flex; flex-direction:column; gap:4px; min-height: 72px; }
+  .cell-code { font-size:11px; font-weight:800; color:#0f4f8a; letter-spacing:0.03em; }
+  .cell-name { font-weight:700; color:#18344f; line-height:1.3; }
+  .cell-empty { color:#7b8796; font-style:italic; }
+  .cell-filler { background:#f7f9fc; }
+  @media (max-width: 1050px) { .datesheet-meta { grid-template-columns:1fr 1fr; } }
+  @media (max-width: 720px) { .datesheet-meta { grid-template-columns:1fr; } .matrix-section-head { flex-direction:column; align-items:flex-start; } }
+</style>
+</head>
+<body>
+<div class="app-wrapper page-wrap">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header"><h2>Exam System</h2><p id="user-label"></p></div>
+    <nav class="nav-links">
+      <a href="student_portal.html"><i>🏠</i> Home</a>
+      <a href="student_datesheet.html" class="active"><i>📅</i> Datesheet</a>
+      <a href="student_seating_slip.html"><i>💺</i> Seating Slip</a>
+      <a href="student_admit_card.html"><i>🪪</i> Admit Card</a>
+      <hr>
+      <a href="#" onclick="logout()"><i>🚪</i> Logout</a>
+    </nav>
+  </aside>
+  <main class="main-content">
+    <header class="top-bar">
+      <button onclick="toggleSidebar()" class="menu-btn">☰</button>
+      <h1>Datesheet</h1>
+      <div class="top-actions no-print">
+        <a class="btn btn-secondary" href="student_portal.html">Home</a>
+      </div>
+    </header>
+    <div class="page-body">
+      <div class="module-shell">
+        <div class="module-head">
+          <div>
+            <h1>Full SOICT Datesheet</h1>
+            <p>Read-only view of the complete school datesheet matrix.</p>
+          </div>
+          <div class="btn-group no-print">
+            <button class="btn btn-secondary" onclick="window.print()">Print</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="profile-summary" class="datesheet-meta"></div>
+          <p class="matrix-note">This page is read only. It shows the complete SOICT datesheet as a single school-wide matrix.</p>
+          <div id="matrix-container"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<div id="toast" class="toast"></div>
+<script src="../js/script.js"></script>
+<script>
+function escapeHtml(value) {
+  return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+
+async function logout() {
+  await fetch('../api/auth.php', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'logout'}) });
+  window.location.href = '../index.html';
+}
+
+function formatDateLabel(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return { day: escapeHtml(value || '-'), mon: '' };
+  }
+  return {
+    day: new Intl.DateTimeFormat('en-GB', { day: '2-digit' }).format(date),
+    mon: new Intl.DateTimeFormat('en-GB', { month: 'short', year: 'numeric' }).format(date)
+  };
+}
+
+function renderSchoolMatrix(matrices) {
+  const groups = Array.isArray(matrices) ? matrices : [];
+  const allDates = [...new Set(groups.flatMap((matrix) => Array.isArray(matrix.dates) ? matrix.dates : []))].sort();
+  const rows = [];
+
+  groups.forEach((matrix) => {
+    const dates = Array.isArray(matrix.dates) ? matrix.dates : [];
+    (Array.isArray(matrix.rows) ? matrix.rows : []).forEach((row) => {
+      rows.push({
+        branch_code: row.branch_code || '-',
+        semester: row.semester || '-',
+        branch_session: row.branch_session || '-',
+        shift: row.shift || '-',
+        cells: row.cells || {},
+        dates,
+      });
+    });
+  });
+
+  if (!allDates.length || !rows.length) {
+    return '<div class="text-center text-muted" style="padding:20px 0;">No school matrix available yet.</div>';
+  }
+
+  const dateHeaders = allDates.map((date) => {
+    const label = formatDateLabel(date);
+    return `<th class="date-col"><div>${escapeHtml(label.day)}</div><div class="cell-note">${escapeHtml(label.mon)}</div></th>`;
+  }).join('');
+
+  const rowHtml = rows.map((row) => {
+    const branchLabel = escapeHtml(row.branch_code || '-');
+    const branchMeta = `Sem ${escapeHtml(row.semester || '-')} · Session ${escapeHtml(row.branch_session || '-')}`;
+    const shift = escapeHtml(row.shift || '-');
+    const session = escapeHtml(row.branch_session || '-');
+    const cells = allDates.map((date) => {
+      const cell = row.cells && row.cells[date] ? row.cells[date] : { is_filler: true, notes: 'Prep Leave' };
+      const hasExam = !cell.is_filler && (cell.subject_name || cell.subject_code);
+      return `
+        <td class="${cell.is_filler ? 'cell-filler' : ''}">
+          <div class="cell-card">
+            ${hasExam ? `<div class="cell-code">${escapeHtml(cell.subject_code || '')}</div>` : ''}
+            <div class="cell-name">${escapeHtml(hasExam ? (cell.subject_name || '-') : (cell.notes || 'Prep Leave / No Exam'))}</div>
+            ${hasExam && (cell.start_time || cell.end_time) ? `<div class="cell-time">${escapeHtml((cell.start_time || '--:--').slice(0,5))} - ${escapeHtml((cell.end_time || '--:--').slice(0,5))}</div>` : ''}
+            <div class="cell-note">${escapeHtml(cell.is_filler ? 'No exam' : (cell.notes || 'Exam'))}</div>
+          </div>
+        </td>
+      `;
+    }).join('');
+
+    return `
+      <tr>
+        <td class="sticky-left shift-col"><span class="shift-pill">${shift}</span></td>
+        <td class="sticky-second branch-col"><div class="branch-name">${branchLabel}</div><div class="branch-meta">${branchMeta}</div></td>
+        <td class="sticky-third sem-col"><span class="shift-pill">${session}</span><div class="branch-meta">${branchLabel}</div></td>
+        ${cells}
+      </tr>
+    `;
+  }).join('');
+
+  return `
+    <section class="matrix-section">
+      <div class="matrix-section-head">
+        <div>
+          <h2>SOICT Datesheet</h2>
+          <p>${rows.length} row(s) across ${allDates.length} date(s)</p>
+        </div>
+      </div>
+      <div class="matrix-table-wrap">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th class="sticky-left shift-col" rowspan="2">Shift</th>
+              <th class="sticky-second branch-col" rowspan="2">Branch</th>
+              <th class="sticky-third sem-col" rowspan="2">Session</th>
+              <th colspan="${allDates.length}">Datesheet</th>
+            </tr>
+            <tr>${dateHeaders}</tr>
+          </thead>
+          <tbody>${rowHtml}</tbody>
+        </table>
+      </div>
+    </section>
+  `;
+}
+
+(async () => {
+  try {
+    const auth = await fetch('../api/auth.php?action=check').then((r) => r.json());
+    if (!auth.logged_in || auth.role !== 'student') {
+      window.location.href = '../index.html';
+      return;
+    }
+
+    document.getElementById('user-label').textContent = auth.username + ' (Student)';
+    addChatbotWidget('student');
+
+    const info = await fetch('../api/student.php?action=info').then((r) => r.json());
+    const matrixResponse = await fetch('../api/student.php?action=school_matrix').then((r) => r.json());
+
+    if (info.success && info.data) {
+      const s = info.data;
+      document.getElementById('profile-summary').innerHTML = `
+        <div class="meta-box"><label>Roll Number</label><span>${escapeHtml(s.roll_no || '-')}</span></div>
+        <div class="meta-box"><label>School</label><span>${escapeHtml(s.school || '-')}</span></div>
+        <div class="meta-box"><label>Department</label><span>${escapeHtml(s.department || '-')}</span></div>
+        <div class="meta-box"><label>Branch</label><span>${escapeHtml(s.branch || '-')}</span></div>
+        <div class="meta-box"><label>Year</label><span>${escapeHtml(s.year_label || '-')}</span></div>
+        <div class="meta-box"><label>Session</label><span>${escapeHtml(s.session_label || '-')}</span></div>
+      `;
+    }
+
+    const container = document.getElementById('matrix-container');
+    const matrices = Array.isArray(matrixResponse.matrices) ? matrixResponse.matrices : [];
+
+    if (matrixResponse.success && matrices.length) {
+      container.innerHTML = renderSchoolMatrix(matrices);
+    } else {
+      container.innerHTML = '<div class="text-center text-muted" style="padding:20px 0;">No school matrix available yet.</div>';
+    }
+  } catch (error) {
+    document.getElementById('matrix-container').innerHTML = '<div class="text-center text-danger" style="padding:20px 0;">Unable to load the datesheet right now.</div>';
+  }
+})();
+</script>
+</body>
+</html>

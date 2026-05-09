@@ -5,6 +5,243 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Faculty | Exam Management</title>
 <link rel="stylesheet" href="../css/style.css">
+<style>
+  .faculty-hero {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 18px;
+    margin-bottom: 20px;
+  }
+  .hero-panel {
+    background: linear-gradient(135deg, #173b7a 0%, #1f6aa5 55%, #2f8ecf 100%);
+    color: #fff;
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 18px 40px rgba(15, 41, 86, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-panel::after {
+    content: '';
+    position: absolute;
+    inset: auto -40px -70px auto;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+  }
+  .hero-title {
+    margin: 0 0 8px;
+    font-size: 30px;
+    letter-spacing: -0.02em;
+  }
+  .hero-subtitle {
+    margin: 0;
+    max-width: 760px;
+    opacity: 0.92;
+    line-height: 1.6;
+  }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .quick-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .stat-card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 18px 20px;
+    box-shadow: 0 14px 32px rgba(17, 33, 68, 0.08);
+    border: 1px solid rgba(27, 56, 114, 0.08);
+  }
+  .stat-card .label {
+    color: #63728a;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+  .stat-card .value {
+    font-size: 30px;
+    font-weight: 800;
+    color: #14213d;
+    line-height: 1;
+  }
+  .stat-card .hint {
+    margin-top: 8px;
+    color: #5c6b82;
+    font-size: 13px;
+  }
+  .toolbar-card {
+    margin-bottom: 18px;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 14px 32px rgba(17, 33, 68, 0.08);
+    border: 1px solid rgba(27, 56, 114, 0.08);
+    padding: 16px;
+  }
+  .toolbar-row {
+    display: grid;
+    grid-template-columns: 1.4fr auto;
+    gap: 14px;
+    align-items: center;
+  }
+  .search-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .search-box {
+    min-width: 280px;
+    flex: 1;
+  }
+  .chip-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    border: 1px solid rgba(27, 56, 114, 0.12);
+    background: #f7f9fd;
+    color: #1d3557;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .chip.active {
+    background: #1f6aa5;
+    color: #fff;
+    border-color: #1f6aa5;
+  }
+  .subtle-note {
+    color: #64748b;
+    font-size: 13px;
+    margin-top: 10px;
+  }
+  .modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .modal-grid .full {
+    grid-column: 1 / -1;
+  }
+  .import-preview {
+    margin-top: 16px;
+    border: 1px solid rgba(27, 56, 114, 0.12);
+    border-radius: 14px;
+    overflow: hidden;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+  .import-preview table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .import-preview th,
+  .import-preview td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eef2f7;
+    text-align: left;
+  }
+  .import-preview th {
+    background: #f7f9fd;
+    color: #42546f;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  .table-wrap {
+    overflow-x: hidden;
+    width: 100%;
+  }
+  .data-table {
+    width: 100%;
+    table-layout: fixed;
+    font-size: 13px;
+  }
+  .data-table th,
+  .data-table td {
+    white-space: normal;
+    word-break: break-word;
+    vertical-align: top;
+  }
+  .data-table th.wrap-col,
+  .data-table td.wrap-col {
+    white-space: normal;
+  }
+  .data-table th.duties-col,
+  .data-table td.duties-col {
+    text-align: center;
+  }
+  .data-table th:nth-child(1), .data-table td:nth-child(1) { width: 8%; }
+  .data-table th:nth-child(2), .data-table td:nth-child(2) { width: 12%; }
+  .data-table th:nth-child(3), .data-table td:nth-child(3) { width: 12%; }
+  .data-table th:nth-child(4), .data-table td:nth-child(4) { width: 11%; }
+  .data-table th:nth-child(5), .data-table td:nth-child(5) { width: 11%; }
+  .data-table th:nth-child(6), .data-table td:nth-child(6) { width: 14%; }
+  .data-table th:nth-child(7), .data-table td:nth-child(7) { width: 8%; }
+  .data-table th:nth-child(8), .data-table td:nth-child(8) { width: 14%; }
+  .data-table th:nth-child(9), .data-table td:nth-child(9) { width: 5%; }
+  .data-table th:nth-child(10), .data-table td:nth-child(10) { width: 5%; }
+  .username-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #edf5ff;
+    color: #1f6aa5;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-weight: 700;
+  }
+  .actions-cell {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .import-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .file-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px dashed rgba(27, 56, 114, 0.22);
+    background: #fafcff;
+    cursor: pointer;
+    color: #1d3557;
+    font-weight: 600;
+  }
+  .file-label input {
+    display: none;
+  }
+  @media (max-width: 1100px) {
+    .faculty-hero,
+    .toolbar-row,
+    .modal-grid {
+      grid-template-columns: 1fr;
+    }
+    .quick-stats {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
 </head>
 <body>
 <div class="app-wrapper">
@@ -12,12 +249,12 @@
     <div class="sidebar-header"><h2>Exam System</h2><p id="user-label"></p></div>
     <nav class="nav-links">
       <a href="../dashboard.html"><i>⊞</i> Dashboard</a>
-      <a href="students.html"><i>👥</i> Students</a>
+       <a href="students.html"><i>👥</i> Students</a>
       <a href="faculty.html" class="active"><i>👨‍🏫</i> Faculty</a>
       <a href="rooms.html"><i>🚪</i> Rooms</a>
       <a href="schedule.html"><i>📅</i> Schedule</a>
-      <a href="seating.html"><i>💺</i> Seating</a>
       <a href="invigilation.html"><i>📋</i> Invigilation</a>
+      <a href="seating.html"><i>💺</i> Seating</a>
       <a href="attendance.html"><i>✅</i> Attendance</a>
       <a href="replacement.html"><i>🔄</i> Replacement</a>
       <a href="reports.html"><i>📊</i> Reports</a>
@@ -25,31 +262,78 @@
       <a href="#" onclick="logout()"><i>🚪</i> Logout</a>
     </nav>
   </aside>
+
   <main class="main-content">
     <header class="top-bar">
       <button onclick="toggleSidebar()" class="menu-btn">☰</button>
       <h1>Faculty Management</h1>
       <div class="top-actions">
-        <input type="text" id="search-input" placeholder="Search faculty..." oninput="filterTable()" class="search-box">
-        <button class="btn btn-primary" onclick="openModal('add')">+ Add Faculty</button>
-        <button class="btn btn-success" onclick="exportCSV()">⬇ Export</button>
+        <input type="text" id="search-input" placeholder="Search name, department, designation, email..." oninput="filterTable()" class="search-box">
       </div>
     </header>
+
     <div class="page-body">
+      <section class="faculty-hero">
+        <div class="hero-panel">
+          <h2 class="hero-title">Faculty registry built for operations teams</h2>
+          <p class="hero-subtitle">Manage usernames, names, departments, designations, and duty counts in one place. Add single records or import a CSV directly, then keep faculty login access ready for allocation workflows.</p>
+          <div class="hero-actions">
+            <button class="btn btn-light" onclick="openModal('add')">Create faculty record</button>
+            <button class="btn btn-light" onclick="openImportModal()">Upload CSV roster</button>
+            <button class="btn btn-light" onclick="window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })">View table</button>
+          </div>
+        </div>
+        <div class="quick-stats">
+          <div class="stat-card">
+            <div class="label">Total Faculty</div>
+            <div class="value" id="stat-total">0</div>
+            <div class="hint">All active records</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Departments</div>
+            <div class="value" id="stat-depts">0</div>
+            <div class="hint">Unique departments tracked</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Loaded Duties</div>
+            <div class="value" id="stat-duties">0</div>
+            <div class="hint">Aggregate duty workload</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="toolbar-card">
+        <div class="toolbar-row">
+          <div>
+            <div class="search-row">
+              <div class="chip-row" id="department-chips"></div>
+            </div>
+            <div class="subtle-note">Use the chips to narrow the list quickly. Search still works across all visible columns.</div>
+          </div>
+          <div class="actions-cell" style="justify-content:flex-end">
+            <button class="btn btn-success" onclick="exportCSV()">⬇ Export CSV</button>
+          </div>
+        </div>
+      </section>
+
       <div class="card">
-        <div class="card-body">
+        <div class="card-body table-wrap">
           <table class="data-table" id="faculty-table">
             <thead>
               <tr>
-                <th onclick="sortTable(0)">Name ↕</th>
-                <th onclick="sortTable(1)">Department ↕</th>
-                <th onclick="sortTable(2)">Designation ↕</th>
-                <th onclick="sortTable(3)">Total Duties ↕</th>
-                <th>Login Username</th>
+                <th onclick="sortTable(0)">Faculty UID ↕</th>
+                <th onclick="sortTable(1)">Username ↕</th>
+                <th onclick="sortTable(2)">Name ↕</th>
+                <th onclick="sortTable(3)">Department ↕</th>
+                <th onclick="sortTable(4)">Designation ↕</th>
+                <th onclick="sortTable(5)">Email ↕</th>
+                <th onclick="sortTable(6)">Phone ↕</th>
+                <th class="wrap-col" onclick="sortTable(7)">Qualification ↕</th>
+                <th class="duties-col" onclick="sortTable(8)">Total Duties ↕</th>
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody id="faculty-tbody"><tr><td colspan="6" class="text-center">Loading...</td></tr></tbody>
+            <tbody id="faculty-tbody"><tr><td colspan="10" class="text-center">Loading...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -65,100 +349,442 @@
     </div>
     <form onsubmit="saveFaculty(event)">
       <input type="hidden" id="edit-id">
-      <div class="form-group">
-        <label>Full Name</label>
-        <input type="text" id="f-name" required>
-      </div>
-      <div class="form-group">
-        <label>Department</label>
-        <input type="text" id="f-dept" required placeholder="e.g. Computer Engineering">
-      </div>
-      <div class="form-group">
-        <label>Designation</label>
-        <input type="text" id="f-desig" required placeholder="e.g. Assistant Professor">
+      <div class="modal-grid">
+        <div class="form-group">
+          <label>Login Username</label>
+          <input type="text" id="f-username" placeholder="Optional. Auto-generated if blank">
+        </div>
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="f-name" required placeholder="e.g. Dr. Rajesh Kumar">
+        </div>
+        <div class="form-group">
+          <label>Department</label>
+          <input type="text" id="f-dept" required placeholder="e.g. Computer Science">
+        </div>
+        <div class="form-group">
+          <label>Designation</label>
+          <input type="text" id="f-desig" required placeholder="e.g. Professor">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="f-email" placeholder="e.g. name@gbu.ac.in">
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="text" id="f-mobile" placeholder="e.g. 9876543210">
+        </div>
+        <div class="form-group full">
+          <label>Qualification</label>
+          <textarea id="f-qualification" rows="2" placeholder="e.g. M.Tech (CSE), Ph.D."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Total Duties</label>
+          <input type="number" id="f-duties" min="0" step="1" value="0" placeholder="0">
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="submit" class="btn btn-primary">Save Faculty</button>
       </div>
     </form>
+  </div>
+</div>
+
+<div id="import-modal" class="modal" style="display:none">
+  <div class="modal-content" style="max-width: 920px; width: 92%;">
+    <div class="modal-header">
+      <h2>Import Faculty CSV</h2>
+      <span class="close-btn" onclick="closeImportModal()">&times;</span>
+    </div>
+    <div class="modal-grid">
+      <div class="form-group full">
+        <label>CSV File</label>
+        <label class="file-label">
+          <input type="file" id="faculty-csv" accept=".csv,text/csv" onchange="previewCsvFile()">
+          <span>Choose CSV file</span>
+        </label>
+      </div>
+      <div class="form-group">
+        <label>Expected columns</label>
+        <input type="text" readonly value="username, name, department, designation, email, mobile, qualification, total_duties">
+      </div>
+      <div class="form-group">
+        <label>Import rule</label>
+        <input type="text" readonly value="Username is optional; system auto-generates one if blank">
+      </div>
+    </div>
+    <div class="subtle-note">The CSV header is flexible. Common column names such as name, department, designation, duties, and username are supported.</div>
+    <div class="import-preview" id="csv-preview-wrap" style="display:none;"></div>
+    <div class="import-foot">
+      <div class="subtle-note" id="csv-status">No file selected.</div>
+      <div class="modal-footer" style="padding:0; margin:0;">
+        <button type="button" class="btn btn-secondary" onclick="closeImportModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="uploadCsv()">Import CSV</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <div id="toast" class="toast"></div>
 <script src="../js/script.js"></script>
 <script>
-let editMode = false;
 const API = '../api/faculty.php';
+let editMode = false;
+let facultyRows = [];
+let filteredDepartment = 'All';
+let csvRows = [];
+
+function normalizeDepartment(value) {
+  return String(value || '').trim().toLowerCase();
+}
 
 (async () => {
-  const res  = await fetch('../api/auth.php?action=check');
+  const res = await fetch('../api/auth.php?action=check');
   const auth = await res.json();
-  if (!auth.logged_in) { window.location.href = '../index.html'; return; }
+  if (!auth.logged_in) {
+    window.location.href = '../index.html';
+    return;
+  }
   document.getElementById('user-label').textContent = auth.username + ' (' + auth.role + ')';
   loadFaculty();
 })();
 
 async function loadFaculty() {
-  const res  = await fetch(API + '?action=list');
+  const res = await fetch(API + '?action=list');
   const data = await res.json();
-  const tbody = document.getElementById('faculty-tbody');
-  tbody.innerHTML = data.data && data.data.length
-    ? data.data.map(f => `
-        <tr>
-          <td>${f.name}</td><td>${f.department}</td><td>${f.designation}</td>
-          <td>${f.total_duties}</td>
-          <td>fac${f.faculty_id}</td>
-          <td>
-            <button class="btn btn-sm btn-warning" onclick='openModal("edit", ${JSON.stringify(f)})'>Edit</button>
-            <button class="btn btn-sm btn-danger" onclick="deleteFaculty(${f.faculty_id})">Delete</button>
-          </td>
-        </tr>`).join('')
-    : '<tr><td colspan="6" class="text-center">No faculty found.</td></tr>';
+  facultyRows = data.data || [];
+  renderDepartmentChips();
+  renderFacultyTable();
+  updateStats();
 }
 
-function openModal(mode, f = null) {
+function renderFacultyTable() {
+  const query = document.getElementById('search-input').value.trim().toLowerCase();
+  const activeDept = normalizeDepartment(filteredDepartment);
+  const rows = facultyRows.filter(f => {
+    const matchesSearch = !query || [
+      String(f.faculty_unique_no || f.faculty_id || ''),
+      f.username,
+      f.name,
+      f.department,
+      f.designation,
+      f.email,
+      f.mobile,
+      f.qualification,
+      String(f.total_duties || 0)
+    ].join(' ').toLowerCase().includes(query);
+    const matchesDept = activeDept === 'all' || normalizeDepartment(f.department) === activeDept;
+    return matchesSearch && matchesDept;
+  });
+
+  const tbody = document.getElementById('faculty-tbody');
+  tbody.innerHTML = rows.length ? rows.map(f => `
+    <tr>
+      <td><strong>${Number(f.faculty_unique_no || f.faculty_id || 0)}</strong></td>
+      <td><span class="username-badge">${escapeHtml(f.username || ('fac' + f.faculty_id))}</span></td>
+      <td>${escapeHtml(f.name || '')}</td>
+      <td>${escapeHtml(f.department || '')}</td>
+      <td>${escapeHtml(f.designation || '')}</td>
+      <td>${escapeHtml(f.email || '')}</td>
+      <td>${escapeHtml(f.mobile || '')}</td>
+      <td class="wrap-col">${escapeHtml(f.qualification || '')}</td>
+      <td class="duties-col">${Number(f.total_duties || 0)}</td>
+      <td>
+        <div class="actions-cell">
+          <button class="btn btn-sm btn-warning" onclick='openModal("edit", ${JSON.stringify(f)})'>Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteFaculty(${f.faculty_id})">Delete</button>
+        </div>
+      </td>
+    </tr>`).join('') : '<tr><td colspan="10" class="text-center">No faculty found.</td></tr>';
+}
+
+function renderDepartmentChips() {
+  const departments = ['All', ...new Set(facultyRows.map(f => String(f.department || '').trim()).filter(Boolean))];
+  const host = document.getElementById('department-chips');
+  const activeDept = normalizeDepartment(filteredDepartment);
+  host.innerHTML = departments.map(dept => `
+    <button type="button" class="chip ${normalizeDepartment(dept) === activeDept ? 'active' : ''}" data-dept="${escapeHtml(dept)}">${escapeHtml(dept)}</button>
+  `).join('');
+
+  host.querySelectorAll('.chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      setDepartmentFilter(chip.dataset.dept || 'All');
+    });
+  });
+}
+
+function setDepartmentFilter(dept) {
+  filteredDepartment = dept;
+  renderDepartmentChips();
+  renderFacultyTable();
+}
+
+function updateStats() {
+  const departments = new Set();
+  let duties = 0;
+  facultyRows.forEach(f => {
+    if ((f.department || '').trim()) departments.add(f.department.trim());
+    duties += Number(f.total_duties || 0);
+  });
+  document.getElementById('stat-total').textContent = facultyRows.length;
+  document.getElementById('stat-depts').textContent = departments.size;
+  document.getElementById('stat-duties').textContent = duties;
+}
+
+function openModal(mode, faculty = null) {
   editMode = mode === 'edit';
   document.getElementById('modal-title').textContent = editMode ? 'Edit Faculty' : 'Add Faculty';
-  document.getElementById('edit-id').value  = f ? f.faculty_id : '';
-  document.getElementById('f-name').value   = f ? f.name : '';
-  document.getElementById('f-dept').value   = f ? f.department : '';
-  document.getElementById('f-desig').value  = f ? f.designation : '';
+  document.getElementById('edit-id').value = faculty ? faculty.faculty_id : '';
+  document.getElementById('f-username').value = faculty?.username ? faculty.username : '';
+  document.getElementById('f-name').value = faculty?.name || '';
+  document.getElementById('f-dept').value = faculty?.department || '';
+  document.getElementById('f-desig').value = faculty?.designation || '';
+  document.getElementById('f-email').value = faculty?.email || '';
+  document.getElementById('f-mobile').value = faculty?.mobile || '';
+  document.getElementById('f-qualification').value = faculty?.qualification || '';
+  document.getElementById('f-duties').value = faculty?.total_duties ?? 0;
   document.getElementById('faculty-modal').style.display = 'flex';
 }
-function closeModal() { document.getElementById('faculty-modal').style.display = 'none'; }
+
+function closeModal() {
+  document.getElementById('faculty-modal').style.display = 'none';
+}
 
 async function saveFaculty(e) {
   e.preventDefault();
   const payload = {
     action: editMode ? 'edit' : 'add',
-    faculty_id:  document.getElementById('edit-id').value,
-    name:        document.getElementById('f-name').value,
-    department:  document.getElementById('f-dept').value,
-    designation: document.getElementById('f-desig').value,
+    faculty_id: document.getElementById('edit-id').value,
+    username: document.getElementById('f-username').value.trim(),
+    name: document.getElementById('f-name').value.trim(),
+    department: document.getElementById('f-dept').value.trim(),
+    designation: document.getElementById('f-desig').value.trim(),
+    email: document.getElementById('f-email').value.trim(),
+    mobile: document.getElementById('f-mobile').value.trim(),
+    qualification: document.getElementById('f-qualification').value.trim(),
+    total_duties: Number(document.getElementById('f-duties').value || 0)
   };
-  const res  = await fetch(API, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+  const res = await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
   const data = await res.json();
   showToast(data.message, data.success ? 'success' : 'error');
-  if (data.success) { closeModal(); loadFaculty(); }
+  if (data.success) {
+    closeModal();
+    loadFaculty();
+  }
 }
 
 async function deleteFaculty(id) {
   if (!confirm('Delete this faculty member?')) return;
-  const res  = await fetch(API, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'delete', faculty_id: id}) });
+  const res = await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'delete', faculty_id: id })
+  });
   const data = await res.json();
   showToast(data.message, data.success ? 'success' : 'error');
   if (data.success) loadFaculty();
 }
 
-function exportCSV() { exportTableToCSV('faculty-table', 'faculty.csv'); }
-function filterTable() { filterTableFn('faculty-table', document.getElementById('search-input').value); }
-function sortTable(col) { sortTableFn('faculty-table', col); }
+function exportCSV() {
+  exportTableToCSV('faculty-table', 'faculty.csv');
+}
+
+function filterTable() {
+  renderFacultyTable();
+}
+
+function sortTable(col) {
+  sortTableFn('faculty-table', col);
+}
+
 async function logout() {
-  await fetch('../api/auth.php', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'logout'}) });
+  await fetch('../api/auth.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'logout' })
+  });
   window.location.href = '../index.html';
 }
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+function openImportModal() {
+  document.getElementById('import-modal').style.display = 'flex';
+}
+
+function closeImportModal() {
+  document.getElementById('import-modal').style.display = 'none';
+  document.getElementById('faculty-csv').value = '';
+  document.getElementById('csv-preview-wrap').style.display = 'none';
+  document.getElementById('csv-preview-wrap').innerHTML = '';
+  document.getElementById('csv-status').textContent = 'No file selected.';
+  csvRows = [];
+}
+
+function previewCsvFile() {
+  const input = document.getElementById('faculty-csv');
+  const file = input.files && input.files[0];
+  if (!file) {
+    csvRows = [];
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    csvRows = parseCsv(String(reader.result || ''));
+    renderCsvPreview(csvRows);
+    document.getElementById('csv-status').textContent = `${csvRows.length} row(s) ready for import.`;
+  };
+  reader.readAsText(file);
+}
+
+function renderCsvPreview(rows) {
+  const wrap = document.getElementById('csv-preview-wrap');
+  if (!rows.length) {
+    wrap.style.display = 'none';
+    wrap.innerHTML = '';
+    return;
+  }
+
+  wrap.style.display = 'block';
+  wrap.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Name</th>
+          <th>Department</th>
+          <th>Designation</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Qualification</th>
+          <th>Total Duties</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.slice(0, 20).map(row => `
+          <tr>
+            <td>${escapeHtml(row.username || '')}</td>
+            <td>${escapeHtml(row.name || '')}</td>
+            <td>${escapeHtml(row.department || '')}</td>
+            <td>${escapeHtml(row.designation || '')}</td>
+            <td>${escapeHtml(row.email || '')}</td>
+            <td>${escapeHtml(row.mobile || '')}</td>
+            <td>${escapeHtml(row.qualification || '')}</td>
+            <td>${Number(row.total_duties || 0)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>`;
+}
+
+async function uploadCsv() {
+  if (!csvRows.length) {
+    showToast('Choose a CSV file first', 'error');
+    return;
+  }
+
+  const res = await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'import_csv', rows: csvRows })
+  });
+  const data = await res.json();
+  showToast(data.message, data.success ? 'success' : 'error');
+  if (data.success) {
+    closeImportModal();
+    loadFaculty();
+  }
+}
+
+function parseCsv(text) {
+  const lines = text.replace(/\r/g, '').split('\n').filter(line => line.trim() !== '');
+  if (!lines.length) return [];
+
+  const splitLine = line => {
+    const values = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      const next = line[i + 1];
+      if (char === '"' && inQuotes && next === '"') {
+        current += '"';
+        i++;
+      } else if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        values.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    values.push(current.trim());
+    return values.map(value => value.replace(/^"|"$/g, '').trim());
+  };
+
+  const headers = splitLine(lines[0]).map(h => h.trim().toLowerCase());
+  const mapped = [];
+  const headerMap = {
+    username: ['username', 'user name', 'login', 'login username'],
+    name: ['name', 'full name', 'faculty name'],
+    department: ['department', 'dept'],
+    designation: ['designation', 'post', 'role'],
+    email: ['email', 'mail'],
+    mobile: ['mobile', 'phone', 'contact', 'phone number'],
+    qualification: ['qualification', 'qualifications', 'education'],
+    total_duties: ['total duties', 'duties', 'duty count', 'total_duties']
+  };
+
+  for (let i = 1; i < lines.length; i++) {
+    const values = splitLine(lines[i]);
+    if (!values.length) continue;
+    const row = {};
+    headers.forEach((header, index) => {
+      const value = values[index] ?? '';
+      Object.entries(headerMap).forEach(([key, aliases]) => {
+        if (aliases.includes(header)) {
+          row[key] = value;
+        }
+      });
+    });
+    if (!row.name && values[0]) row.name = values[0];
+    if (!row.department && values[1]) row.department = values[1];
+    if (!row.designation && values[2]) row.designation = values[2];
+    if (!row.email && values[3]) row.email = values[3];
+    if (!row.mobile && values[4]) row.mobile = values[4];
+    if (!row.qualification && values[5]) row.qualification = values[5];
+    if (!row.total_duties && values[6]) row.total_duties = values[6];
+    mapped.push({
+      username: row.username || '',
+      name: row.name || '',
+      department: row.department || '',
+      designation: row.designation || '',
+      email: row.email || '',
+      mobile: row.mobile || '',
+      qualification: row.qualification || '',
+      total_duties: Number(row.total_duties || 0)
+    });
+  }
+  return mapped.filter(row => row.name && row.department && row.designation);
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 </script>
 </body>
 </html>

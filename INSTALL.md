@@ -35,35 +35,28 @@
 5. Click **Go** button at the bottom
 6. Wait for success message
 
-#### Step 5: Import Sample Data (Optional)
-1. Stay in the **exam_management** database
-2. Click **Import** tab again
-3. Click **Choose File**
-4. Navigate to: `C:\xampp\htdocs\Automated Seating management\database\sample_data.sql`
-5. Click **Go** button
-6. Wait for success message
-
-#### Step 6: Access the System
+#### Step 5: Access the System
 1. Open web browser
 2. Go to: http://localhost/Automated%20Seating%20management/
    OR: http://localhost/Automated Seating management/
 3. You should see the login page
 
-#### Step 7: Login
+#### Step 5.1: Install PHP PDF Dependency (Required for Seating Plan PDF)
+1. Open terminal in project root:
+   ```
+   C:\xampp\htdocs\Automated Seating management\
+   ```
+2. Run:
+   ```bash
+   composer install
+   ```
+3. This installs `dompdf/dompdf` used by `api/seating-pdf.php`.
+
+#### Step 6: Login
 **Admin Login:**
 - Username: `admin`
 - Password: `admin123`
 - Role: Select "Admin"
-
-**Student Login (if sample data imported):**
-- Username: `2021001` (any roll number)
-- Password: `student123`
-- Role: Select "Student"
-
-**Faculty Login (if sample data imported):**
-- Username: `fac1` (fac2, fac3, etc.)
-- Password: `faculty123`
-- Role: Select "Faculty"
 
 ---
 
@@ -74,7 +67,6 @@
 ✅ MySQL service started (green in XAMPP)
 ✅ Database created (exam_management)
 ✅ Schema imported (10 tables created)
-✅ Sample data imported (optional)
 ✅ Can access http://localhost/phpmyadmin
 ✅ Can access login page
 ✅ Can login with admin credentials
@@ -141,28 +133,22 @@ chmod -R 777 /path/to/project/uploads (if needed)
 
 ## Testing the System
 
-### 1. Test Student Management
-- Login as Admin
-- Go to Students
-- Click "Add Student"
-- Add a test student
-
-### 2. Test Seating Allocation
-- Add at least 5 students
+### 1. Test Seating Allocation
+- Ensure student data already exists in the database
 - Add at least 2 rooms
 - Create an exam
 - Go to Seating Allocation
 - Click "Allocate Seating"
 - View seating chart
 
-### 3. Test Invigilation
+### 2. Test Invigilation
 - Add at least 3 faculty members
 - Ensure seating is allocated
 - Go to Invigilation
 - Click "Allocate Duties"
 - View duty chart
 
-### 4. Test Student Portal
+### 3. Test Student Portal
 - Login as student (use roll number)
 - View exam schedule
 - View seating allocation

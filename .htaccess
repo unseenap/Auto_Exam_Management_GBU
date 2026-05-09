@@ -22,10 +22,23 @@ Options -Indexes
 # Set default character encoding
 AddDefaultCharset UTF-8
 
+# Never cache HTML pages — always serve fresh
+<IfModule mod_headers.c>
+    <FilesMatch "\.(html|htm)$">
+        Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+</IfModule>
+
 # Enable URL rewriting (if mod_rewrite is available)
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
+
+    # Backward-compatible routing: old seating-plan URLs -> canonical seating page
+    RewriteRule ^seating-plan\.html$ modules/seating.html [R=302,L,NC]
+    RewriteRule ^modules/seating-plan\.html$ modules/seating.html [R=302,L,NC]
     
     # Redirect to HTTPS (uncomment for production with SSL)
     # RewriteCond %{HTTPS} off

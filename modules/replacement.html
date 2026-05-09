@@ -5,6 +5,221 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Replacement | Exam Management</title>
 <link rel="stylesheet" href="../css/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rx-ink: #152137;
+    --rx-muted: #59708f;
+    --rx-border: #d5deea;
+    --rx-panel: #ffffff;
+    --rx-surface: #f3f7fc;
+    --rx-primary: #0c6dd8;
+    --rx-primary-dark: #0a4f9d;
+    --rx-ok: #138957;
+    --rx-warn: #cf7f03;
+    --rx-bad: #c33a2f;
+  }
+
+  body {
+    font-family: 'Manrope', sans-serif;
+    background:
+      radial-gradient(circle at 8% 0%, #e1eeff 0, transparent 36%),
+      radial-gradient(circle at 100% 10%, #e5f8ef 0, transparent 30%),
+      #edf2f8;
+  }
+
+  .top-bar h1,
+  .sidebar-header h2,
+  .rep-headline,
+  .card-header h2 {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  .rep-shell {
+    display: grid;
+    gap: 16px;
+  }
+
+  .rep-banner {
+    border-radius: 18px;
+    padding: 18px;
+    color: #fff;
+    background: linear-gradient(122deg, #0f355c 0%, #0c6dd8 54%, #2d94f7 100%);
+    box-shadow: 0 16px 36px rgba(14, 67, 129, 0.26);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .rep-banner::before {
+    content: '';
+    position: absolute;
+    width: 210px;
+    height: 210px;
+    border-radius: 50%;
+    right: -46px;
+    bottom: -86px;
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  .rep-banner-grid {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .rep-banner p {
+    margin-top: 6px;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .rep-banner-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn-outline-light {
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    color: #fff;
+    background: transparent;
+  }
+
+  .btn-outline-light:hover {
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  .rep-note {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.9);
+    margin-top: 8px;
+  }
+
+  .rep-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+  }
+
+  .rep-kpi {
+    border-radius: 14px;
+    border: 1px solid var(--rx-border);
+    background: var(--rx-panel);
+    padding: 13px;
+    box-shadow: 0 8px 20px rgba(17, 38, 71, 0.08);
+  }
+
+  .rep-kpi .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: var(--rx-muted);
+    font-weight: 700;
+  }
+
+  .rep-kpi .value {
+    margin-top: 4px;
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--rx-ink);
+  }
+
+  .rep-kpi.pending { border-top: 4px solid var(--rx-warn); }
+  .rep-kpi.approved { border-top: 4px solid var(--rx-ok); }
+  .rep-kpi.rejected { border-top: 4px solid var(--rx-bad); }
+
+  .rep-controls {
+    border-radius: 14px;
+    border: 1px solid var(--rx-border);
+    background: var(--rx-panel);
+    box-shadow: 0 8px 20px rgba(17, 38, 71, 0.06);
+    padding: 14px;
+  }
+
+  .rep-controls-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr 1fr auto;
+    gap: 12px;
+    align-items: end;
+  }
+
+  .rep-controls-grid .form-group { margin-bottom: 0; }
+
+  .rep-controls-grid input,
+  .rep-controls-grid select {
+    border: 1px solid #c8d4e7;
+    background: #fff;
+  }
+
+  .rep-table-wrap {
+    border: 1px solid var(--rx-border);
+    border-radius: 12px;
+    overflow: auto;
+  }
+
+  .data-table thead {
+    background: #112f50;
+  }
+
+  .pill-status {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 4px 11px;
+  }
+
+  .pill-status.Pending { background: #ffe9c2; color: #7c4e00; }
+  .pill-status.Approved { background: #d8f4e7; color: #0f6340; }
+  .pill-status.Rejected { background: #fbe2df; color: #8a2e26; }
+
+  .action-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 195px;
+  }
+
+  .action-box select {
+    width: 100%;
+    border: 1px solid #c8d4e7;
+    border-radius: 8px;
+    padding: 6px;
+    font-size: 12px;
+  }
+
+  .action-row {
+    display: flex;
+    gap: 6px;
+  }
+
+  .readonly-chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #1e548d;
+    background: #e8f1ff;
+  }
+
+  @media (max-width: 980px) {
+    .rep-controls-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .rep-controls-grid { grid-template-columns: 1fr; }
+    .action-row { flex-direction: column; }
+  }
+</style>
 </head>
 <body>
 <div class="app-wrapper">
@@ -16,8 +231,8 @@
       <a href="faculty.html"><i>👨‍🏫</i> Faculty</a>
       <a href="rooms.html"><i>🚪</i> Rooms</a>
       <a href="schedule.html"><i>📅</i> Schedule</a>
-      <a href="seating.html"><i>💺</i> Seating</a>
       <a href="invigilation.html"><i>📋</i> Invigilation</a>
+      <a href="seating.html"><i>💺</i> Seating</a>
       <a href="attendance.html"><i>✅</i> Attendance</a>
       <a href="replacement.html" class="active"><i>🔄</i> Replacement</a>
       <a href="reports.html"><i>📊</i> Reports</a>
@@ -25,34 +240,105 @@
       <a href="#" onclick="logout()"><i>🚪</i> Logout</a>
     </nav>
   </aside>
+
   <main class="main-content">
     <header class="top-bar">
       <button onclick="toggleSidebar()" class="menu-btn">☰</button>
       <h1>Faculty Replacement</h1>
-      <div class="top-actions" id="faculty-actions" style="display:none">
-        <button class="btn btn-primary" onclick="openModal()">+ New Request</button>
-      </div>
     </header>
+
     <div class="page-body">
-      <div class="card">
-        <div class="card-header"><h2>Replacement Requests</h2></div>
-        <div class="card-body">
-          <table class="data-table" id="rep-table">
-            <thead>
-              <tr>
-                <th>Exam</th><th>Date</th><th>Room</th><th>Requested By</th>
-                <th>Replacement</th><th>Reason</th><th>Status</th><th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="rep-tbody"><tr><td colspan="8" class="text-center">Loading...</td></tr></tbody>
-          </table>
+      <div class="rep-shell">
+        <section class="rep-banner">
+          <div class="rep-banner-grid">
+            <div>
+              <h2 class="rep-headline">Replacement Operations Desk</h2>
+              <p>Review requests, assign substitutes, and close pending invigilation gaps with confidence.</p>
+            </div>
+            <div class="rep-banner-actions">
+              <button class="btn btn-outline-light" onclick="loadRequests()">Refresh</button>
+              <button class="btn btn-primary" id="new-request-btn" onclick="openModal()" style="display:none">+ New Request</button>
+            </div>
+          </div>
+          <div class="rep-note" id="role-tip">Loading access profile...</div>
+        </section>
+
+        <section class="rep-kpis">
+          <article class="rep-kpi">
+            <div class="label">Total Requests</div>
+            <div class="value" id="kpi-total">0</div>
+          </article>
+          <article class="rep-kpi pending">
+            <div class="label">Pending</div>
+            <div class="value" id="kpi-pending">0</div>
+          </article>
+          <article class="rep-kpi approved">
+            <div class="label">Approved</div>
+            <div class="value" id="kpi-approved">0</div>
+          </article>
+          <article class="rep-kpi rejected">
+            <div class="label">Rejected</div>
+            <div class="value" id="kpi-rejected">0</div>
+          </article>
+        </section>
+
+        <section class="rep-controls">
+          <div class="rep-controls-grid">
+            <div class="form-group">
+              <label>Status</label>
+              <select id="status-filter" onchange="applyFilters()">
+                <option value="all">All</option>
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Find Request</label>
+              <input id="search-filter" type="text" placeholder="Exam, room, reason, faculty..." oninput="applyFilters()">
+            </div>
+            <div class="form-group">
+              <label>Order</label>
+              <select id="sort-filter" onchange="applyFilters()">
+                <option value="latest">Latest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="pending-first">Pending First</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <button class="btn btn-secondary" onclick="clearFilters()">Reset</button>
+            </div>
+          </div>
+        </section>
+
+        <div class="card">
+          <div class="card-header"><h2>Replacement Requests</h2></div>
+          <div class="card-body">
+            <div class="rep-table-wrap">
+              <table class="data-table" id="rep-table">
+                <thead>
+                  <tr>
+                    <th>Exam</th>
+                    <th>Date</th>
+                    <th>Room</th>
+                    <th>Original Faculty</th>
+                    <th>Replacement Faculty</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="rep-tbody"><tr><td colspan="8" class="text-center">Loading...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </main>
 </div>
 
-<!-- Request Modal (Faculty) -->
 <div id="req-modal" class="modal" style="display:none">
   <div class="modal-content">
     <div class="modal-header">
@@ -95,60 +381,188 @@
 <script>
 const API = '../api/replacement.php';
 let userRole = '';
+let allRequests = [];
+const availableFacultyByExam = {};
 
 (async () => {
-  const res  = await fetch('../api/auth.php?action=check');
+  const res = await fetch('../api/auth.php?action=check');
   const auth = await res.json();
   if (!auth.logged_in) { window.location.href = '../index.html'; return; }
   userRole = auth.role;
   document.getElementById('user-label').textContent = auth.username + ' (' + userRole + ')';
-  if (userRole === 'faculty') {
-    document.getElementById('faculty-actions').style.display = '';
+
+  const isFaculty = userRole === 'faculty';
+  document.getElementById('role-tip').textContent = isFaculty
+    ? 'Faculty mode: submit and track your replacement requests.'
+    : 'Admin mode: process pending requests with optional manual substitute selection.';
+
+  if (isFaculty) {
+    document.getElementById('new-request-btn').style.display = 'inline-flex';
     await loadFormData();
   }
-  loadRequests();
+
+  if (userRole !== 'admin') {
+    const actionCol = document.querySelector('#rep-table thead th:last-child');
+    if (actionCol) actionCol.textContent = 'Note';
+  }
+
+  await loadRequests();
 })();
 
 async function loadFormData() {
-  const [er, rr, fr] = await Promise.all([
+  const [examRes, facultyRes] = await Promise.all([
     fetch(API + '?action=list_exams').then(r => r.json()),
-    fetch(API + '?action=list_rooms').then(r => r.json()),
     fetch(API + '?action=faculty_list').then(r => r.json()),
   ]);
-  if (er.data) er.data.forEach(e => addOption('f-exam', e.exam_id, `${e.exam_name} (${e.date})`));
-  if (rr.data) rr.data.forEach(r => addOption('f-room', r.room_id, `${r.room_no} – ${r.building}`));
-  if (fr.data) fr.data.forEach(f => addOption('f-rep', f.faculty_id, `${f.name} (${f.department})`));
+
+  const roomResponse = await fetch(API + '?action=list_rooms').then(r => r.json());
+
+  if (examRes.data) examRes.data.forEach(e => addOption('f-exam', e.exam_id, `${e.exam_name} (${e.date})`));
+  if (roomResponse.data) roomResponse.data.forEach(r => addOption('f-room', r.room_id, `${r.room_no} - ${r.building}`));
+  if (facultyRes.data) facultyRes.data.forEach(f => addOption('f-rep', f.faculty_id, `${f.name} (${f.department})`));
+
+  document.getElementById('f-exam').addEventListener('change', async function () {
+    const examId = this.value;
+    const roomSel = document.getElementById('f-room');
+    roomSel.innerHTML = '<option value="">Select Room</option>';
+    if (!examId) return;
+    const rr = await fetch(API + '?action=list_rooms&exam_id=' + examId).then(r => r.json());
+    if (rr.data) rr.data.forEach(r => addOption('f-room', r.room_id, `${r.room_no} - ${r.building}`));
+  });
 }
 
 function addOption(selId, val, text) {
   const opt = document.createElement('option');
-  opt.value = val; opt.textContent = text;
+  opt.value = val;
+  opt.textContent = text;
   document.getElementById(selId).appendChild(opt);
 }
 
 async function loadRequests() {
-  const res  = await fetch(API + '?action=list');
+  const res = await fetch(API + '?action=list');
   const data = await res.json();
-  const tbody = document.getElementById('rep-tbody');
-  tbody.innerHTML = data.data && data.data.length
-    ? data.data.map(r => `
-        <tr>
-          <td>${r.exam_name}</td><td>${r.date}</td><td>${r.room_no}</td>
-          <td>${r.requestor ?? '—'}</td><td>${r.replacement_name ?? '—'}</td>
-          <td>${r.reason}</td>
-          <td><span class="status-badge ${r.status==='Approved'?'badge-green':r.status==='Rejected'?'badge-red':'badge-yellow'}">${r.status}</span></td>
-          <td>
-            ${(userRole==='admin' || userRole==='exam_cell') && r.status==='Pending' ? `
-              <button class="btn btn-sm btn-success" onclick="process(${r.log_id},'Approved')">✓</button>
-              <button class="btn btn-sm btn-danger"  onclick="process(${r.log_id},'Rejected')">✗</button>
-            ` : '—'}
-          </td>
-        </tr>`).join('')
-    : '<tr><td colspan="8" class="text-center">No replacement requests.</td></tr>';
+  allRequests = data.data || [];
+  refreshKpis(allRequests);
+  applyFilters();
 }
 
-function openModal() { document.getElementById('req-modal').style.display = 'flex'; }
-function closeModal() { document.getElementById('req-modal').style.display = 'none'; }
+function refreshKpis(rows) {
+  const total = rows.length;
+  const pending = rows.filter(r => r.status === 'Pending').length;
+  const approved = rows.filter(r => r.status === 'Approved').length;
+  const rejected = rows.filter(r => r.status === 'Rejected').length;
+
+  document.getElementById('kpi-total').textContent = total;
+  document.getElementById('kpi-pending').textContent = pending;
+  document.getElementById('kpi-approved').textContent = approved;
+  document.getElementById('kpi-rejected').textContent = rejected;
+}
+
+function applyFilters() {
+  const status = document.getElementById('status-filter').value;
+  const keyword = document.getElementById('search-filter').value.trim().toLowerCase();
+  const sort = document.getElementById('sort-filter').value;
+  const tbody = document.getElementById('rep-tbody');
+
+  let rows = [...allRequests];
+
+  if (status !== 'all') {
+    rows = rows.filter(r => r.status === status);
+  }
+
+  if (keyword) {
+    rows = rows.filter(r => {
+      const blob = `${r.exam_name || ''} ${r.room_no || ''} ${r.reason || ''} ${r.original_faculty_name || ''} ${r.replacement_faculty_name || ''}`.toLowerCase();
+      return blob.includes(keyword);
+    });
+  }
+
+  if (sort === 'latest') {
+    rows.sort((a, b) => new Date(b.requested_at) - new Date(a.requested_at));
+  } else if (sort === 'oldest') {
+    rows.sort((a, b) => new Date(a.requested_at) - new Date(b.requested_at));
+  } else if (sort === 'pending-first') {
+    const rank = { Pending: 0, Approved: 1, Rejected: 2 };
+    rows.sort((a, b) => (rank[a.status] - rank[b.status]) || (new Date(b.requested_at) - new Date(a.requested_at)));
+  }
+
+  tbody.innerHTML = rows.length
+    ? rows.map(renderRow).join('')
+    : '<tr><td colspan="8" class="text-center">No matching requests found.</td></tr>';
+
+  rows.forEach(r => {
+    if (userRole === 'admin' && r.status === 'Pending') {
+      fillReplacementOptions(r.log_id, r.exam_id);
+    }
+  });
+}
+
+function clearFilters() {
+  document.getElementById('status-filter').value = 'all';
+  document.getElementById('search-filter').value = '';
+  document.getElementById('sort-filter').value = 'latest';
+  applyFilters();
+}
+
+function renderRow(r) {
+  const canProcess = userRole === 'admin' && r.status === 'Pending';
+  const note = userRole === 'faculty'
+    ? '<span class="readonly-chip">Read Only</span>'
+    : '<span class="readonly-chip">Processed</span>';
+
+  return `
+    <tr>
+      <td>${r.exam_name || '-'}</td>
+      <td>${r.date || '-'}</td>
+      <td>${r.room_no || '-'}</td>
+      <td>${r.original_faculty_name || '-'}</td>
+      <td>${r.replacement_faculty_name || 'Auto-Assign'}</td>
+      <td>${r.reason || '-'}</td>
+      <td><span class="pill-status ${r.status}">${r.status}</span></td>
+      <td>
+        ${canProcess ? `
+          <div class="action-box">
+            <select id="replacement-select-${r.log_id}">
+              <option value="0">Auto-assign by workload</option>
+            </select>
+            <div class="action-row">
+              <button class="btn btn-sm btn-success" onclick="processRequest(${r.log_id}, 'Approved')">Approve</button>
+              <button class="btn btn-sm btn-danger" onclick="processRequest(${r.log_id}, 'Rejected')">Reject</button>
+            </div>
+          </div>
+        ` : note}
+      </td>
+    </tr>
+  `;
+}
+
+async function fillReplacementOptions(logId, examId) {
+  const select = document.getElementById(`replacement-select-${logId}`);
+  if (!select || select.dataset.loaded === '1') return;
+
+  if (!availableFacultyByExam[examId]) {
+    const response = await fetch(`${API}?action=available_faculty&exam_id=${examId}`).then(r => r.json());
+    availableFacultyByExam[examId] = response.data || [];
+  }
+
+  const faculty = availableFacultyByExam[examId];
+  faculty.forEach(f => {
+    const option = document.createElement('option');
+    option.value = f.faculty_id;
+    option.textContent = `${f.name} (${f.department})`;
+    select.appendChild(option);
+  });
+
+  select.dataset.loaded = '1';
+}
+
+function openModal() {
+  document.getElementById('req-modal').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('req-modal').style.display = 'none';
+}
 
 async function submitRequest(e) {
   e.preventDefault();
@@ -159,25 +573,58 @@ async function submitRequest(e) {
     replacement_faculty_id: document.getElementById('f-rep').value,
     reason: document.getElementById('f-reason').value,
   };
-  const res  = await fetch(API, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+
+  const res = await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
   const data = await res.json();
   showToast(data.message, data.success ? 'success' : 'error');
-  if (data.success) { closeModal(); loadRequests(); }
+  if (data.success) {
+    closeModal();
+    await loadRequests();
+  }
 }
 
-async function process(logId, status) {
+async function processRequest(logId, status) {
   if (!confirm(`${status} this request?`)) return;
-  const res  = await fetch(API, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'process', log_id: logId, status}) });
+
+  const selectedReplacement = document.getElementById(`replacement-select-${logId}`);
+  const replacementFacultyId = selectedReplacement ? Number(selectedReplacement.value || 0) : 0;
+
+  const payload = {
+    action: 'process',
+    log_id: logId,
+    status,
+    replacement_faculty_id: replacementFacultyId,
+  };
+
+  const res = await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
   const data = await res.json();
+
   showToast(data.message, data.success ? 'success' : 'error');
-  if (data.success) loadRequests();
+  if (data.success) {
+    await loadRequests();
+  }
 }
 
 async function logout() {
-  await fetch('../api/auth.php', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'logout'}) });
+  await fetch('../api/auth.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'logout' })
+  });
   window.location.href = '../index.html';
 }
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
 </script>
 </body>
 </html>

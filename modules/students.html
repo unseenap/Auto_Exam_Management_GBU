@@ -5,6 +5,77 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Students | Exam Management</title>
 <link rel="stylesheet" href="../css/style.css">
+<style>
+  .students-toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; }
+  .students-toolbar .form-group { margin-bottom: 0; }
+  .students-toolbar .search-box { min-width: 260px; }
+  .students-meta { font-size: 13px; color: #4f6072; }
+  .students-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .students-grid .full { grid-column: 1 / -1; }
+  .students-note { background: #f3f8ff; border: 1px solid #cfe2ff; color: #1f4b72; padding: 10px 12px; border-radius: 10px; margin-bottom: 14px; }
+  .main-content,
+  .page-body,
+  .card {
+    min-width: 0;
+  }
+  .card-body.table-responsive {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  #students-table {
+    width: 100%;
+    min-width: 900px;
+    table-layout: auto;
+  }
+  #students-table th,
+  #students-table td {
+    white-space: nowrap;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+  #students-table td:nth-child(8) { /* Address */
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .data-table th,
+  .data-table td,
+  .import-preview th,
+  .import-preview td {
+    border-right: 1px dotted #c7d3e0;
+  }
+  .data-table th:last-child,
+  .data-table td:last-child,
+  .import-preview th:last-child,
+  .import-preview td:last-child {
+    border-right: none;
+  }
+  .data-table th,
+  .import-preview th {
+    border-bottom: 1px dotted #c7d3e0;
+  }
+  .data-table td,
+  .import-preview td {
+    border-bottom: 1px dotted #e1e8f0;
+  }
+  .import-preview { margin-top: 12px; border: 1px solid #d8e3f0; border-radius: 10px; max-height: 260px; overflow: auto; }
+  .import-preview table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .import-preview th, .import-preview td { padding: 8px 10px; border-bottom: 1px solid #edf2f8; text-align: left; }
+  .import-preview th { background: #f4f8fd; color: #2a4d76; position: sticky; top: 0; }
+  .template-note { font-size: 12px; color: #58708c; margin-top: 8px; }
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(8,18,35,0.55); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 1000; }
+  .modal-backdrop.show { display: flex; }
+  .modal-card { width: min(920px, 100%); max-height: 92vh; overflow: auto; background: #fff; border-radius: 16px; border: 1px solid #d8e3f0; box-shadow: 0 16px 36px rgba(16, 34, 67, 0.16); padding: 18px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+  @media (max-width: 900px) {
+    .students-grid { grid-template-columns: 1fr; }
+  }
+</style>
 </head>
 <body>
 <div class="app-wrapper">
@@ -16,8 +87,8 @@
       <a href="faculty.html"><i>👨‍🏫</i> Faculty</a>
       <a href="rooms.html"><i>🚪</i> Rooms</a>
       <a href="schedule.html"><i>📅</i> Schedule</a>
-      <a href="seating.html"><i>💺</i> Seating</a>
       <a href="invigilation.html"><i>📋</i> Invigilation</a>
+      <a href="seating.html"><i>💺</i> Seating</a>
       <a href="attendance.html"><i>✅</i> Attendance</a>
       <a href="replacement.html"><i>🔄</i> Replacement</a>
       <a href="reports.html"><i>📊</i> Reports</a>
@@ -25,33 +96,58 @@
       <a href="#" onclick="logout()"><i>🚪</i> Logout</a>
     </nav>
   </aside>
+
   <main class="main-content">
     <header class="top-bar">
       <button onclick="toggleSidebar()" class="menu-btn">☰</button>
       <h1>Students</h1>
-      <div class="top-actions">
-        <input type="text" id="search-input" placeholder="Search students..." oninput="filterTable()" class="search-box">
-        <button class="btn btn-primary" onclick="openModal('add')">+ Add Student</button>
-        <button class="btn btn-secondary" onclick="document.getElementById('csv-input').click()">📤 Import CSV</button>
-        <button class="btn btn-success" onclick="exportCSV()">⬇ Export</button>
-        <input type="file" id="csv-input" accept=".csv" style="display:none" onchange="uploadCSV(event)">
-      </div>
     </header>
+
     <div class="page-body">
-      <div class="card">
+      <div class="card mb-3">
+        <div class="card-header"><h2>Student Registry</h2></div>
         <div class="card-body">
+          <div class="students-note">
+            Enrollment/Roll Number is mandatory. Username/Mail ID is auto-set to Enrollment/Roll Number + @gbu.ac.in. Batch must be in YYYY-YYYY format (example: 2023-2027). Year and semester stay aligned (Year 3 -> Sem 5/6, Year 4 -> Sem 7/8).
+          </div>
+          <div class="students-toolbar">
+            <div class="form-group">
+              <label>Search</label>
+              <input id="search-input" class="form-control search-box" placeholder="Search roll number, name, branch, department..." oninput="loadStudents()">
+            </div>
+            <button id="add-btn" class="btn btn-primary" onclick="openStudentModal()">+ Add Student</button>
+            <button id="import-btn" class="btn btn-secondary" onclick="openImportModal()">Upload CSV</button>
+            <button id="template-btn" class="btn btn-success" onclick="downloadStudentTemplate()">Download Excel Template</button>
+            <span class="students-meta" id="count-text">0 records</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2>Students List</h2></div>
+        <div class="card-body table-responsive">
           <table class="data-table" id="students-table">
             <thead>
               <tr>
-                <th onclick="sortTable(0)">Roll No ↕</th>
-                <th onclick="sortTable(1)">Name ↕</th>
-                <th onclick="sortTable(2)">Branch ↕</th>
-                <th onclick="sortTable(3)">Semester ↕</th>
-                <th onclick="sortTable(4)">Section ↕</th>
+                <th>Username/Mail ID</th>
+                <th>Roll Number</th>
+                <th>Batch</th>
+                <th>Branch</th>
+                <th>Name</th>
+                <th>Enrollment No.</th>
+                <th>Father Name</th>
+                <th>Mobile</th>
+                <th>Address</th>
+                <th>Department</th>
+                <th>School</th>
+                <th>Year</th>
+                <th>Sem</th>
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody id="student-tbody"><tr><td colspan="6" class="text-center">Loading...</td></tr></tbody>
+            <tbody id="students-body">
+              <tr><td colspan="14" class="text-center">Loading...</td></tr>
+            </tbody>
           </table>
         </div>
       </div>
@@ -59,140 +155,576 @@
   </main>
 </div>
 
-<!-- Add/Edit Modal -->
-<div id="student-modal" class="modal" style="display:none">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2 id="modal-title">Add Student</h2>
-      <span class="close-btn" onclick="closeModal()">&times;</span>
-    </div>
-    <form id="student-form" onsubmit="saveStudent(event)">
-      <input type="hidden" id="edit-id">
-      <div class="form-group">
-        <label>Roll Number</label>
-        <input type="text" id="f-roll" required placeholder="e.g. 21CE001">
-      </div>
-      <div class="form-group">
-        <label>Full Name</label>
-        <input type="text" id="f-name" required>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Branch</label>
-          <input type="text" id="f-branch" required placeholder="e.g. Computer Engineering">
+<div class="modal-backdrop" id="student-modal">
+  <div class="modal-card">
+    <div class="card-header"><h2 id="modal-title">Add Student</h2></div>
+    <form id="student-form">
+      <input type="hidden" id="student_id">
+      <div class="students-grid">
+        <div>
+          <label>Username / Mail ID</label>
+          <input id="username" class="form-control" readonly>
         </div>
-        <div class="form-group">
-          <label>Semester</label>
-          <select id="f-sem" required>
-            <option value="">Select</option>
-            <option>1</option><option>2</option><option>3</option><option>4</option>
-            <option>5</option><option>6</option><option>7</option><option>8</option>
+        <div>
+          <label>Enrollment / Roll Number *</label>
+          <input id="enrollment_no" class="form-control" required placeholder="Example: 235/UCS/001">
+        </div>
+        <div>
+          <label>Enrollment Number (Optional)</label>
+          <input id="enrollment_number" class="form-control" value="1234" placeholder="Optional enrollment number">
+        </div>
+        <div>
+          <label>Batch (YYYY-YYYY) *</label>
+          <input id="session_year" class="form-control" required placeholder="Example: 2023-2027">
+        </div>
+        <div>
+          <label>Name *</label>
+          <input id="name" class="form-control" required>
+        </div>
+        <div>
+          <label>Branch *</label>
+          <input id="branch" class="form-control" required placeholder="Example: CSE">
+        </div>
+        <div>
+          <label>Father Name</label>
+          <input id="father_name" class="form-control" placeholder="Father's full name">
+        </div>
+        <div>
+          <label>Mobile</label>
+          <input id="mobile" class="form-control" placeholder="Mobile number">
+        </div>
+        <div class="full">
+          <label>Address</label>
+          <textarea id="address" class="form-control" rows="2" placeholder="Full address"></textarea>
+        </div>
+        <div>
+          <label>Department *</label>
+          <input id="department" class="form-control" required value="Computer Science and Engineering">
+        </div>
+        <div>
+          <label>School *</label>
+          <input id="school" class="form-control" required value="SOICT">
+        </div>
+        <div>
+          <label>Current Year *</label>
+          <select id="year_of_study" class="form-control" required>
+            <option value="1">1st Year</option>
+            <option value="2">2nd Year</option>
+            <option value="3">3rd Year</option>
+            <option value="4">4th Year</option>
+            <option value="5">5th Year</option>
           </select>
         </div>
-        <div class="form-group">
+        <div>
+          <label>Current Semester *</label>
+          <select id="semester" class="form-control" required>
+            <option value="1">Sem 1</option>
+            <option value="2">Sem 2</option>
+            <option value="3">Sem 3</option>
+            <option value="4">Sem 4</option>
+            <option value="5">Sem 5</option>
+            <option value="6">Sem 6</option>
+            <option value="7">Sem 7</option>
+            <option value="8">Sem 8</option>
+            <option value="9">Sem 9</option>
+            <option value="10">Sem 10</option>
+          </select>
+        </div>
+        <div>
           <label>Section</label>
-          <input type="text" id="f-section" required placeholder="e.g. A">
+          <input id="section" class="form-control" value="A">
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-        <button type="submit" class="btn btn-primary">Save</button>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeStudentModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Student</button>
       </div>
     </form>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="import-modal">
+  <div class="modal-card" style="max-width: 980px;">
+    <div class="card-header"><h2>Import Students from CSV</h2></div>
+    <div class="students-note" style="margin-top: 12px;">
+      Required columns: roll_number, session_year (YYYY-YYYY), name, branch, year_of_study, semester.
+      Optional columns: enrollment_number, father_name, mobile, address, department, school, section.
+    </div>
+
+    <div class="form-group">
+      <label>CSV File</label>
+      <input type="file" id="students-csv" class="form-control" accept=".csv,text/csv" onchange="previewCsvFile()">
+      <div class="template-note">Tip: Use the template button to generate an Excel-friendly CSV format first.</div>
+    </div>
+
+    <div id="csv-status" class="students-meta" style="margin: 4px 0 8px 0;">No file selected.</div>
+
+    <div class="import-preview" id="csv-preview-wrap" style="display:none;"></div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn-secondary" onclick="closeImportModal()">Cancel</button>
+      <button type="button" class="btn btn-primary" onclick="uploadCsv()">Import CSV</button>
+    </div>
   </div>
 </div>
 
 <div id="toast" class="toast"></div>
 <script src="../js/script.js"></script>
 <script>
-let editMode = false;
-const API = '../api/students.php';
+const API_URL = '../api/students.php';
+let canManage = false;
+let students = [];
+let csvRows = [];
 
-(async () => {
-  const res  = await fetch('../api/auth.php?action=check');
-  const auth = await res.json();
-  if (!auth.logged_in) { window.location.href = '../index.html'; return; }
-  document.getElementById('user-label').textContent = auth.username + ' (' + auth.role + ')';
-  loadStudents();
-})();
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+function syncUsername() {
+  const enr = document.getElementById('enrollment_no').value.trim().toUpperCase();
+  document.getElementById('enrollment_no').value = enr;
+  document.getElementById('username').value = enr ? (enr + '@gbu.ac.in') : '';
+}
+
+function normalizeSessionValue() {
+  const raw = document.getElementById('session_year').value.trim();
+  const match = raw.match(/^(\d{4})\s*-\s*(\d{4})$/);
+  if (!match) return null;
+  const start = Number(match[1]);
+  const end = Number(match[2]);
+  if (!start || !end || end <= start) return null;
+  return `${start}-${end}`;
+}
+
+function syncYearFromSemester() {
+  const sem = Number(document.getElementById('semester').value || 1);
+  const year = Math.max(1, Math.ceil(sem / 2));
+  document.getElementById('year_of_study').value = String(year);
+}
+
+function ensureSemesterFitsYear() {
+  const year = Number(document.getElementById('year_of_study').value || 1);
+  const minSem = (year * 2) - 1;
+  const maxSem = year * 2;
+  const semSelect = document.getElementById('semester');
+  const sem = Number(semSelect.value || minSem);
+  if (sem < minSem || sem > maxSem) {
+    semSelect.value = String(minSem);
+  }
+}
+
+function closeStudentModal() {
+  document.getElementById('student-modal').classList.remove('show');
+}
+
+function openImportModal() {
+  document.getElementById('import-modal').classList.add('show');
+}
+
+function closeImportModal() {
+  document.getElementById('import-modal').classList.remove('show');
+  document.getElementById('students-csv').value = '';
+  document.getElementById('csv-preview-wrap').style.display = 'none';
+  document.getElementById('csv-preview-wrap').innerHTML = '';
+  document.getElementById('csv-status').textContent = 'No file selected.';
+  csvRows = [];
+}
+
+function normalizeHeader(value) {
+  return String(value || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+function splitCsvLine(line) {
+  const out = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        cur += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (ch === ',' && !inQuotes) {
+      out.push(cur.trim());
+      cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  out.push(cur.trim());
+  return out;
+}
+
+function parseCsvRows(text) {
+  const lines = String(text || '').replace(/\r/g, '').split('\n').filter(l => l.trim() !== '');
+  if (!lines.length) return [];
+
+  const rawHeaders = splitCsvLine(lines[0]);
+  const headers = rawHeaders.map(normalizeHeader);
+  const rows = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const vals = splitCsvLine(lines[i]);
+    if (vals.every(v => String(v).trim() === '')) continue;
+    const row = {};
+    for (let c = 0; c < headers.length; c++) {
+      const h = headers[c];
+      const v = vals[c] ?? '';
+      if (!h) continue;
+
+      if (['enrollmentno', 'enrollment', 'rollno', 'roll', 'rollnumber'].includes(h)) row.enrollment_no = v;
+      else if (['enrollment_number', 'enrollmentnumber', 'optionalenrollment', 'optionalenrollmentnumber', 'enrollmentnooptional'].includes(h)) row.enrollment_number = v;
+      else if (['sessionyear', 'session'].includes(h)) row.session_year = v;
+      else if (['name', 'studentname'].includes(h)) row.name = v;
+      else if (['branch', 'program'].includes(h)) row.branch = v;
+      else if (['fathername', 'father_name', 'father'].includes(h)) row.father_name = v;
+      else if (['mobile', 'phone', 'contact'].includes(h)) row.mobile = v;
+      else if (['address', 'addr'].includes(h)) row.address = v;
+      else if (['department', 'dept'].includes(h)) row.department = v;
+      else if (['school'].includes(h)) row.school = v;
+      else if (['yearofstudy', 'year', 'currentyear'].includes(h)) row.year_of_study = v;
+      else if (['semester', 'sem'].includes(h)) row.semester = v;
+      else if (['section'].includes(h)) row.section = v;
+      else row[h] = v;
+    }
+    rows.push(row);
+  }
+
+  return rows;
+}
+
+function renderCsvPreview(rows) {
+  const wrap = document.getElementById('csv-preview-wrap');
+  if (!rows.length) {
+    wrap.style.display = 'none';
+    wrap.innerHTML = '';
+    return;
+  }
+
+  wrap.style.display = 'block';
+  wrap.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Roll Number</th>
+          <th>Enrollment Number</th>
+          <th>Batch</th>
+          <th>Name</th>
+          <th>Branch</th>
+          <th>Father Name</th>
+          <th>Mobile</th>
+          <th>Address</th>
+          <th>Department</th>
+          <th>School</th>
+          <th>Year</th>
+          <th>Semester</th>
+          <th>Section</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.slice(0, 25).map(row => `
+          <tr>
+            <td>${escapeHtml(row.enrollment_no || '')}</td>
+            <td>${escapeHtml(row.enrollment_number || '')}</td>
+            <td>${escapeHtml(row.session_year || '')}</td>
+            <td>${escapeHtml(row.name || '')}</td>
+            <td>${escapeHtml(row.branch || '')}</td>
+            <td>${escapeHtml(row.father_name || '')}</td>
+            <td>${escapeHtml(row.mobile || '')}</td>
+            <td>${escapeHtml(row.address || '')}</td>
+            <td>${escapeHtml(row.department || '')}</td>
+            <td>${escapeHtml(row.school || '')}</td>
+            <td>${escapeHtml(row.year_of_study || '')}</td>
+            <td>${escapeHtml(row.semester || '')}</td>
+            <td>${escapeHtml(row.section || '')}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function previewCsvFile() {
+  const input = document.getElementById('students-csv');
+  const file = input.files && input.files[0];
+  if (!file) {
+    csvRows = [];
+    document.getElementById('csv-status').textContent = 'No file selected.';
+    renderCsvPreview([]);
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    csvRows = parseCsvRows(String(reader.result || ''));
+    renderCsvPreview(csvRows);
+    document.getElementById('csv-status').textContent = `${csvRows.length} row(s) ready for import.`;
+  };
+  reader.readAsText(file);
+}
+
+async function uploadCsv() {
+  if (!csvRows.length) {
+    showToast('Choose a CSV file first', 'error');
+    return;
+  }
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'import_csv', rows: csvRows })
+    });
+    const data = await res.json();
+
+    if (!data.success) {
+      showToast(data.message || 'Import failed', 'error');
+      return;
+    }
+
+    showToast(data.message || 'CSV imported', 'success');
+    if (Array.isArray(data.errors) && data.errors.length) {
+      console.warn('Student import warnings/errors:', data.errors);
+    }
+    closeImportModal();
+    await loadStudents();
+  } catch (err) {
+    showToast('Import failed', 'error');
+  }
+}
+
+function downloadStudentTemplate() {
+  const rows = [
+    ['roll_number', 'enrollment_number', 'session_year', 'name', 'branch', 'father_name', 'mobile', 'address', 'department', 'school', 'year_of_study', 'semester', 'section'],
+    ['235/UCS/001', '1234', '2023-2027', 'Aarav Sharma', 'CSE', 'Rajesh Sharma', '1234', '', 'Computer Science and Engineering', 'SOICT', '3', '5', 'A'],
+    ['235/UCS/002', '1234', '2023-2027', 'Ananya Gupta', 'CSE', '', '1234', '', 'Computer Science and Engineering', 'SOICT', '3', '6', 'B']
+  ];
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  downloadCSV(csv, 'students_import_template.csv');
+}
+
+function openStudentModal(student = null) {
+  document.getElementById('student-form').reset();
+  document.getElementById('student_id').value = '';
+  document.getElementById('username').value = '';
+  document.getElementById('enrollment_number').value = '1234';
+  document.getElementById('department').value = 'Computer Science and Engineering';
+  document.getElementById('school').value = 'SOICT';
+  document.getElementById('year_of_study').value = '1';
+  document.getElementById('semester').value = '1';
+  document.getElementById('section').value = 'A';
+  document.getElementById('father_name').value = '';
+  document.getElementById('mobile').value = '';
+  document.getElementById('address').value = '';
+
+  if (student) {
+    document.getElementById('modal-title').textContent = 'Edit Student';
+    document.getElementById('student_id').value = student.student_id;
+    document.getElementById('enrollment_no').value = student.enrollment_no || '';
+    document.getElementById('enrollment_number').value = student.enrollment_number || '1234';
+    document.getElementById('username').value = student.username || '';
+    document.getElementById('session_year').value = student.session_year || '';
+    document.getElementById('name').value = student.name || '';
+    document.getElementById('branch').value = student.branch || '';
+    document.getElementById('father_name').value = student.father_name || '';
+    document.getElementById('mobile').value = student.mobile || '';
+    document.getElementById('address').value = student.address || '';
+    document.getElementById('department').value = student.department || '';
+    document.getElementById('school').value = student.school || '';
+    document.getElementById('year_of_study').value = student.year_of_study || 1;
+    document.getElementById('semester').value = student.semester || 1;
+    document.getElementById('section').value = student.section || 'A';
+  } else {
+    document.getElementById('modal-title').textContent = 'Add Student';
+  }
+
+  syncUsername();
+  document.getElementById('student-modal').classList.add('show');
+}
+
+function renderTable() {
+  const tbody = document.getElementById('students-body');
+  document.getElementById('count-text').textContent = students.length + ' records';
+
+  if (!students.length) {
+    tbody.innerHTML = '<tr><td colspan="14" class="text-center">No students found.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = students.map((s) => {
+    const actions = canManage
+      ? `<button class="btn btn-secondary" onclick="editStudent(${s.student_id})">Edit</button> <button class="btn btn-danger" onclick="deleteStudent(${s.student_id})">Delete</button>`
+      : '<span class="text-muted">Read only</span>';
+
+    return `<tr>
+      <td>${escapeHtml(s.username)}</td>
+      <td>${escapeHtml(s.roll_number || s.enrollment_no || '')}</td>
+      <td>${escapeHtml(s.session_year || '')}</td>
+      <td>${escapeHtml(s.branch)}</td>
+      <td>${escapeHtml(s.name)}</td>
+      <td>${escapeHtml(s.enrollment_number || '')}</td>
+      <td>${escapeHtml(s.father_name || '')}</td>
+      <td>${escapeHtml(s.mobile || '')}</td>
+      <td title="${escapeHtml(s.address || '')}">${escapeHtml(s.address || '')}</td>
+      <td>${escapeHtml(s.department)}</td>
+      <td>${escapeHtml(s.school)}</td>
+      <td>${escapeHtml(s.year_of_study)}</td>
+      <td>${escapeHtml(s.semester)}</td>
+      <td>${actions}</td>
+    </tr>`;
+  }).join('');
+}
 
 async function loadStudents() {
-  const res  = await fetch(API + '?action=list');
-  const data = await res.json();
-  const tbody = document.getElementById('student-tbody');
-  if (!data.success) { tbody.innerHTML = '<tr><td colspan="6" class="text-center">Error loading.</td></tr>'; return; }
-  tbody.innerHTML = data.data.length
-    ? data.data.map(s => `
-        <tr>
-          <td>${s.roll_no}</td>
-          <td>${s.name}</td>
-          <td>${s.branch}</td>
-          <td>${s.semester}</td>
-          <td>${s.section}</td>
-          <td>
-            <button class="btn btn-sm btn-warning" onclick='openModal("edit", ${JSON.stringify(s)})'>Edit</button>
-            <button class="btn btn-sm btn-danger" onclick="deleteStudent(${s.student_id})">Delete</button>
-          </td>
-        </tr>`).join('')
-    : '<tr><td colspan="6" class="text-center">No students found.</td></tr>';
+  try {
+    const q = encodeURIComponent(document.getElementById('search-input').value.trim());
+    const res = await fetch(`${API_URL}?action=list&q=${q}`);
+    const data = await res.json();
+    if (!data.success) {
+      showToast(data.message || 'Failed to load students', 'error');
+      return;
+    }
+
+    canManage = !!data.can_manage;
+    students = data.data || [];
+    document.getElementById('add-btn').style.display = canManage ? '' : 'none';
+    document.getElementById('import-btn').style.display = canManage ? '' : 'none';
+    document.getElementById('template-btn').style.display = canManage ? '' : 'none';
+    renderTable();
+  } catch (err) {
+    showToast('Failed to load students', 'error');
+  }
 }
 
-function openModal(mode, s = null) {
-  editMode = mode === 'edit';
-  document.getElementById('modal-title').textContent = editMode ? 'Edit Student' : 'Add Student';
-  document.getElementById('edit-id').value  = s ? s.student_id : '';
-  document.getElementById('f-roll').value   = s ? s.roll_no : '';
-  document.getElementById('f-name').value   = s ? s.name : '';
-  document.getElementById('f-branch').value = s ? s.branch : '';
-  document.getElementById('f-sem').value    = s ? s.semester : '';
-  document.getElementById('f-section').value = s ? s.section : '';
-  document.getElementById('student-modal').style.display = 'flex';
+function editStudent(studentId) {
+  const item = students.find((s) => Number(s.student_id) === Number(studentId));
+  if (!item) return;
+  openStudentModal(item);
 }
-function closeModal() { document.getElementById('student-modal').style.display = 'none'; }
 
-async function saveStudent(e) {
-  e.preventDefault();
+async function saveStudent(event) {
+  event.preventDefault();
+
+  const normalizedSession = normalizeSessionValue();
+  if (!normalizedSession) {
+    showToast('Session must be in YYYY-YYYY format (example: 2023-2027)', 'error');
+    return;
+  }
+
+  const year = Number(document.getElementById('year_of_study').value || 1);
+  const sem = Number(document.getElementById('semester').value || 1);
+  const minSem = (year * 2) - 1;
+  const maxSem = year * 2;
+  if (sem < minSem || sem > maxSem) {
+    showToast(`For Year ${year}, semester must be ${minSem} or ${maxSem}`, 'error');
+    return;
+  }
+
   const payload = {
-    action: editMode ? 'edit' : 'add',
-    student_id: document.getElementById('edit-id').value,
-    roll_no: document.getElementById('f-roll').value,
-    name:    document.getElementById('f-name').value,
-    branch:  document.getElementById('f-branch').value,
-    semester: document.getElementById('f-sem').value,
-    section:  document.getElementById('f-section').value,
+    action: 'save',
+    student_id: Number(document.getElementById('student_id').value || 0),
+    enrollment_no: document.getElementById('enrollment_no').value.trim(),
+    enrollment_number: document.getElementById('enrollment_number').value.trim() || '1234',
+    session_year: normalizedSession,
+    name: document.getElementById('name').value.trim(),
+    branch: document.getElementById('branch').value.trim(),
+    father_name: document.getElementById('father_name').value.trim(),
+    mobile: document.getElementById('mobile').value.trim(),
+    address: document.getElementById('address').value.trim(),
+    department: document.getElementById('department').value.trim(),
+    school: document.getElementById('school').value.trim(),
+    year_of_study: year,
+    semester: sem,
+    section: document.getElementById('section').value.trim() || 'A'
   };
-  const res  = await fetch(API, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-  const data = await res.json();
-  showToast(data.message, data.success ? 'success' : 'error');
-  if (data.success) { closeModal(); loadStudents(); }
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!data.success) {
+      showToast(data.message || 'Save failed', 'error');
+      return;
+    }
+
+    closeStudentModal();
+    showToast(data.message || 'Saved', 'success');
+    await loadStudents();
+  } catch (err) {
+    showToast('Save failed', 'error');
+  }
 }
 
-async function deleteStudent(id) {
-  if (!confirm('Delete this student?')) return;
-  const res  = await fetch(API, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'delete', student_id: id}) });
-  const data = await res.json();
-  showToast(data.message, data.success ? 'success' : 'error');
-  if (data.success) loadStudents();
+async function deleteStudent(studentId) {
+  if (!confirmDelete('Delete this student?')) return;
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', student_id: studentId })
+    });
+    const data = await res.json();
+    if (!data.success) {
+      showToast(data.message || 'Delete failed', 'error');
+      return;
+    }
+    showToast('Student deleted', 'success');
+    await loadStudents();
+  } catch (err) {
+    showToast('Delete failed', 'error');
+  }
 }
 
-async function uploadCSV(e) {
-  const form = new FormData();
-  form.append('csv_file', e.target.files[0]);
-  form.append('action', 'upload_csv');
-  const res  = await fetch(API, { method: 'POST', body: form });
-  const data = await res.json();
-  showToast(data.message, data.success ? 'success' : 'error');
-  if (data.success) loadStudents();
-}
-
-function exportCSV() { exportTableToCSV('students-table', 'students.csv'); }
-function filterTable() { filterTableFn('students-table', document.getElementById('search-input').value); }
-function sortTable(col) { sortTableFn('students-table', col); }
 async function logout() {
-  await fetch('../api/auth.php', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'logout'}) });
+  await fetch('../api/auth.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'logout' })
+  });
   window.location.href = '../index.html';
 }
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+
+(async function bootstrap() {
+  const res = await fetch('../api/auth.php?action=check');
+  const auth = await res.json();
+
+  if (!auth.logged_in) {
+    window.location.href = '../index.html';
+    return;
+  }
+
+  if (auth.role === 'student') {
+    window.location.href = 'student_portal.html';
+    return;
+  }
+
+  document.getElementById('user-label').textContent = auth.username + ' (' + auth.role + ')';
+  document.getElementById('enrollment_no').addEventListener('input', syncUsername);
+  document.getElementById('session_year').addEventListener('blur', () => {
+    const normalized = normalizeSessionValue();
+    if (normalized) document.getElementById('session_year').value = normalized;
+  });
+  document.getElementById('semester').addEventListener('change', syncYearFromSemester);
+  document.getElementById('year_of_study').addEventListener('change', ensureSemesterFitsYear);
+  document.getElementById('student-form').addEventListener('submit', saveStudent);
+  await loadStudents();
+})();
 </script>
 </body>
 </html>

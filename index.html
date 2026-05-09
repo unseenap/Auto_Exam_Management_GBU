@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Login - Exam Management System</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -17,9 +20,10 @@
                 <p>Automated Seating, Invigilation &amp; Attendance</p>
             </div>
 
-            <div id="loginAlert" class="alert" style="display:none;"></div>
+            <div id="loginAlert" class="alert alert-error" id="loginAlert" style="display:none;"></div>
 
-            <form id="loginForm">
+            <!-- Direct POST to PHP — no JS fetch, no JS redirect, no cache issues -->
+            <form id="loginForm" method="POST" action="api/login.php">
                 <div class="form-group">
                     <label for="username">Username / Roll Number</label>
                     <input type="text" id="username" name="username" placeholder="Enter username" required autocomplete="off">
@@ -35,75 +39,36 @@
                     <select id="role" name="role" required>
                         <option value="">-- Select Role --</option>
                         <option value="admin">Admin</option>
-                        <option value="exam_cell">Exam Cell</option>
                         <option value="faculty">Faculty</option>
                         <option value="student">Student</option>
                     </select>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-full" id="loginBtn">
-                    <span id="loginBtnText">Login</span>
-                    <span id="loginSpinner" style="display:none;">Logging in...</span>
-                </button>
+                <button type="submit" class="btn btn-primary btn-full" id="loginBtn">Login</button>
             </form>
 
             <div class="login-footer">
                 <p>Default Admin: <strong>admin</strong> / <strong>admin123</strong></p>
+                <p>Demo Faculty: <strong>rakesh.kumar@gbu.ac.in</strong> / <strong>123</strong></p>
+                <p>Demo Student: <strong>235UCS014@gbu.ac.in</strong> / <strong>123</strong></p>
             </div>
         </div>
     </div>
 
+    <script src="js/script.js"></script>
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-            const role     = document.getElementById('role').value;
-            const alert    = document.getElementById('loginAlert');
-            const btnText  = document.getElementById('loginBtnText');
-            const spinner  = document.getElementById('loginSpinner');
-
-            if (!username || !password || !role) {
-                showAlert('error', 'Please fill in all fields.');
-                return;
+        // Show error from PHP redirect if present
+        (function() {
+            var params = new URLSearchParams(window.location.search);
+            var err = params.get('error');
+            if (err) {
+                var el = document.getElementById('loginAlert');
+                el.textContent = decodeURIComponent(err);
+                el.style.display = 'block';
+                // Clean the URL without reloading
+                history.replaceState(null, '', window.location.pathname);
             }
-
-            btnText.style.display  = 'none';
-            spinner.style.display  = 'inline';
-
-            try {
-                const res  = await fetch('api/auth.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'login', username, password, role })
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    if (data.role === 'student') {
-                        window.location.href = 'modules/student_portal.html';
-                    } else {
-                        window.location.href = 'dashboard.html';
-                    }
-                } else {
-                    showAlert('error', data.message || 'Invalid credentials.');
-                }
-            } catch (err) {
-                showAlert('error', 'Server error. Open via http://localhost/... not by double-clicking the file. (' + err.message + ')');
-            }
-
-            btnText.style.display = 'inline';
-            spinner.style.display = 'none';
-        });
-
-        function showAlert(type, msg) {
-            const el = document.getElementById('loginAlert');
-            el.className = 'alert alert-' + type;
-            el.textContent = msg;
-            el.style.display = 'block';
-            setTimeout(() => el.style.display = 'none', 4000);
-        }
+        })();
     </script>
 </body>
 </html>

@@ -5,6 +5,217 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Reports | Exam Management</title>
 <link rel="stylesheet" href="../css/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root {
+    --rep-bg: #ecf2f9;
+    --rep-panel: #ffffff;
+    --rep-ink: #152236;
+    --rep-muted: #5d6f8c;
+    --rep-border: #d7e0ec;
+    --rep-brand: #0f6fd9;
+    --rep-brand-2: #2f8df1;
+    --rep-ok: #17935d;
+    --rep-bad: #d0402e;
+    --rep-warn: #d68a05;
+  }
+
+  body {
+    font-family: 'Manrope', sans-serif;
+    background:
+      radial-gradient(circle at 95% 0%, #e3f2ff 0, transparent 33%),
+      radial-gradient(circle at 0% 20%, #e9f6ef 0, transparent 30%),
+      var(--rep-bg);
+  }
+
+  .top-bar h1,
+  .sidebar-header h2,
+  .card-header h2,
+  .report-hero h2 {
+    font-family: 'Outfit', sans-serif;
+  }
+
+  .reports-shell {
+    display: grid;
+    gap: 16px;
+  }
+
+  .report-hero {
+    border-radius: 16px;
+    color: #fff;
+    background: linear-gradient(125deg, #0d375e, #0f6fd9 55%, #2892ff);
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 14px 34px rgba(11, 71, 137, 0.23);
+  }
+
+  .report-hero::after {
+    content: '';
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    right: -45px;
+    bottom: -90px;
+    background: rgba(255, 255, 255, 0.16);
+  }
+
+  .report-hero p {
+    margin-top: 6px;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .control-panel,
+  .kpi-panel,
+  .content-panel {
+    background: var(--rep-panel);
+    border: 1px solid var(--rep-border);
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(22, 44, 78, 0.07);
+  }
+
+  .control-panel {
+    padding: 14px;
+  }
+
+  .control-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+    align-items: end;
+  }
+
+  .control-grid .form-group {
+    margin-bottom: 0;
+  }
+
+  .kpi-panel {
+    padding: 14px;
+  }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+  }
+
+  .kpi-tile {
+    border: 1px solid #d9e3f2;
+    border-radius: 12px;
+    padding: 10px;
+    background: #f8fbff;
+  }
+
+  .kpi-tile .label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--rep-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .kpi-tile .value {
+    font-size: 24px;
+    margin-top: 2px;
+    color: var(--rep-ink);
+    font-weight: 800;
+  }
+
+  .content-panel {
+    padding: 16px;
+  }
+
+  .content-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .content-head h2 {
+    margin: 0;
+    color: var(--rep-ink);
+    font-size: 19px;
+  }
+
+  .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .chart-card {
+    border: 1px solid #dbe5f2;
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px;
+    min-height: 280px;
+  }
+
+  .chart-card h3 {
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #1c2f48;
+  }
+
+  .table-wrap {
+    margin-top: 12px;
+    border: 1px solid #dbe5f2;
+    border-radius: 12px;
+    overflow: auto;
+    max-height: 560px;
+  }
+
+  .data-table thead {
+    background: #123457;
+  }
+
+  .legend-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .legend-chip.ok { background: #d8f5e7; color: #0f653f; }
+  .legend-chip.bad { background: #fbe0dd; color: #812c25; }
+  .legend-chip.warn { background: #ffecc8; color: #80500a; }
+
+  .summary-note {
+    color: var(--rep-muted);
+    font-size: 12px;
+    margin-top: 8px;
+  }
+
+  @media (max-width: 1120px) {
+    .control-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .chart-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .control-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .report-hero {
+      padding: 14px;
+    }
+  }
+</style>
 </head>
 <body>
 <div class="app-wrapper">
@@ -16,8 +227,8 @@
       <a href="faculty.html"><i>👨‍🏫</i> Faculty</a>
       <a href="rooms.html"><i>🚪</i> Rooms</a>
       <a href="schedule.html"><i>📅</i> Schedule</a>
-      <a href="seating.html"><i>💺</i> Seating</a>
       <a href="invigilation.html"><i>📋</i> Invigilation</a>
+      <a href="seating.html"><i>💺</i> Seating</a>
       <a href="attendance.html"><i>✅</i> Attendance</a>
       <a href="replacement.html"><i>🔄</i> Replacement</a>
       <a href="reports.html" class="active"><i>📊</i> Reports</a>
@@ -31,39 +242,77 @@
       <h1>Reports &amp; Analytics</h1>
     </header>
     <div class="page-body">
-      <!-- Controls -->
-      <div class="card mb-4">
-        <div class="card-body row-flex gap-2 flex-wrap">
-          <div class="form-group mb-0">
-            <label>Report Type</label>
-            <select id="report-type" onchange="onTypeChange()">
-              <option value="seating">Seating Chart</option>
-              <option value="duty">Invigilation Duty</option>
-              <option value="attendance">Attendance Report</option>
-              <option value="faculty_summary">Faculty Duty Summary</option>
-              <option value="utilization">Room Utilization</option>
-              <option value="timetable">Exam Timetable</option>
-            </select>
-          </div>
-          <div class="form-group mb-0" id="exam-group">
-            <label>Exam</label>
-            <select id="exam-select">
-              <option value="">-- Select Exam --</option>
-            </select>
-          </div>
-          <div class="btn-group ml-auto" style="align-self:flex-end">
-            <button class="btn btn-primary" onclick="generateReport()">Generate</button>
-            <button class="btn btn-success" onclick="exportCSV()">⬇ Export</button>
-            <button class="btn btn-secondary" onclick="window.print()">🖨 Print</button>
-          </div>
-        </div>
-      </div>
+      <div class="reports-shell">
+        <section class="report-hero">
+          <h2>Professional Exam Reporting Studio</h2>
+          <p>Use one control surface for executive metrics, attendance analytics, room utilization, replacement tracking, and branch-wise outcome analysis.</p>
+        </section>
 
-      <!-- Results -->
-      <div class="card">
-        <div class="card-header"><h2 id="report-title">Select a report type and click Generate</h2></div>
-        <div class="card-body" id="report-container">
-          <p class="text-center text-muted">No report generated yet.</p>
+        <section class="control-panel">
+          <div class="control-grid">
+            <div class="form-group">
+              <label>Report View</label>
+              <select id="report-view">
+                <option value="executive">Executive Overview</option>
+                <option value="attendance_subject">Branch/Session/Year/Subject Attendance</option>
+                <option value="room_utilization">Room Utilization Analytics</option>
+                <option value="faculty_workload">Faculty Duty Workload</option>
+                <option value="replacement_tracker">Replacement Tracker</option>
+              </select>
+            </div>
+            <div class="form-group" id="exam-group">
+              <label>Exam Scope</label>
+              <select id="exam-select">
+                <option value="">All Exams</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Visualization Focus</label>
+              <select id="chart-focus">
+                <option value="all">All Charts</option>
+                <option value="pie">Pie Chart</option>
+                <option value="line">Line Graph</option>
+                <option value="bar">Bar Graph</option>
+                <option value="histogram">Histogram</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <button class="btn btn-primary" onclick="generateReport()">Generate Report</button>
+            </div>
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <div class="btn-group">
+                <button class="btn btn-success" onclick="exportCSV()">Export CSV</button>
+                <button class="btn btn-secondary" onclick="window.print()">Print</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="kpi-panel">
+          <div class="kpi-grid" id="kpi-grid">
+            <div class="kpi-tile"><div class="label">Present</div><div class="value" id="kpi-present">0</div></div>
+            <div class="kpi-tile"><div class="label">Absent</div><div class="value" id="kpi-absent">0</div></div>
+            <div class="kpi-tile"><div class="label">Attendance %</div><div class="value" id="kpi-att-rate">0%</div></div>
+            <div class="kpi-tile"><div class="label">Rooms Used</div><div class="value" id="kpi-rooms">0</div></div>
+            <div class="kpi-tile"><div class="label">Duties Assigned</div><div class="value" id="kpi-duties">0</div></div>
+            <div class="kpi-tile"><div class="label">Replacement Pending</div><div class="value" id="kpi-repl-pending">0</div></div>
+          </div>
+        </section>
+
+        <section class="content-panel">
+          <div class="content-head">
+            <h2 id="report-title">Select report view and click Generate Report</h2>
+            <div class="stats-row">
+              <span class="legend-chip ok">Present</span>
+              <span class="legend-chip bad">Absent</span>
+              <span class="legend-chip warn">Critical Pending</span>
+            </div>
+          </div>
+          <div id="report-container">
+            <p class="text-center text-muted">No report generated yet.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -74,13 +323,26 @@
 <script src="../js/script.js"></script>
 <script>
 const API = '../api/reports.php';
+let analyticsData = null;
+const charts = {};
+
+const palette = {
+  blue: '#1f77d9',
+  blue2: '#59a4f5',
+  green: '#1f9a62',
+  red: '#d04639',
+  amber: '#de8d10',
+  navy: '#1f3552',
+  soft: '#edf4ff',
+};
 
 (async () => {
   const res  = await fetch('../api/auth.php?action=check');
   const auth = await res.json();
   if (!auth.logged_in) { window.location.href = '../index.html'; return; }
   document.getElementById('user-label').textContent = auth.username + ' (' + auth.role + ')';
-  loadExams();
+  await loadExams();
+  await generateReport();
 })();
 
 async function loadExams() {
@@ -90,58 +352,403 @@ async function loadExams() {
   if (data.data) data.data.forEach(e => {
     const opt = document.createElement('option');
     opt.value = e.exam_id;
-    opt.textContent = `${e.exam_name} (${e.date})`;
+    opt.textContent = `${e.exam_name} (${e.date} | ${e.session || 'N/A'})`;
     sel.appendChild(opt);
   });
 }
 
-function onTypeChange() {
-  const t = document.getElementById('report-type').value;
-  const needExam = ['seating','duty','attendance'].includes(t);
-  document.getElementById('exam-group').style.display = needExam ? '' : 'none';
+function destroyCharts() {
+  Object.keys(charts).forEach(key => {
+    if (charts[key]) {
+      charts[key].destroy();
+      charts[key] = null;
+    }
+  });
 }
 
-const reportMeta = {
-  seating:        { title: 'Seating Chart',         cols: ['Exam','Date','Room','Building','Roll No','Name','Branch','Sem','Section','Seat','Row'] },
-  duty:           { title: 'Invigilation Duties',    cols: ['Exam','Date','Faculty','Department','Room','Building','Duty Type'] },
-  attendance:     { title: 'Attendance Report',      cols: ['Exam','Date','Roll No','Name','Branch','Section','Room','Status'] },
-  faculty_summary:{ title: 'Faculty Duty Summary',   cols: ['Name','Department','Recorded Duties','Actual Duties'] },
-  utilization:    { title: 'Room Utilization',       cols: ['Room No','Building','Capacity','Used','Utilization %'] },
-  timetable:      { title: 'Exam Timetable',         cols: ['Date','Session','Subject','Start','End','Exam Name'] },
-};
-
 async function generateReport() {
-  const type = document.getElementById('report-type').value;
-  const eid  = document.getElementById('exam-select').value;
-  const needExam = ['seating','duty','attendance'].includes(type);
-  if (needExam && !eid) { showToast('Please select an exam.', 'error'); return; }
-
-  let url = `${API}?action=${type}`;
-  if (needExam) url += `&exam_id=${eid}`;
+  const view = document.getElementById('report-view').value;
+  const examId = document.getElementById('exam-select').value;
+  const focus = document.getElementById('chart-focus').value;
+  let url = `${API}?action=analytics`;
+  if (examId) url += `&exam_id=${examId}`;
 
   const res  = await fetch(url);
   const data = await res.json();
-  if (!data.success) { showToast('Failed to generate report.', 'error'); return; }
+  if (!data.success) {
+    showToast(data.message || 'Failed to generate report.', 'error');
+    return;
+  }
 
-  const { title, cols } = reportMeta[type];
-  document.getElementById('report-title').textContent = title;
+  analyticsData = data;
+  updateKpis(data.kpis || {}, data.replacement_summary || {});
+  destroyCharts();
 
-  const rows  = data.data || [];
-  const keys  = {
-    seating:         d => [d.exam_name,d.date,d.room_no,d.building,d.roll_no,d.name,d.branch,d.semester,d.section,d.seat_no,d.row_no],
-    duty:            d => [d.exam_name,d.date,d.faculty_name,d.department,d.room_no,d.building,d.duty_type],
-    attendance:      d => [d.exam_name,d.date,d.roll_no,d.name,d.branch,d.section,d.room_no,d.status],
-    faculty_summary: d => [d.name,d.department,d.total_duties,d.actual_duties],
-    utilization:     d => [d.room_no,d.building,d.capacity,d.used,d.util_pct+'%'],
-    timetable:       d => [d.exam_date,d.session,d.subject_name,d.start_time,d.end_time,d.exam_name],
-  };
+  if (view === 'executive') {
+    renderExecutiveView(data, focus);
+  } else if (view === 'attendance_subject') {
+    renderAttendanceSubjectView(data, focus);
+  } else if (view === 'room_utilization') {
+    renderRoomUtilizationView(data, focus);
+  } else if (view === 'faculty_workload') {
+    renderFacultyWorkloadView(data, focus);
+  } else if (view === 'replacement_tracker') {
+    renderReplacementTrackerView(data, focus);
+  }
+}
 
-  const tbody_rows = rows.map(d => '<tr>' + keys[type](d).map(v => `<td>${v??''}</td>`).join('') + '</tr>').join('');
+function updateKpis(kpis, replacement) {
+  document.getElementById('kpi-present').textContent = Number(kpis.present_count || 0).toLocaleString();
+  document.getElementById('kpi-absent').textContent = Number(kpis.absent_count || 0).toLocaleString();
+  document.getElementById('kpi-att-rate').textContent = `${Number(kpis.attendance_rate_pct || 0).toFixed(1)}%`;
+  document.getElementById('kpi-rooms').textContent = Number(kpis.rooms_used || 0).toLocaleString();
+  document.getElementById('kpi-duties').textContent = Number(kpis.duty_assignments || 0).toLocaleString();
+  document.getElementById('kpi-repl-pending').textContent = Number(replacement.pending || 0).toLocaleString();
+}
+
+function renderExecutiveView(data, focus) {
+  document.getElementById('report-title').textContent = 'Executive Overview';
+  const operations = data.sections?.exam_operations || [];
+  const branches = data.sections?.branch_distribution || [];
+  const rooms = data.sections?.room_utilization || [];
+  const kpis = data.kpis || {};
+
+  const chartSection = `
+    <div class="chart-grid">
+      ${focus === 'all' || focus === 'pie' ? '<div class="chart-card"><h3>Pie Chart: Present vs Absent</h3><canvas id="chart-pie"></canvas></div>' : ''}
+      ${focus === 'all' || focus === 'line' ? '<div class="chart-card"><h3>Line Graph: Attendance Trend by Exam</h3><canvas id="chart-line"></canvas></div>' : ''}
+      ${focus === 'all' || focus === 'bar' ? '<div class="chart-card"><h3>Bar Graph: Branch Allocation</h3><canvas id="chart-bar"></canvas></div>' : ''}
+      ${focus === 'all' || focus === 'histogram' ? '<div class="chart-card"><h3>Histogram: Room Utilization Distribution</h3><canvas id="chart-histogram"></canvas></div>' : ''}
+    </div>
+    <p class="summary-note">Generated at: ${data.generated_at || '-'} | Scope: ${data.context?.exam_name || 'All Exams'}</p>
+  `;
+
+  document.getElementById('report-container').innerHTML = chartSection;
+
+  if (focus === 'all' || focus === 'pie') {
+    charts.pie = new Chart(document.getElementById('chart-pie'), {
+      type: 'pie',
+      data: {
+        labels: ['Present', 'Absent'],
+        datasets: [{
+          data: [Number(kpis.present_count || 0), Number(kpis.absent_count || 0)],
+          backgroundColor: [palette.green, palette.red],
+          borderColor: ['#ffffff', '#ffffff'],
+          borderWidth: 2,
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+  }
+
+  if (focus === 'all' || focus === 'line') {
+    charts.line = new Chart(document.getElementById('chart-line'), {
+      type: 'line',
+      data: {
+        labels: operations.map(r => `${r.exam_name || '-'} (${r.date || '-'})`).slice(0, 20),
+        datasets: [{
+          label: 'Attendance %',
+          data: operations.map(r => Number(r.attendance_rate_pct || 0)).slice(0, 20),
+          borderColor: palette.blue,
+          backgroundColor: 'rgba(31, 119, 217, 0.16)',
+          fill: true,
+          tension: 0.32,
+          pointRadius: 3,
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true, max: 100, ticks: { callback: v => `${v}%` } }
+        },
+        plugins: { legend: { display: true } }
+      }
+    });
+  }
+
+  if (focus === 'all' || focus === 'bar') {
+    charts.bar = new Chart(document.getElementById('chart-bar'), {
+      type: 'bar',
+      data: {
+        labels: branches.map(r => `${r.branch_code || r.branch || '-'}-Y${r.semester || '-'}`).slice(0, 15),
+        datasets: [{
+          label: 'Allocated Students',
+          data: branches.map(r => Number(r.allocated_students || 0)).slice(0, 15),
+          backgroundColor: palette.blue2,
+          borderRadius: 8,
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+  }
+
+  if (focus === 'all' || focus === 'histogram') {
+    const buckets = [0, 0, 0, 0, 0];
+    rooms.forEach(r => {
+      const val = Number(r.utilization_pct || 0);
+      if (val <= 20) buckets[0] += 1;
+      else if (val <= 40) buckets[1] += 1;
+      else if (val <= 60) buckets[2] += 1;
+      else if (val <= 80) buckets[3] += 1;
+      else buckets[4] += 1;
+    });
+
+    charts.histogram = new Chart(document.getElementById('chart-histogram'), {
+      type: 'bar',
+      data: {
+        labels: ['0-20%', '21-40%', '41-60%', '61-80%', '81-100%'],
+        datasets: [{
+          label: 'No. of Rooms',
+          data: buckets,
+          backgroundColor: [palette.navy, palette.blue, palette.blue2, palette.amber, palette.red],
+          borderRadius: 8,
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+  }
+}
+
+function normalizeBranchCode(value) {
+  return String(value || '').trim().toUpperCase().replace(/\s+/g, '');
+}
+
+function renderAttendanceSubjectView(data, focus) {
+  document.getElementById('report-title').textContent = 'Branch / Session / Year / Subject Attendance';
+  const sourceRows = data.sections?.attendance_subject || [];
+  const rows = sourceRows.map(r => ({
+    branch: normalizeBranchCode(r.branch_code),
+    session: String(r.branch_session || 'N/A').trim(),
+    year: String(r.semester || 'N/A').trim(),
+    subject_code: String(r.subject_code || 'N/A').trim(),
+    present: Number(r.present_count || 0),
+    absent: Number(r.absent_count || 0),
+    total_appeared: Number(r.total_appeared || 0),
+  }));
+
+  const html = `
+    <div class="chart-grid">
+      ${(focus === 'all' || focus === 'bar') ? '<div class="chart-card"><h3>Bar Graph: Total Appeared by Subject Row</h3><canvas id="subject-bar"></canvas></div>' : ''}
+      ${(focus === 'all' || focus === 'pie') ? '<div class="chart-card"><h3>Pie Chart: Net Attendance Mix</h3><canvas id="subject-pie"></canvas></div>' : ''}
+    </div>
+    <div class="table-wrap">
+      <table class="data-table" id="report-table">
+        <thead>
+          <tr>
+            <th>Branch</th>
+            <th>Session</th>
+            <th>Year</th>
+            <th>Subject Code</th>
+            <th>Present</th>
+            <th>Absent</th>
+            <th>Total Student Appeared</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.length ? rows.map(r => `
+            <tr>
+              <td>${r.branch}</td>
+              <td>${r.session}</td>
+              <td>${r.year}</td>
+              <td>${r.subject_code}</td>
+              <td>${r.present}</td>
+              <td>${r.absent}</td>
+              <td>${r.total_appeared}</td>
+            </tr>
+          `).join('') : '<tr><td colspan="7" class="text-center">No analytics rows found.</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+    <p class="summary-note">This report merges schedule matrix context with attendance/seating outcomes to present branch-session-year-subject performance view.</p>
+  `;
+
+  document.getElementById('report-container').innerHTML = html;
+
+  if ((focus === 'all' || focus === 'bar') && rows.length) {
+    charts.subjectBar = new Chart(document.getElementById('subject-bar'), {
+      type: 'bar',
+      data: {
+        labels: rows.slice(0, 16).map(r => `${r.branch}-${r.subject_code}`),
+        datasets: [{
+          label: 'Appeared',
+          data: rows.slice(0, 16).map(r => r.total_appeared),
+          backgroundColor: palette.blue2,
+          borderRadius: 8,
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+  }
+
+  if ((focus === 'all' || focus === 'pie') && rows.length) {
+    const present = rows.reduce((sum, r) => sum + Number(r.present || 0), 0);
+    const absent = rows.reduce((sum, r) => sum + Number(r.absent || 0), 0);
+    charts.subjectPie = new Chart(document.getElementById('subject-pie'), {
+      type: 'pie',
+      data: {
+        labels: ['Present', 'Absent'],
+        datasets: [{
+          data: [present, absent],
+          backgroundColor: [palette.green, palette.red],
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+  }
+}
+
+function renderRoomUtilizationView(data, focus) {
+  document.getElementById('report-title').textContent = 'Room Utilization Analytics';
+  const rows = data.sections?.room_utilization || [];
   document.getElementById('report-container').innerHTML = `
-    <table class="data-table" id="report-table">
-      <thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
-      <tbody>${tbody_rows || '<tr><td colspan="'+cols.length+'" class="text-center">No data.</td></tr>'}</tbody>
-    </table>`;
+    <div class="chart-grid">
+      ${(focus === 'all' || focus === 'bar') ? '<div class="chart-card"><h3>Bar Graph: Utilization by Room</h3><canvas id="room-bar"></canvas></div>' : ''}
+      ${(focus === 'all' || focus === 'histogram') ? '<div class="chart-card"><h3>Histogram: Utilization Buckets</h3><canvas id="room-hist"></canvas></div>' : ''}
+    </div>
+    <div class="table-wrap">
+      <table class="data-table" id="report-table">
+        <thead><tr><th>Room</th><th>Building</th><th>Capacity</th><th>Used Seats</th><th>Utilization %</th><th>Invigilators</th></tr></thead>
+        <tbody>
+          ${rows.length ? rows.map(r => `<tr><td>${r.room_no}</td><td>${r.building}</td><td>${r.capacity}</td><td>${r.used_seats}</td><td>${Number(r.utilization_pct || 0).toFixed(2)}%</td><td>${r.invigilators || 0}</td></tr>`).join('') : '<tr><td colspan="6" class="text-center">No room utilization data.</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  if ((focus === 'all' || focus === 'bar') && rows.length) {
+    charts.roomBar = new Chart(document.getElementById('room-bar'), {
+      type: 'bar',
+      data: {
+        labels: rows.slice(0, 18).map(r => r.room_no),
+        datasets: [{
+          label: 'Utilization %',
+          data: rows.slice(0, 18).map(r => Number(r.utilization_pct || 0)),
+          backgroundColor: palette.blue,
+          borderRadius: 7,
+        }]
+      },
+      options: { scales: { y: { beginAtZero: true, max: 100 } }, responsive: true }
+    });
+  }
+
+  if ((focus === 'all' || focus === 'histogram') && rows.length) {
+    const bins = [0, 0, 0, 0, 0];
+    rows.forEach(r => {
+      const v = Number(r.utilization_pct || 0);
+      if (v <= 20) bins[0] += 1;
+      else if (v <= 40) bins[1] += 1;
+      else if (v <= 60) bins[2] += 1;
+      else if (v <= 80) bins[3] += 1;
+      else bins[4] += 1;
+    });
+    charts.roomHist = new Chart(document.getElementById('room-hist'), {
+      type: 'bar',
+      data: {
+        labels: ['0-20%', '21-40%', '41-60%', '61-80%', '81-100%'],
+        datasets: [{ label: 'Room Count', data: bins, backgroundColor: [palette.navy, palette.blue, palette.blue2, palette.amber, palette.red] }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+  }
+}
+
+function renderFacultyWorkloadView(data, focus) {
+  document.getElementById('report-title').textContent = 'Faculty Duty Workload';
+  const rows = data.sections?.faculty_workload || [];
+  document.getElementById('report-container').innerHTML = `
+    <div class="chart-grid">
+      ${(focus === 'all' || focus === 'bar') ? '<div class="chart-card"><h3>Bar Graph: Duty Count by Faculty</h3><canvas id="faculty-bar"></canvas></div>' : ''}
+      ${(focus === 'all' || focus === 'line') ? '<div class="chart-card"><h3>Line Graph: Recorded vs Scope Duties</h3><canvas id="faculty-line"></canvas></div>' : ''}
+    </div>
+    <div class="table-wrap">
+      <table class="data-table" id="report-table">
+        <thead><tr><th>Faculty</th><th>Department</th><th>Designation</th><th>Recorded Duties</th><th>Duties in Scope</th></tr></thead>
+        <tbody>
+          ${rows.length ? rows.map(r => `<tr><td>${r.name}</td><td>${r.department || '-'}</td><td>${r.designation || '-'}</td><td>${r.recorded_total_duties || 0}</td><td>${r.duties_for_scope || 0}</td></tr>`).join('') : '<tr><td colspan="5" class="text-center">No faculty workload data.</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  if ((focus === 'all' || focus === 'bar') && rows.length) {
+    charts.facultyBar = new Chart(document.getElementById('faculty-bar'), {
+      type: 'bar',
+      data: {
+        labels: rows.slice(0, 16).map(r => r.name),
+        datasets: [{ label: 'Duties in Scope', data: rows.slice(0, 16).map(r => Number(r.duties_for_scope || 0)), backgroundColor: palette.blue2 }]
+      },
+      options: { responsive: true }
+    });
+  }
+
+  if ((focus === 'all' || focus === 'line') && rows.length) {
+    const slice = rows.slice(0, 14);
+    charts.facultyLine = new Chart(document.getElementById('faculty-line'), {
+      type: 'line',
+      data: {
+        labels: slice.map(r => r.name),
+        datasets: [
+          { label: 'Recorded Duties', data: slice.map(r => Number(r.recorded_total_duties || 0)), borderColor: palette.navy, backgroundColor: 'rgba(31, 53, 82, 0.18)', fill: true, tension: 0.25 },
+          { label: 'Duties in Scope', data: slice.map(r => Number(r.duties_for_scope || 0)), borderColor: palette.blue, backgroundColor: 'rgba(31, 119, 217, 0.14)', fill: true, tension: 0.25 },
+        ]
+      },
+      options: { responsive: true }
+    });
+  }
+}
+
+function renderReplacementTrackerView(data, focus) {
+  document.getElementById('report-title').textContent = 'Replacement Tracker';
+  const rows = data.sections?.replacement_tracker || [];
+  const summary = data.replacement_summary || {};
+
+  document.getElementById('report-container').innerHTML = `
+    <div class="chart-grid">
+      ${(focus === 'all' || focus === 'pie') ? '<div class="chart-card"><h3>Pie Chart: Request Status Mix</h3><canvas id="replace-pie"></canvas></div>' : ''}
+      ${(focus === 'all' || focus === 'bar') ? '<div class="chart-card"><h3>Bar Graph: Requests by Exam</h3><canvas id="replace-bar"></canvas></div>' : ''}
+    </div>
+    <div class="table-wrap">
+      <table class="data-table" id="report-table">
+        <thead><tr><th>Exam</th><th>Date</th><th>Session</th><th>Room</th><th>Original Faculty</th><th>Replacement Faculty</th><th>Status</th><th>Reason</th></tr></thead>
+        <tbody>
+          ${rows.length ? rows.map(r => `<tr><td>${r.exam_name}</td><td>${r.date}</td><td>${r.session || '-'}</td><td>${r.room_no} (${r.building})</td><td>${r.original_faculty || '-'}</td><td>${r.replacement_faculty || '-'}</td><td>${r.status}</td><td>${r.reason || '-'}</td></tr>`).join('') : '<tr><td colspan="8" class="text-center">No replacement requests in this scope.</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  if ((focus === 'all' || focus === 'pie')) {
+    charts.replacePie = new Chart(document.getElementById('replace-pie'), {
+      type: 'pie',
+      data: {
+        labels: ['Pending', 'Approved', 'Rejected'],
+        datasets: [{
+          data: [Number(summary.pending || 0), Number(summary.approved || 0), Number(summary.rejected || 0)],
+          backgroundColor: [palette.amber, palette.green, palette.red],
+        }]
+      },
+      options: { responsive: true }
+    });
+  }
+
+  if ((focus === 'all' || focus === 'bar') && rows.length) {
+    const byExam = {};
+    rows.forEach(r => {
+      const key = `${r.exam_name} (${r.date})`;
+      byExam[key] = (byExam[key] || 0) + 1;
+    });
+    const labels = Object.keys(byExam);
+    charts.replaceBar = new Chart(document.getElementById('replace-bar'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{ label: 'Request Count', data: labels.map(k => byExam[k]), backgroundColor: palette.blue }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+  }
 }
 
 function exportCSV() {
@@ -154,7 +761,10 @@ async function logout() {
   window.location.href = '../index.html';
 }
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
-onTypeChange(); // init
+
+document.getElementById('report-view').addEventListener('change', generateReport);
+document.getElementById('chart-focus').addEventListener('change', generateReport);
+document.getElementById('exam-select').addEventListener('change', generateReport);
 </script>
 </body>
 </html>

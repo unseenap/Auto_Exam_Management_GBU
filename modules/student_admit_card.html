@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admit Card | Student Portal</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  .page-wrap { min-height: 100vh; }
+  .module-shell { border: 1px solid #d9e5f1; border-radius: 18px; background: rgba(255,255,255,0.94); box-shadow: 0 16px 36px rgba(22,43,66,.08); }
+  .module-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:18px 20px; border-bottom:1px solid #e5edf5; }
+  .module-head h1 { margin:0; font-size:24px; color:#143d66; }
+  .module-head p { margin:4px 0 0; color:#62758a; font-size:13px; }
+  .admit-shell { border:2px dashed var(--primary-color); border-radius:12px; padding:16px; background:rgba(39,118,214,0.06); }
+  .admit-slip { border:1px solid #d9e5f1; border-radius:14px; background:#fff; overflow:hidden; box-shadow:0 8px 22px rgba(18,49,79,0.06); }
+  .admit-header { display:grid; grid-template-columns:78px 1fr auto; gap:14px; align-items:center; padding:16px 18px; border-bottom:1px solid #e5ecf4; background:linear-gradient(135deg, rgba(20,61,102,0.05), rgba(11,107,203,0.04)); }
+  .admit-header img { width:72px; height:72px; object-fit:contain; border-radius:14px; border:1px solid #dce6f0; background:#fff; padding:6px; }
+  .admit-header h3 { margin:0; font-size:18px; color:#153656; }
+  .admit-header p { margin:4px 0 0; font-size:12px; color:#5f6f82; line-height:1.45; }
+  .admit-stamp { text-align:right; font-size:12px; color:#4b6279; }
+  .admit-stamp strong { display:block; color:#153656; font-size:14px; }
+  .admit-meta { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; padding:16px 18px 0; }
+  .meta-box { border:1px solid var(--border-color); border-radius:10px; background:#fff; padding:10px; }
+  .meta-box label { display:block; font-size:0.72rem; color:#66758a; margin-bottom:4px; }
+  .meta-box span { font-weight:700; }
+  .admit-entries { display:grid; gap:14px; padding:18px; }
+  .admit-entry { border:1px solid #dbe6f2; border-radius:14px; overflow:hidden; }
+  .admit-entry-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; padding:14px 16px; background:linear-gradient(135deg, rgba(20,61,102,0.07), rgba(11,107,203,0.04)); border-bottom:1px solid #e5edf5; }
+  .admit-entry-head h4 { margin:0; font-size:16px; color:#143d66; }
+  .admit-entry-head p { margin:4px 0 0; font-size:12px; color:#62758a; }
+  .admit-badge { display:inline-flex; align-items:center; padding:6px 10px; border-radius:999px; background:#e7f3ff; color:#0f4d87; font-weight:800; font-size:11px; white-space:nowrap; }
+  .admit-entry-body { display:grid; grid-template-columns:1.2fr 0.8fr; gap:0; }
+  .admit-detail-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px 12px; padding:14px 16px; }
+  .admit-schedule { border-left:1px solid #edf2f7; padding:14px 16px; background:#fbfdff; }
+  .admit-schedule strong { display:block; color:#153656; margin-bottom:8px; }
+  .admit-schedule .schedule-line { font-size:12px; color:#5f7085; margin-bottom:8px; }
+  .admit-schedule .schedule-line:last-child { margin-bottom:0; }
+  @media (max-width: 1050px) { .admit-meta { grid-template-columns:1fr; } .admit-header { grid-template-columns:1fr; text-align:left; } .admit-stamp { text-align:left; } }
+  @media (max-width: 1050px) { .admit-entry-body { grid-template-columns:1fr; } .admit-schedule { border-left:0; border-top:1px solid #edf2f7; } }
+  @media print { .sidebar, .top-bar, .no-print { display:none !important; } .main-content { margin-left:0 !important; } .page-body > :not(#admit-card-section) { display:none !important; } #admit-card-section .btn-group { display:none !important; } }
+</style>
+</head>
+<body>
+<div class="app-wrapper page-wrap">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header"><h2>Exam System</h2><p id="user-label"></p></div>
+    <nav class="nav-links">
+      <a href="student_portal.html"><i>🏠</i> Home</a>
+      <a href="student_datesheet.html"><i>📅</i> Datesheet</a>
+      <a href="student_seating_slip.html"><i>💺</i> Seating Slip</a>
+      <a href="student_admit_card.html" class="active"><i>🪪</i> Admit Card</a>
+      <hr>
+      <a href="#" onclick="logout()"><i>🚪</i> Logout</a>
+    </nav>
+  </aside>
+  <main class="main-content">
+    <header class="top-bar">
+      <button onclick="toggleSidebar()" class="menu-btn">☰</button>
+      <h1>Admit Card</h1>
+      <div class="top-actions no-print">
+        <a class="btn btn-secondary" href="student_portal.html">Home</a>
+        <button class="btn btn-secondary" onclick="printAdmitCard()">Print / Download PDF</button>
+      </div>
+    </header>
+    <div class="page-body">
+      <div class="module-shell" id="admit-card-section">
+        <div class="module-head">
+          <div>
+            <h1>My Admit Card</h1>
+            <p>Printable student admit card with logo, university header, and exam details.</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="admit-shell" id="admit-card-wrap"><p class="text-center text-muted">Loading admit card...</p></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<div id="toast" class="toast"></div>
+<script src="../js/script.js"></script>
+<script>
+function escapeHtml(value) { return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+function printAdmitCard() { window.print(); }
+async function logout() {
+  await fetch('../api/auth.php', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'logout'}) });
+  window.location.href = '../index.html';
+}
+async function fetchJson(url, fallbackMessage) {
+  const response = await fetch(url);
+  const text = await response.text();
+  let data = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (error) {
+    throw new Error(fallbackMessage);
+  }
+  if (!response.ok || data.success === false) {
+    throw new Error(data.message || fallbackMessage);
+  }
+  return data;
+}
+(async () => {
+  try {
+    const auth = await fetchJson('../api/auth.php?action=check', 'Unable to verify your session. Please log in again.');
+    if (!auth.logged_in || auth.role !== 'student') { window.location.href = '../index.html'; return; }
+    document.getElementById('user-label').textContent = auth.username + ' (Student)';
+    addChatbotWidget('student');
+    const admitR = await fetchJson('../api/student.php?action=admit_card', 'Unable to load the admit card right now.');
+    const admitWrap = document.getElementById('admit-card-wrap');
+    if (admitR.success && Array.isArray(admitR.entries) && admitR.entries.length) {
+      const st = admitR.student || {};
+      admitWrap.innerHTML = `
+      <div class="admit-slip">
+        <div class="admit-header">
+          <img src="../logo.jpeg" alt="University logo">
+          <div>
+            <h3>University Examination Cell</h3>
+            <p>Official student admit card for examination entry and seating verification.</p>
+          </div>
+          <div class="admit-stamp"><strong>Admit Card</strong>${escapeHtml(st.session_label || '')}</div>
+        </div>
+        <div class="admit-meta">
+          <div class="meta-box"><label>Name</label><span>${escapeHtml(st.name || '-')}</span></div>
+          <div class="meta-box"><label>Roll No</label><span>${escapeHtml(st.roll_no || '-')}</span></div>
+          <div class="meta-box"><label>Branch</label><span>${escapeHtml(st.branch || '-')}</span></div>
+          <div class="meta-box"><label>Year</label><span>${escapeHtml(st.year_label || '-')}</span></div>
+          <div class="meta-box"><label>School</label><span>${escapeHtml(st.school || '-')}</span></div>
+          <div class="meta-box"><label>Session</label><span>${escapeHtml(st.session_label || '-')}</span></div>
+          <div class="meta-box"><label>Username</label><span>${escapeHtml(st.username || '-')}</span></div>
+          <div class="meta-box"><label>Student ID</label><span>${escapeHtml(st.student_id || '-')}</span></div>
+        </div>
+        <div class="admit-entries">
+          ${admitR.entries.map((e) => `
+            <section class="admit-entry">
+              <div class="admit-entry-head">
+                <div>
+                  <h4>${escapeHtml(e.exam_name || 'Exam')}</h4>
+                  <p>${escapeHtml(e.exam_date || '-')}</p>
+                </div>
+                <span class="admit-badge">Seat ${escapeHtml(e.seat_no || '-')} / Row ${escapeHtml(e.row_no || '-')}</span>
+              </div>
+              <div class="admit-entry-body">
+                <div class="admit-detail-list">
+                  <div class="meta-box"><label>Room</label><span>${escapeHtml((e.room_no || '-') + ' (' + (e.building || '-') + ')')}</span></div>
+                  <div class="meta-box"><label>Subject</label><span>${escapeHtml((e.subject_code ? e.subject_code + ' - ' : '') + (e.subject_name || '-'))}</span></div>
+                  <div class="meta-box"><label>Whiteboard / Teacher Area</label><span>${escapeHtml(e.whiteboard_area || '-')}</span></div>
+                  <div class="meta-box"><label>Time</label><span>${escapeHtml((e.start_time || '--:--').slice(0,5))} - ${escapeHtml((e.end_time || '--:--').slice(0,5))}</span></div>
+                </div>
+                <div class="admit-schedule">
+                  <strong>Schedule Summary</strong>
+                  <div class="schedule-line">Date: ${escapeHtml(e.exam_date || '-')}</div>
+                  <div class="schedule-line">Notes: ${escapeHtml(e.matrix_notes || e.notes || 'As per published schedule')}</div>
+                </div>
+              </div>
+            </section>
+          `).join('')}
+        </div>
+      </div>
+      <p class="mt-2" style="font-size:12px;color:#5d7083;">Generated at: ${escapeHtml(admitR.generated_at || '-')}</p>
+    `;
+    } else {
+      admitWrap.innerHTML = '<p class="text-center text-muted">Admit card will appear after seating allocation is published.</p>';
+    }
+  } catch (error) {
+    document.getElementById('admit-card-wrap').innerHTML = '<p class="text-center text-danger">' + escapeHtml(error.message || 'Unable to load the admit card right now.') + '</p>';
+  }
+})();
+</script>
+</body>
+</html>

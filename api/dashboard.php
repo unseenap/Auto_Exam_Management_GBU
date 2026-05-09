@@ -5,7 +5,7 @@ session_start();
 ob_clean();
 
 header('Content-Type: application/json');
-require_once '../config/database.php';
+require_once __DIR__ . '/../config/database.php';
 
 if(!isset($_SESSION['logged_in'])){
     echo json_encode(['success'=>false, 'message'=>'Not logged in']);

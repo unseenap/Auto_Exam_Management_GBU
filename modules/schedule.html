@@ -3,11 +3,533 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Exam Schedule | Exam Management</title>
+<title>Datesheet | Exam Management</title>
 <link rel="stylesheet" href="../css/style.css">
+<style>
+  :root {
+    --sheet-bg: #f4f7fb;
+    --sheet-card: rgba(255, 255, 255, 0.88);
+    --sheet-border: #d7e2ee;
+    --sheet-text: #18324a;
+    --sheet-muted: #62758a;
+    --sheet-primary: #143d66;
+    --sheet-accent: #0b6bcb;
+    --sheet-accent-2: #e9f2ff;
+    --sheet-success: #1f8f5f;
+    --sheet-warning: #b25f00;
+    --sheet-danger: #b42318;
+  }
+
+  body {
+    background:
+      radial-gradient(circle at top left, rgba(18, 100, 175, 0.12), transparent 26%),
+      radial-gradient(circle at top right, rgba(6, 143, 111, 0.09), transparent 24%),
+      linear-gradient(180deg, #f7faff 0%, #eef4fb 100%);
+    color: var(--sheet-text);
+  }
+
+  .datesheet-shell {
+    min-height: 100vh;
+  }
+    .main-content {
+      min-width: 0;
+      overflow-x: hidden;
+    }
+    .page-body {
+      overflow-x: hidden;
+    }
+
+  .sheet-topbar {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(215, 226, 238, 0.9);
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(20, 61, 102, 0.98), rgba(11, 107, 203, 0.92));
+    color: #fff;
+    box-shadow: 0 22px 45px rgba(16, 39, 72, 0.12);
+  }
+    .sheet-topbar,
+    .control-card,
+    .matrix-toolbar,
+    .matrix-wrap {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+  .sheet-brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .sheet-brand img {
+    width: 58px;
+    height: 58px;
+    object-fit: contain;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  .sheet-brand h1 {
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.1;
+  }
+
+  .sheet-brand p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    opacity: 0.9;
+  }
+
+  .sheet-top-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+
+  .control-card {
+    border: 1px solid var(--sheet-border);
+    border-radius: 20px;
+    background: var(--sheet-card);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 16px 36px rgba(22, 43, 66, 0.08);
+  }
+
+  .control-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr 1fr 1fr 1fr auto;
+    gap: 14px;
+    align-items: end;
+  }
+
+  .control-grid .form-group {
+    margin-bottom: 0;
+  }
+
+  .control-grid label,
+  .modal label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #46607a;
+    letter-spacing: 0.02em;
+  }
+
+  .date-meta {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 14px;
+  }
+
+  .meta-chip {
+    border: 1px solid #d9e5f1;
+    border-radius: 14px;
+    background: #fff;
+    padding: 10px 12px;
+  }
+
+  .meta-chip .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #70859b;
+    margin-bottom: 4px;
+  }
+
+  .meta-chip .value {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--sheet-primary);
+    word-break: break-word;
+  }
+
+  .preview-card {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    gap: 14px;
+    align-items: center;
+    margin-top: 16px;
+    padding: 16px 18px;
+    border: 1px solid #d9e5f1;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #ffffff, #f8fbff);
+  }
+
+  .preview-card img {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+    border-radius: 16px;
+    border: 1px solid #e1eaf5;
+    background: #fff;
+    padding: 6px;
+  }
+
+  .preview-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--sheet-primary);
+    margin-bottom: 4px;
+  }
+
+  .preview-subtitle {
+    color: var(--sheet-muted);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .preview-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .stat-card {
+    border: 1px solid #d9e5f1;
+    border-radius: 16px;
+    background: #fff;
+    padding: 14px 16px;
+  }
+
+  .stat-card .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6f8196;
+    margin-bottom: 7px;
+  }
+
+  .stat-card .value {
+    font-size: 26px;
+    line-height: 1;
+    font-weight: 900;
+    color: var(--sheet-primary);
+  }
+
+  .stat-card .hint {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--sheet-muted);
+  }
+
+  .matrix-toolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin: 18px 0 12px;
+  }
+
+  .matrix-toolbar .legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+    color: var(--sheet-muted);
+    font-size: 12px;
+  }
+
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    display: inline-block;
+  }
+
+  .matrix-wrap {
+    border: 1px solid #d9e5f1;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.93);
+    overflow: auto;
+    box-shadow: 0 16px 36px rgba(22, 43, 66, 0.08);
+  }
+
+  .matrix-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+     min-width: 920px;
+     table-layout: fixed;
+  }
+
+  .matrix-table th,
+  .matrix-table td {
+    border-bottom: 1px solid #edf2f7;
+    border-right: 1px solid #edf2f7;
+    vertical-align: top;
+  }
+
+  .matrix-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: #f7fbff;
+    color: #254766;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 12px 10px;
+    white-space: nowrap;
+  }
+
+  .matrix-table .sticky-left {
+    position: sticky;
+    z-index: 6;
+    background: inherit;
+  }
+
+  .matrix-table .sticky-branch {
+    left: 0;
+     width: 200px;
+     min-width: 200px;
+     max-width: 200px;
+  }
+
+  .matrix-table .sticky-shift {
+     left: 200px;
+     width: 110px;
+     min-width: 110px;
+     max-width: 110px;
+  }
+
+  .matrix-table tbody td {
+    background: #fff;
+  }
+
+  .branch-cell,
+  .shift-cell {
+    padding: 12px 12px;
+    background: linear-gradient(180deg, #fcfdff 0%, #f7fbff 100%);
+  }
+
+  .branch-name {
+    font-weight: 900;
+    color: var(--sheet-primary);
+    font-size: 14px;
+  }
+
+  .branch-meta {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--sheet-muted);
+    line-height: 1.4;
+  }
+
+  .shift-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 88px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: #eaf4ff;
+    color: #17549b;
+    font-weight: 800;
+    font-size: 12px;
+  }
+
+  .date-head {
+     width: 120px;
+     min-width: 120px;
+    text-align: center;
+    line-height: 1.35;
+  }
+
+  .date-head .day {
+    display: block;
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--sheet-primary);
+  }
+
+  .date-head .mon {
+    display: block;
+    font-size: 11px;
+    color: var(--sheet-muted);
+  }
+
+  .matrix-cell {
+    width: 100%;
+    min-height: 112px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px;
+    border: 0;
+    background: #fdfefe;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+  }
+
+  .matrix-cell:hover {
+    transform: translateY(-1px);
+    box-shadow: inset 0 0 0 1px rgba(11, 107, 203, 0.18), 0 8px 16px rgba(11, 107, 203, 0.08);
+    background: #fbfdff;
+  }
+
+  .matrix-cell.exam {
+    background: linear-gradient(180deg, #ffffff 0%, #f8fcff 100%);
+  }
+
+  .matrix-cell.filler {
+    background: linear-gradient(180deg, #f7f7f7 0%, #f0f3f8 100%);
+  }
+
+  .matrix-cell .slot-title {
+    font-size: 12px;
+    font-weight: 900;
+    color: #1d3550;
+  }
+
+  .matrix-cell .slot-code {
+    font-size: 11px;
+    font-weight: 800;
+    color: #0b6bcb;
+    letter-spacing: 0.02em;
+  }
+
+  .matrix-cell .slot-name {
+    font-size: 12px;
+    line-height: 1.45;
+    color: #2b4058;
+    font-weight: 600;
+  }
+
+  .matrix-cell .slot-time {
+    font-size: 11px;
+    color: #4f647b;
+  }
+
+  .matrix-cell .slot-note {
+    align-self: flex-start;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #e9f2ff;
+    color: #1a56a3;
+  }
+
+  .matrix-cell.filler .slot-note {
+    background: #f7ede3;
+    color: var(--sheet-warning);
+  }
+
+  .matrix-empty {
+    padding: 28px 18px;
+    text-align: center;
+    color: var(--sheet-muted);
+  }
+
+  .matrix-empty h3 {
+    margin: 0 0 6px;
+    color: var(--sheet-primary);
+  }
+
+  .upload-input {
+    display: none;
+  }
+
+  .modal .modal-content {
+    width: min(960px, calc(100vw - 24px));
+    max-height: calc(100vh - 24px);
+    overflow: auto;
+  }
+
+  .modal .modal-header {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 2;
+  }
+
+  .editor-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .editor-grid .form-group {
+    margin-bottom: 0;
+  }
+
+  .modal-note {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: var(--sheet-muted);
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border-radius: 999px;
+    padding: 6px 10px;
+    background: #edf5ff;
+    color: #0c4b86;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  @media (max-width: 1200px) {
+    .control-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .preview-card {
+      grid-template-columns: 72px 1fr;
+    }
+
+    .preview-actions {
+      grid-column: 1 / -1;
+      justify-content: flex-start;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .date-meta,
+    .stats-grid,
+    .editor-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .sheet-topbar {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .sheet-top-actions {
+      justify-content: flex-start;
+    }
+  }
+</style>
 </head>
 <body>
-<div class="app-wrapper">
+<div class="app-wrapper datesheet-shell">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header"><h2>Exam System</h2><p id="user-label"></p></div>
     <nav class="nav-links">
@@ -16,8 +538,8 @@
       <a href="faculty.html"><i>👨‍🏫</i> Faculty</a>
       <a href="rooms.html"><i>🚪</i> Rooms</a>
       <a href="schedule.html" class="active"><i>📅</i> Schedule</a>
-      <a href="seating.html"><i>💺</i> Seating</a>
       <a href="invigilation.html"><i>📋</i> Invigilation</a>
+      <a href="seating.html"><i>💺</i> Seating</a>
       <a href="attendance.html"><i>✅</i> Attendance</a>
       <a href="replacement.html"><i>🔄</i> Replacement</a>
       <a href="reports.html"><i>📊</i> Reports</a>
@@ -25,143 +547,941 @@
       <a href="#" onclick="logout()"><i>🚪</i> Logout</a>
     </nav>
   </aside>
+
   <main class="main-content">
-    <header class="top-bar">
-      <button onclick="toggleSidebar()" class="menu-btn">☰</button>
-      <h1>Exam Schedule</h1>
-      <div class="top-actions">
-        <button class="btn btn-primary" onclick="openModal()">+ Add Exam</button>
-        <button class="btn btn-success" onclick="exportCSV()">⬇ Export</button>
+    <header class="sheet-topbar">
+      <div class="sheet-brand">
+        <button onclick="toggleSidebar()" class="menu-btn" style="background:rgba(255,255,255,0.12);color:#fff;border-color:rgba(255,255,255,0.18)">☰</button>
+        <img src="../logo.jpeg" alt="University logo">
+        <div>
+          <h1>Datesheet</h1>
+          <p>School, department, exam type and shifts in one screen.</p>
+        </div>
+      </div>
+      <div class="sheet-top-actions">
+        <button class="btn btn-primary" onclick="openCellEditor()">+ Add Manual Entry</button>
+        <button class="btn btn-secondary" onclick="openCsvPicker()">Upload CSV</button>
+        <button class="btn btn-secondary" onclick="downloadTemplate()">CSV Template</button>
+        <button class="btn btn-success" onclick="downloadPDF()">Export PDF</button>
       </div>
     </header>
+
     <div class="page-body">
-      <div class="card">
+      <div class="control-card card">
         <div class="card-body">
-          <table class="data-table" id="schedule-table">
-            <thead>
-              <tr>
-                <th>Exam Name</th><th>Subject</th><th>Date</th>
-                <th>Session</th><th>Start</th><th>End</th><th>Duration</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="schedule-tbody"><tr><td colspan="8" class="text-center">Loading...</td></tr></tbody>
-          </table>
+          <div class="control-grid">
+            <div class="form-group">
+              <label>School</label>
+              <select id="school-select"></select>
+              <input type="text" id="school-custom-input" class="form-control" placeholder="Enter school name" style="display:none; margin-top:8px;">
+            </div>
+            <div class="form-group">
+              <label>Dept</label>
+              <select id="dept-select"></select>
+              <input type="text" id="dept-custom-input" class="form-control" placeholder="Enter department" style="display:none; margin-top:8px;">
+            </div>
+            <div class="form-group">
+              <label>Exam Type</label>
+              <select id="exam-type-select"></select>
+              <input type="text" id="exam-type-custom-input" class="form-control" placeholder="Enter exam type" style="display:none; margin-top:8px;">
+            </div>
+            <div class="form-group">
+              <label>Matrix Status</label>
+              <div class="pill" id="matrix-status">Idle</div>
+            </div>
+            <div class="form-group">
+              <button class="btn btn-primary" onclick="loadMatrix()">Load Matrix</button>
+            </div>
+          </div>
+
+          <div class="preview-card">
+            <img id="logo-preview" src="../logo.jpeg" alt="Logo preview">
+            <div>
+              <div class="preview-title" id="datesheet-title">Datesheet</div>
+              <div class="preview-subtitle" id="datesheet-subtitle">Branch, year, semester and session-wise exam matrix.</div>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="label">Rows</div>
+              <div class="value" id="stat-rows">0</div>
+              <div class="hint">Branch / semester / session combinations</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">Dates</div>
+              <div class="value" id="stat-dates">0</div>
+              <div class="hint">Date columns in the matrix</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">Filled Cells</div>
+              <div class="value" id="stat-filled">0</div>
+              <div class="hint">Actual exams saved in the matrix</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">Prep Leave</div>
+              <div class="value" id="stat-filler">0</div>
+              <div class="hint">Auto-filled gaps between exams</div>
+            </div>
+          </div>
+
+          <input type="file" id="csv-upload" class="upload-input" accept=".csv" />
         </div>
+      </div>
+
+      <div class="matrix-toolbar">
+        <div class="legend">
+          <span class="legend-item"><span class="legend-dot" style="background:#e8f1ff"></span>Exam cell</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#f7ede3"></span>Prep Leave / No Exam</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#f0f4f8"></span>Editable cell</span>
+        </div>
+          <div class="pill" id="matrix-range">From: - | To: -</div>
+      </div>
+
+      <div class="matrix-wrap">
+        <div id="matrix-empty" class="matrix-empty" style="display:none">
+          <h3>No matrix loaded yet</h3>
+          <p>Select school, department and exam type, then load or import your datesheet.</p>
+        </div>
+        <table class="matrix-table" id="matrix-table" style="display:none">
+          <thead id="matrix-thead"></thead>
+          <tbody id="matrix-tbody"></tbody>
+        </table>
       </div>
     </div>
   </main>
 </div>
 
-<div id="schedule-modal" class="modal" style="display:none">
+<div id="editor-modal" class="modal" style="display:none">
   <div class="modal-content">
     <div class="modal-header">
-      <h2>Add Exam</h2>
-      <span class="close-btn" onclick="closeModal()">&times;</span>
+      <h2 id="editor-title">Add Exam Cell</h2>
+      <span class="close-btn" onclick="closeEditor()">&times;</span>
     </div>
-    <form onsubmit="saveExam(event)">
-      <div class="form-group">
-        <label>Exam Name</label>
-        <input type="text" id="f-exam" required placeholder="e.g. Mid-Term Exam 2024">
-      </div>
-      <div class="form-group">
-        <label>Subject Name</label>
-        <input type="text" id="f-subject" required placeholder="e.g. Data Structures">
-      </div>
-      <div class="form-row">
+    <form onsubmit="saveCell(event)">
+      <div class="editor-grid">
+        <div class="form-group">
+          <label>Branch Code</label>
+          <input type="text" id="cell-branch-code" placeholder="CSE" required>
+        </div>
+        <div class="form-group">
+          <label>Semester</label>
+          <input type="number" min="1" max="20" id="cell-semester" placeholder="4" required>
+        </div>
+        <div class="form-group">
+          <label>Branch Session</label>
+          <input type="text" id="cell-branch-session" placeholder="A">
+        </div>
+        <div class="form-group">
+          <label>Shift</label>
+          <select id="cell-shift"></select>
+        </div>
         <div class="form-group">
           <label>Date</label>
-          <input type="date" id="f-date" required>
+          <input type="date" id="cell-date" required>
         </div>
         <div class="form-group">
-          <label>Session</label>
-          <select id="f-session" required>
-            <option value="Morning">Morning</option>
-            <option value="Afternoon">Afternoon</option>
-            <option value="Evening">Evening</option>
-          </select>
+          <label>Subject Code</label>
+          <input type="text" id="cell-subject-code" placeholder="CSE401">
         </div>
-      </div>
-      <div class="form-row">
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label>Subject / Exam Name</label>
+          <input type="text" id="cell-subject-name" placeholder="Data Structures">
+        </div>
         <div class="form-group">
           <label>Start Time</label>
-          <input type="time" id="f-start" required>
+          <input type="time" id="cell-start-time">
         </div>
         <div class="form-group">
           <label>End Time</label>
-          <input type="time" id="f-end" required>
+          <input type="time" id="cell-end-time">
+        </div>
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label>Notes</label>
+          <input type="text" id="cell-notes" placeholder="Optional note, e.g. Prep Leave">
         </div>
       </div>
+      <p class="modal-note">Leave Subject Code and Subject Name blank to clear the cell back to the auto-generated Prep Leave / No Exam state.</p>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-        <button type="submit" class="btn btn-primary">Schedule</button>
+        <button type="button" class="btn btn-secondary" onclick="closeEditor()">Cancel</button>
+        <button type="button" class="btn btn-warning" onclick="clearCell()">Clear Cell</button>
+        <button type="submit" class="btn btn-primary">Save Cell</button>
       </div>
     </form>
   </div>
 </div>
 
 <div id="toast" class="toast"></div>
+
 <script src="../js/script.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 const API = '../api/schedule.php';
+const state = {
+  meta: null,
+  matrix: null,
+  logoDataUrl: null,
+  currentCell: null,
+  loading: false,
+};
+
+const SHIFT_OPTIONS = {
+  midsem: ['Morning', 'Afternoon', 'Evening'],
+  end: ['Morning', 'Afternoon'],
+  practical: ['Morning', 'Afternoon', 'Evening'],
+  back: ['Morning', 'Afternoon', 'Evening'],
+  repeat: ['Morning', 'Afternoon', 'Evening'],
+};
 
 (async () => {
-  const res  = await fetch('../api/auth.php?action=check');
+  const res = await fetch('../api/auth.php?action=check');
   const auth = await res.json();
-  if (!auth.logged_in) { window.location.href = '../index.html'; return; }
+  if (!auth.logged_in) {
+    window.location.href = '../index.html';
+    return;
+  }
   document.getElementById('user-label').textContent = auth.username + ' (' + auth.role + ')';
-  loadSchedule();
+  bindControls();
+  await loadMeta();
+  await loadMatrix();
 })();
 
-async function loadSchedule() {
-  const res  = await fetch(API + '?action=list');
-  const data = await res.json();
-  const tbody = document.getElementById('schedule-tbody');
-  tbody.innerHTML = data.data && data.data.length
-    ? data.data.map(e => `
-        <tr>
-          <td>${e.exam_name}</td><td>${e.subject_name||'-'}</td><td>${e.date}</td>
-          <td>${e.session}</td><td>${e.start_time||'-'}</td><td>${e.end_time||'-'}</td>
-          <td>${e.duration ? e.duration+' min' : '-'}</td>
-          <td><button class="btn btn-sm btn-danger" onclick="deleteExam(${e.exam_id})">Delete</button></td>
-        </tr>`).join('')
-    : '<tr><td colspan="8" class="text-center">No exams scheduled.</td></tr>';
+function bindControls() {
+  document.getElementById('school-select').addEventListener('change', async () => {
+    syncCustomField('school-select', 'school-custom-input');
+    updateHeaderCopy();
+    syncDeptOptions();
+    await loadMatrix();
+  });
+  document.getElementById('dept-select').addEventListener('change', async () => {
+    syncCustomField('dept-select', 'dept-custom-input');
+    updateHeaderCopy();
+    await loadMatrix();
+  });
+  document.getElementById('exam-type-select').addEventListener('change', async () => {
+    syncCustomField('exam-type-select', 'exam-type-custom-input');
+    syncShiftOptions();
+    updateHeaderCopy();
+    await loadMatrix();
+  });
+  document.getElementById('school-custom-input').addEventListener('input', updateHeaderCopy);
+  document.getElementById('dept-custom-input').addEventListener('input', updateHeaderCopy);
+  document.getElementById('exam-type-custom-input').addEventListener('input', updateHeaderCopy);
+  document.getElementById('csv-upload').addEventListener('change', handleCsvUpload);
 }
 
-function openModal() { document.getElementById('schedule-modal').style.display = 'flex'; }
-function closeModal() { document.getElementById('schedule-modal').style.display = 'none'; }
+async function apiGet(url) {
+  const res = await fetch(url, { cache: 'no-store' });
+  const text = await res.text();
+  if (!text) throw new Error('Server returned an empty response');
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    throw new Error('Invalid JSON from server: ' + text.slice(0, 180));
+  }
+}
 
-async function saveExam(e) {
-  e.preventDefault();
-  const payload = {
-    action: 'add',
-    exam_name:    document.getElementById('f-exam').value,
-    subject_name: document.getElementById('f-subject').value,
-    exam_date:    document.getElementById('f-date').value,
-    session:      document.getElementById('f-session').value,
-    start_time:   document.getElementById('f-start').value,
-    end_time:     document.getElementById('f-end').value,
+function apiPost(action, payload) {
+  return fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, ...payload }),
+  }).then(async (res) => {
+    const text = await res.text();
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}${text ? ': ' + text.slice(0, 180) : ''}`);
+    }
+    if (!text) throw new Error('Server returned an empty response');
+    return JSON.parse(text);
+  });
+}
+
+function titleCase(value) {
+  return String(value || '').replace(/\b\w/g, (m) => m.toUpperCase());
+}
+
+function formatDateLabel(dateStr) {
+  if (!dateStr) return { day: '--', mon: '-' };
+  const date = new Date(dateStr + 'T00:00:00');
+  if (Number.isNaN(date.getTime())) return { day: '--', mon: dateStr };
+  const day = date.getDate();
+  const month = date.toLocaleString('en-US', { month: 'short' });
+  const year = date.getFullYear();
+  return { day: String(day).padStart(2, '0'), mon: `${month} ${year}` };
+}
+
+function allowedShifts(examType) {
+  return SHIFT_OPTIONS[examType] || SHIFT_OPTIONS.midsem;
+}
+
+function getSelectedValue(selectId, customInputId) {
+  const select = document.getElementById(selectId);
+  const customInput = document.getElementById(customInputId);
+  if (select.value === '__other__') {
+    return String(customInput.value || '').trim();
+  }
+  return String(select.value || '').trim();
+}
+
+function syncCustomField(selectId, customInputId) {
+  const select = document.getElementById(selectId);
+  const customInput = document.getElementById(customInputId);
+  const showCustom = select.value === '__other__';
+  customInput.style.display = showCustom ? 'block' : 'none';
+  if (!showCustom) {
+    customInput.value = '';
+  }
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function summaryTitle() {
+  const school = getSelectedValue('school-select', 'school-custom-input') || 'SOICT';
+  const dept = getSelectedValue('dept-select', 'dept-custom-input') || 'CSE';
+  const examType = getSelectedValue('exam-type-select', 'exam-type-custom-input') || 'midsem';
+  const fromDate = state.matrix?.dates?.[0] || '-';
+  const toDate = state.matrix?.dates?.[state.matrix.dates.length - 1] || '-';
+  return {
+    school,
+    dept,
+    examType: titleCase(examType),
+    fromDate,
+    toDate,
   };
-  const res  = await fetch(API, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-  const data = await res.json();
-  showToast(data.message, data.success ? 'success' : 'error');
-  if (data.success) { closeModal(); loadSchedule(); }
 }
 
-async function deleteExam(id) {
-  if (!confirm('Delete this exam? All related seating/invigilation will also be removed.')) return;
-  const res  = await fetch(API, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'delete', exam_id: id}) });
-  const data = await res.json();
-  showToast(data.message, data.success ? 'success' : 'error');
-  if (data.success) loadSchedule();
+function updateHeaderCopy() {
+  const info = summaryTitle();
+  document.getElementById('matrix-range').textContent = `From: ${info.fromDate} | To: ${info.toDate}`;
+  document.getElementById('datesheet-subtitle').textContent = `School: ${info.school} · Dept: ${info.dept} · Exam Type: ${info.examType} · Branch, year, semester and session-wise exam matrix.`;
+  document.getElementById('datesheet-title').textContent = 'Datesheet';
 }
 
-function exportCSV() { exportTableToCSV('schedule-table', 'schedule.csv'); }
+async function loadMeta() {
+  const data = await apiGet(`${API}?action=meta`);
+  if (!data.success) {
+    throw new Error(data.message || 'Failed to load metadata');
+  }
+
+  state.meta = data;
+
+  const schoolSelect = document.getElementById('school-select');
+  const deptSelect = document.getElementById('dept-select');
+  const examTypeSelect = document.getElementById('exam-type-select');
+  const schoolCustomInput = document.getElementById('school-custom-input');
+  const deptCustomInput = document.getElementById('dept-custom-input');
+  const examTypeCustomInput = document.getElementById('exam-type-custom-input');
+
+  schoolSelect.innerHTML = '';
+  (data.schools || []).forEach((school) => {
+    const opt = document.createElement('option');
+    opt.value = school;
+    opt.textContent = school;
+    schoolSelect.appendChild(opt);
+  });
+  {
+    const opt = document.createElement('option');
+    opt.value = '__other__';
+    opt.textContent = 'Other';
+    schoolSelect.appendChild(opt);
+  }
+
+  examTypeSelect.innerHTML = '';
+  (data.exam_types || []).forEach((examType) => {
+    const opt = document.createElement('option');
+    opt.value = examType;
+    opt.textContent = titleCase(examType);
+    examTypeSelect.appendChild(opt);
+  });
+  {
+    const opt = document.createElement('option');
+    opt.value = '__other__';
+    opt.textContent = 'Other';
+    examTypeSelect.appendChild(opt);
+  }
+
+  schoolSelect.value = data.default_school || 'SOICT';
+  examTypeSelect.value = 'midsem';
+  syncDeptOptions();
+  syncShiftOptions();
+  syncCustomField('school-select', 'school-custom-input');
+  syncCustomField('dept-select', 'dept-custom-input');
+  syncCustomField('exam-type-select', 'exam-type-custom-input');
+  schoolCustomInput.value = '';
+  deptCustomInput.value = '';
+  examTypeCustomInput.value = '';
+  updateHeaderCopy();
+  document.getElementById('matrix-status').textContent = 'Metadata loaded';
+}
+
+function syncDeptOptions() {
+  if (!state.meta) return;
+  const school = getSelectedValue('school-select', 'school-custom-input') || state.meta.default_school || 'SOICT';
+  const depts = (state.meta.dept_map && state.meta.dept_map[school]) ? state.meta.dept_map[school] : [];
+  const deptSelect = document.getElementById('dept-select');
+  const previous = deptSelect.value || state.meta.default_dept || 'CSE';
+
+  deptSelect.innerHTML = '';
+  if (depts.length === 0) {
+    const opt = document.createElement('option');
+    opt.value = previous;
+    opt.textContent = previous;
+    deptSelect.appendChild(opt);
+  } else {
+    depts.forEach((dept) => {
+      const opt = document.createElement('option');
+      opt.value = dept;
+      opt.textContent = dept;
+      deptSelect.appendChild(opt);
+    });
+  }
+
+  {
+    const opt = document.createElement('option');
+    opt.value = '__other__';
+    opt.textContent = 'Other';
+    deptSelect.appendChild(opt);
+  }
+
+  if ([...deptSelect.options].some((opt) => opt.value === previous)) {
+    deptSelect.value = previous;
+  } else {
+    deptSelect.value = deptSelect.options[0] ? deptSelect.options[0].value : previous;
+  }
+
+  syncCustomField('dept-select', 'dept-custom-input');
+}
+
+function syncShiftOptions() {
+  const examType = getSelectedValue('exam-type-select', 'exam-type-custom-input') || 'midsem';
+  const cellShiftSelect = document.getElementById('cell-shift');
+  const shifts = allowedShifts(examType);
+
+  cellShiftSelect.innerHTML = '';
+
+  shifts.forEach((shift) => {
+    const opt2 = document.createElement('option');
+    opt2.value = shift;
+    opt2.textContent = shift;
+    cellShiftSelect.appendChild(opt2);
+  });
+
+  cellShiftSelect.value = shifts[0] || '';
+}
+
+async function loadMatrix() {
+  if (state.loading) return;
+  state.loading = true;
+  document.getElementById('matrix-status').textContent = 'Loading...';
+
+  try {
+    const school = getSelectedValue('school-select', 'school-custom-input') || 'SOICT';
+    const dept = getSelectedValue('dept-select', 'dept-custom-input') || 'CSE';
+    const examType = getSelectedValue('exam-type-select', 'exam-type-custom-input') || 'midsem';
+
+    if (!school || !dept || !examType) {
+      throw new Error('Please enter a value for School, Dept, and Exam Type when using Other.');
+    }
+
+    const data = await apiGet(`${API}?action=matrix&exam_type=${encodeURIComponent(examType)}&school=${encodeURIComponent(school)}&dept=${encodeURIComponent(dept)}`);
+
+    if (!data.success) {
+      throw new Error(data.message || 'Failed to load matrix');
+    }
+
+    state.matrix = data;
+    renderMatrix();
+    document.getElementById('matrix-status').textContent = 'Matrix loaded';
+    updateHeaderCopy();
+  } catch (err) {
+    document.getElementById('matrix-status').textContent = 'Load failed';
+    showToast(err.message, 'error');
+  } finally {
+    state.loading = false;
+  }
+}
+
+function renderMatrix() {
+  const matrix = state.matrix;
+  const table = document.getElementById('matrix-table');
+  const thead = document.getElementById('matrix-thead');
+  const tbody = document.getElementById('matrix-tbody');
+  const empty = document.getElementById('matrix-empty');
+
+  if (!matrix || !Array.isArray(matrix.rows) || matrix.rows.length === 0 || !Array.isArray(matrix.dates) || matrix.dates.length === 0) {
+    table.style.display = 'none';
+    empty.style.display = 'block';
+    updateStats([], []);
+    return;
+  }
+
+  empty.style.display = 'none';
+  table.style.display = 'table';
+
+  const dateHeaders = matrix.dates.map((date) => {
+    const label = formatDateLabel(date);
+    return `<th class="date-head"><span class="day">${label.day}</span><span class="mon">${label.mon}</span></th>`;
+  }).join('');
+
+  thead.innerHTML = `
+    <tr>
+      <th class="sticky-left sticky-branch" rowspan="2">Branch (Sem Session)</th>
+      <th class="sticky-left sticky-shift" rowspan="2">Shift</th>
+      <th colspan="${matrix.dates.length}">Datesheet</th>
+    </tr>
+    <tr>
+      ${dateHeaders}
+    </tr>
+  `;
+
+  tbody.innerHTML = matrix.rows.map((row, rowIndex) => {
+    const branchLabel = `${escapeHtml(row.branch_code || '-')}`;
+    const branchMeta = `Sem ${escapeHtml(row.semester || '-')}${row.branch_session ? ` · Session ${escapeHtml(row.branch_session)}` : ' · Session -'}`;
+    const shift = escapeHtml(row.shift || '-');
+    const cells = matrix.dates.map((date) => {
+      const cell = row.cells && row.cells[date] ? row.cells[date] : { matrix_id: 0, subject_code: '', subject_name: '', start_time: '', end_time: '', notes: 'Prep Leave', is_filler: true };
+      const hasExam = !cell.is_filler && (cell.subject_name || cell.subject_code);
+      const cellClass = hasExam ? 'exam' : 'filler';
+      const title = hasExam ? 'Exam Cell' : 'Prep Leave / No Exam';
+      const code = cell.subject_code ? `<div class="slot-code">${escapeHtml(cell.subject_code)}</div>` : '';
+      const name = cell.subject_name ? `<div class="slot-name">${escapeHtml(cell.subject_name)}</div>` : `<div class="slot-name">${escapeHtml(cell.notes || 'Prep Leave / No Exam')}</div>`;
+      const time = (cell.start_time || cell.end_time) ? `<div class="slot-time">${escapeHtml(cell.start_time || '--:--')} - ${escapeHtml(cell.end_time || '--:--')}</div>` : '';
+      const note = cell.is_filler ? 'Prep Leave / No Exam' : (cell.notes ? escapeHtml(cell.notes) : 'Exam');
+      return `
+        <td>
+          <button type="button" class="matrix-cell ${cellClass}" data-row-index="${rowIndex}" data-date="${escapeHtml(date)}">
+            <div class="slot-title">${title}</div>
+            ${code}
+            ${name}
+            ${time}
+            <div class="slot-note">${note}</div>
+          </button>
+        </td>
+      `;
+    }).join('');
+
+    return `
+      <tr>
+        <td class="sticky-left sticky-branch branch-cell">
+          <div class="branch-name">${branchLabel}</div>
+          <div class="branch-meta">${branchMeta}</div>
+        </td>
+        <td class="sticky-left sticky-shift shift-cell"><span class="shift-pill">${shift}</span></td>
+        ${cells}
+      </tr>
+    `;
+  }).join('');
+
+  bindMatrixCellButtons();
+  updateStats(matrix.rows, matrix.dates);
+}
+
+function updateStats(rows, dates) {
+  const rowCount = Array.isArray(rows) ? rows.length : 0;
+  const dateCount = Array.isArray(dates) ? dates.length : 0;
+  let filled = 0;
+  let filler = 0;
+
+  (rows || []).forEach((row) => {
+    Object.values(row.cells || {}).forEach((cell) => {
+      if (cell && !cell.is_filler && (cell.subject_name || cell.subject_code)) filled += 1;
+      if (cell && cell.is_filler) filler += 1;
+    });
+  });
+
+  document.getElementById('stat-rows').textContent = String(rowCount);
+  document.getElementById('stat-dates').textContent = String(dateCount);
+  document.getElementById('stat-filled').textContent = String(filled);
+  document.getElementById('stat-filler').textContent = String(filler);
+}
+
+function bindMatrixCellButtons() {
+  document.querySelectorAll('.matrix-cell').forEach((button) => {
+    button.addEventListener('click', () => {
+      const rowIndex = Number(button.getAttribute('data-row-index'));
+      const date = button.getAttribute('data-date');
+      openCellEditor(rowIndex, date);
+    });
+  });
+}
+
+function openCellEditor(rowIndex = null, date = null) {
+  const modal = document.getElementById('editor-modal');
+  const title = document.getElementById('editor-title');
+  const cellShift = document.getElementById('cell-shift');
+  const examType = getSelectedValue('exam-type-select', 'exam-type-custom-input') || 'midsem';
+  const dept = getSelectedValue('dept-select', 'dept-custom-input') || 'CSE';
+
+  if (cellShift.options.length === 0) {
+    syncShiftOptions();
+  }
+
+  if (rowIndex === null || date === null || !state.matrix || !state.matrix.rows[rowIndex]) {
+    state.currentCell = null;
+    title.textContent = 'Add Manual Entry';
+    document.getElementById('cell-branch-code').value = dept;
+    document.getElementById('cell-semester').value = '';
+    document.getElementById('cell-branch-session').value = '';
+    cellShift.value = allowedShifts(examType)[0] || 'Morning';
+    document.getElementById('cell-date').value = state.matrix?.dates?.[0] || '';
+    document.getElementById('cell-subject-code').value = '';
+    document.getElementById('cell-subject-name').value = '';
+    document.getElementById('cell-start-time').value = '';
+    document.getElementById('cell-end-time').value = '';
+    document.getElementById('cell-notes').value = '';
+  } else {
+    const row = state.matrix.rows[rowIndex];
+    const cell = row.cells[date] || { matrix_id: 0, subject_code: '', subject_name: '', start_time: '', end_time: '', notes: '', is_filler: true };
+    state.currentCell = { rowIndex, date, row, cell };
+    title.textContent = cell.matrix_id ? 'Edit Exam Cell' : 'Add Exam Cell';
+    document.getElementById('cell-branch-code').value = row.branch_code || dept;
+    document.getElementById('cell-semester').value = row.semester || '';
+    document.getElementById('cell-branch-session').value = row.branch_session || '';
+    cellShift.value = row.shift || allowedShifts(examType)[0] || 'Morning';
+    document.getElementById('cell-date').value = date || '';
+    document.getElementById('cell-subject-code').value = cell.subject_code || '';
+    document.getElementById('cell-subject-name').value = cell.subject_name || '';
+    document.getElementById('cell-start-time').value = cell.start_time || '';
+    document.getElementById('cell-end-time').value = cell.end_time || '';
+    document.getElementById('cell-notes').value = cell.notes || '';
+  }
+
+  modal.style.display = 'flex';
+}
+
+function closeEditor() {
+  document.getElementById('editor-modal').style.display = 'none';
+  state.currentCell = null;
+}
+
+async function saveCell(event) {
+  event.preventDefault();
+
+  const examType = getSelectedValue('exam-type-select', 'exam-type-custom-input') || 'midsem';
+  const school = getSelectedValue('school-select', 'school-custom-input') || 'SOICT';
+  const dept = getSelectedValue('dept-select', 'dept-custom-input') || 'CSE';
+
+  if (!school || !dept || !examType) {
+    showToast('Please enter a value for School, Dept, and Exam Type when using Other.', 'error');
+    return;
+  }
+
+  const payload = {
+    exam_type: examType,
+    school,
+    dept,
+    branch_code: document.getElementById('cell-branch-code').value,
+    semester: Number(document.getElementById('cell-semester').value || 0),
+    branch_session: document.getElementById('cell-branch-session').value,
+    shift: document.getElementById('cell-shift').value,
+    exam_date: document.getElementById('cell-date').value,
+    subject_code: document.getElementById('cell-subject-code').value,
+    subject_name: document.getElementById('cell-subject-name').value,
+    start_time: document.getElementById('cell-start-time').value,
+    end_time: document.getElementById('cell-end-time').value,
+    notes: document.getElementById('cell-notes').value,
+  };
+
+  try {
+    const data = await apiPost('upsert_cell', payload);
+    showToast(data.message || 'Cell saved', data.success ? 'success' : 'error');
+    if (data.success) {
+      closeEditor();
+      await loadMatrix();
+    }
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+async function clearCell() {
+  document.getElementById('cell-subject-code').value = '';
+  document.getElementById('cell-subject-name').value = '';
+  document.getElementById('cell-start-time').value = '';
+  document.getElementById('cell-end-time').value = '';
+  document.getElementById('cell-notes').value = '';
+
+  if (state.currentCell && state.currentCell.cell && state.currentCell.cell.matrix_id > 0) {
+    await saveCell({ preventDefault() {} });
+    return;
+  }
+
+  await saveCell({ preventDefault() {} });
+}
+
+function openCsvPicker() {
+  document.getElementById('csv-upload').click();
+}
+
+function downloadTemplate() {
+  const headers = ['branch_code', 'semester', 'branch_session', 'shift', 'exam_date', 'subject_code', 'subject_name', 'start_time', 'end_time', 'notes'];
+  const sample = ['CSE', '4', 'A', 'Morning', '2026-04-20', 'CSE401', 'Data Structures', '09:30', '12:30', ''];
+  const csv = [headers.join(','), sample.join(',')].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'schedule_template.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let cell = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const next = text[i + 1];
+
+    if (inQuotes) {
+      if (char === '"' && next === '"') {
+        cell += '"';
+        i += 1;
+      } else if (char === '"') {
+        inQuotes = false;
+      } else {
+        cell += char;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      inQuotes = true;
+    } else if (char === ',') {
+      row.push(cell);
+      cell = '';
+    } else if (char === '\n') {
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = '';
+    } else if (char === '\r') {
+      continue;
+    } else {
+      cell += char;
+    }
+  }
+
+  if (cell.length > 0 || row.length > 0) {
+    row.push(cell);
+    rows.push(row);
+  }
+
+  return rows.filter((entry) => entry.some((value) => String(value).trim() !== ''));
+}
+
+async function handleCsvUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    const rows = parseCsv(text);
+    if (rows.length < 2) {
+      showToast('CSV needs a header row and at least one data row.', 'error');
+      return;
+    }
+
+    const headers = rows[0].map((header) => String(header || '').trim().toLowerCase());
+    const entries = rows.slice(1).map((row) => {
+      const entry = {};
+      headers.forEach((header, index) => {
+        entry[header] = String(row[index] ?? '').trim();
+      });
+      return entry;
+    });
+
+    const examType = getSelectedValue('exam-type-select', 'exam-type-custom-input') || 'midsem';
+    const school = getSelectedValue('school-select', 'school-custom-input') || 'SOICT';
+    const dept = getSelectedValue('dept-select', 'dept-custom-input') || 'CSE';
+
+    if (!school || !dept || !examType) {
+      showToast('Please enter a value for School, Dept, and Exam Type when using Other.', 'error');
+      return;
+    }
+
+    const data = await apiPost('import_csv', {
+      exam_type: examType,
+      school,
+      dept,
+      entries,
+    });
+
+    showToast(data.message || 'CSV imported', data.success ? 'success' : 'error');
+    if (data.success) {
+      await loadMatrix();
+    }
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+async function loadLogoDataUrl() {
+  if (state.logoDataUrl) return state.logoDataUrl;
+  const res = await fetch('../logo.jpeg');
+  const blob = await res.blob();
+  state.logoDataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+  return state.logoDataUrl;
+}
+
+async function downloadPDF() {
+  if (!state.matrix || !Array.isArray(state.matrix.rows) || state.matrix.rows.length === 0) {
+    showToast('Load a matrix before exporting the PDF.', 'error');
+    return;
+  }
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('landscape', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 10;
+    const info = summaryTitle();
+    const logoDataUrl = await loadLogoDataUrl();
+
+    const drawHeader = () => {
+      pdf.setFillColor(255, 255, 255);
+      pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+      pdf.addImage(logoDataUrl, 'JPEG', margin, margin - 1, 26, 26);
+      pdf.setTextColor(20, 61, 102);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(18);
+      pdf.text('Gautam Buddha University', pageWidth / 2, 16, { align: 'center' });
+      pdf.setFontSize(12);
+      pdf.text('School of Information and Communication Technology', pageWidth / 2, 22, { align: 'center' });
+      pdf.setFontSize(15);
+      pdf.text(`${info.school} · ${info.dept} · ${info.examType} Datesheet`, pageWidth / 2, 30, { align: 'center' });
+
+      pdf.setDrawColor(216, 228, 241);
+      pdf.roundedRect(margin, 36, pageWidth - (margin * 2), 16, 3, 3, 'S');
+      pdf.setFontSize(9);
+      pdf.setTextColor(52, 72, 95);
+      pdf.text(`School: ${info.school}`, margin + 4, 42);
+      pdf.text(`Dept: ${info.dept}`, margin + 58, 42);
+      pdf.text(`Exam Type: ${info.examType}`, margin + 108, 42);
+      pdf.text(`Session/Shifts: ${info.shifts}`, margin + 168, 42);
+      pdf.text(`From: ${info.fromDate}`, margin + 4, 48);
+      pdf.text(`To: ${info.toDate}`, margin + 58, 48);
+      pdf.text(`Generated: ${new Date().toLocaleString()}`, margin + 108, 48);
+    };
+
+    drawHeader();
+
+    const rows = state.matrix.rows;
+    const dates = state.matrix.dates;
+    const rowHeaderWidth = 42;
+    const shiftWidth = 22;
+    const dateWidth = Math.max(20, (pageWidth - (margin * 2) - rowHeaderWidth - shiftWidth) / Math.max(dates.length, 1));
+    let y = 58;
+
+    const drawTableHead = () => {
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(8);
+      pdf.setFillColor(234, 241, 248);
+      pdf.setDrawColor(196, 214, 233);
+      pdf.rect(margin, y, rowHeaderWidth, 10, 'FD');
+      pdf.rect(margin + rowHeaderWidth, y, shiftWidth, 10, 'FD');
+      pdf.text('Branch (Sem Session)', margin + 2, y + 6.4);
+      pdf.text('Shift', margin + rowHeaderWidth + 3, y + 6.4);
+      let x = margin + rowHeaderWidth + shiftWidth;
+      dates.forEach((date) => {
+        pdf.rect(x, y, dateWidth, 10, 'FD');
+        const label = formatDateLabel(date);
+        pdf.text(label.day, x + (dateWidth / 2), y + 4.1, { align: 'center' });
+        pdf.text(label.mon, x + (dateWidth / 2), y + 8, { align: 'center' });
+        x += dateWidth;
+      });
+      y += 10;
+    };
+
+    const drawCell = (x, yPos, width, height, textLines, fillRgb) => {
+      pdf.setFillColor(fillRgb[0], fillRgb[1], fillRgb[2]);
+      pdf.setDrawColor(216, 228, 241);
+      pdf.rect(x, yPos, width, height, 'FD');
+      pdf.setTextColor(28, 45, 65);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(textLines, x + 2, yPos + 5);
+    };
+
+    drawTableHead();
+
+    rows.forEach((row) => {
+      const rowCells = dates.map((date) => row.cells[date] || { matrix_id: 0, subject_code: '', subject_name: '', start_time: '', end_time: '', notes: 'Prep Leave', is_filler: true });
+      const rowHeight = Math.max(18, ...rowCells.map((cell) => {
+        const lines = [];
+        if (cell.subject_code) lines.push(cell.subject_code);
+        if (cell.subject_name) lines.push(cell.subject_name);
+        if (cell.start_time || cell.end_time) lines.push(`${cell.start_time || '--:--'} - ${cell.end_time || '--:--'}`);
+        if (!cell.subject_code && !cell.subject_name) lines.push(cell.notes || 'Prep Leave / No Exam');
+        return Math.min(28, 12 + (lines.length * 4));
+      }));
+
+      if (y + rowHeight > pageHeight - margin) {
+        pdf.addPage();
+        drawHeader();
+        y = 58;
+        drawTableHead();
+      }
+
+      const branchMeta = [`Sem ${row.semester || '-'}`, row.branch_session ? `Session ${row.branch_session}` : 'Session -'];
+      drawCell(margin, y, rowHeaderWidth, rowHeight, [String(row.branch_code || '-'), branchMeta.join(' · ')], [247, 250, 255]);
+      drawCell(margin + rowHeaderWidth, y, shiftWidth, rowHeight, [String(row.shift || '-')], [234, 241, 248]);
+
+      let x = margin + rowHeaderWidth + shiftWidth;
+      rowCells.forEach((cell) => {
+        const hasExam = !cell.is_filler && (cell.subject_code || cell.subject_name);
+        const lines = [];
+        if (hasExam && cell.subject_code) lines.push(cell.subject_code);
+        if (hasExam && cell.subject_name) lines.push(cell.subject_name);
+        if (cell.start_time || cell.end_time) lines.push(`${cell.start_time || '--:--'} - ${cell.end_time || '--:--'}`);
+        if (!hasExam) lines.push('Prep Leave / No Exam');
+        if (cell.notes && hasExam) lines.push(cell.notes);
+
+        const wrapped = lines.flatMap((line) => pdf.splitTextToSize(line, dateWidth - 4));
+        const cellFill = hasExam ? [255, 255, 255] : [247, 240, 232];
+        drawCell(x, y, dateWidth, rowHeight, wrapped, cellFill);
+        x += dateWidth;
+      });
+
+      y += rowHeight;
+    });
+
+    const safeSchool = String(info.school).replace(/[^a-z0-9_-]+/gi, '_');
+    const safeDept = String(info.dept).replace(/[^a-z0-9_-]+/gi, '_');
+    const safeExamType = String(info.examType).replace(/[^a-z0-9_-]+/gi, '_');
+    pdf.save(`GBU_${safeSchool}_${safeDept}_${safeExamType}_Datesheet.pdf`);
+    showToast('PDF downloaded.', 'success');
+  } catch (err) {
+    showToast('PDF generation failed.', 'error');
+  }
+}
+
 async function logout() {
-  await fetch('../api/auth.php', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'logout'}) });
+  await fetch('../api/auth.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'logout' }) });
   window.location.href = '../index.html';
 }
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
 </script>
 </body>
 </html>

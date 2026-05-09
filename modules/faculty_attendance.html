@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<title>Digital Attendance | Faculty Portal</title>
+<link rel="stylesheet" href="../css/style.css?v=2">
+<style>
+:root {
+  --fp-primary: #2563eb;
+  --fp-primary-light: #eff6ff;
+  --fp-bg: #f1f5f9;
+  --fp-card: #ffffff;
+  --fp-border: #e2e8f0;
+  --fp-text: #1e293b;
+  --fp-muted: #64748b;
+  --fp-radius: 12px;
+  --fp-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.06);
+}
+body { background: var(--fp-bg); color: var(--fp-text); }
+
+.fp-card {
+  background: var(--fp-card);
+  border-radius: var(--fp-radius);
+  box-shadow: var(--fp-shadow);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.fp-card-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--fp-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.fp-card-header h3 { font-size: 14px; font-weight: 600; color: var(--fp-text); margin: 0; }
+.fp-card-body { padding: 20px; }
+
+.page-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--fp-text);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.page-title span {
+  background: var(--fp-primary);
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 18px;
+}
+
+.att-controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+.att-controls .form-group { margin-bottom: 0; flex: 1; min-width: 200px; }
+
+.status-select {
+  padding: 5px 8px;
+  border: 1px solid var(--fp-border);
+  border-radius: 6px;
+  font-size: 12px;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+  width: 100%;
+}
+.status-select.present { border-color: #16a34a; background: #f0fdf4; color: #15803d; }
+.status-select.late    { border-color: #d97706; background: #fffbeb; color: #b45309; }
+.status-select.absent  { border-color: #dc2626; background: #fef2f2; color: #b91c1c; }
+
+.fp-empty { text-align: center; padding: 48px 20px; color: var(--fp-muted); }
+.fp-empty-icon { font-size: 44px; margin-bottom: 12px; }
+.fp-empty p { font-size: 14px; }
+
+.sidebar .nav-links a.active {
+  background: linear-gradient(90deg, rgba(37,99,235,0.28) 0%, rgba(37,99,235,0.10) 100%);
+  color: #fff;
+  border-left-color: #60a5fa;
+  font-weight: 600;
+}
+/* ── Force sidebar nav into strict vertical source order ── */
+.sidebar .nav-links {
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+}
+.sidebar .nav-links a,
+.sidebar .nav-links hr {
+  order: unset !important;
+  float: none !important;
+  position: static !important;
+}
+</style>
+</head>
+<body>
+<div class="app-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Exam System</h2>
+      <p id="user-label">Loading...</p>
+    </div>
+    <nav class="nav-links" data-nav="faculty">
+      <a href="faculty_portal.html"><i>&#128197;</i> My Duties</a>
+      <a href="faculty_attendance.html" class="active"><i>&#9989;</i> Digital Attendance</a>
+      <a href="faculty_replacement.html"><i>&#128260;</i> Replacement Requests</a>
+      <a href="faculty_profile.html"><i>&#128100;</i> My Profile</a>
+      <hr>
+      <a href="#" onclick="doLogout(); return false;"><i>&#128682;</i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <header class="top-bar">
+      <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('collapsed')" aria-label="Toggle sidebar">&#9776;</button>
+      <h1>Digital Attendance</h1>
+    </header>
+
+    <div class="page-body">
+
+      <div class="fp-card">
+        <div class="fp-card-header"><h3>Select Exam &amp; Room</h3></div>
+        <div class="fp-card-body">
+          <div class="att-controls">
+            <div class="form-group">
+              <label for="att-exam-select">Exam</label>
+              <select id="att-exam-select" class="form-control" onchange="loadRooms()">
+                <option value="">&#8212; Select Exam &#8212;</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="att-room-select">Room</label>
+              <select id="att-room-select" class="form-control" disabled>
+                <option value="">&#8212; Select Room &#8212;</option>
+              </select>
+            </div>
+            <div style="padding-bottom:1px;">
+              <button class="btn btn-primary" onclick="loadSheet()">Load Students</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="sheet-wrap" style="display:none;">
+        <div class="fp-card">
+          <div class="fp-card-header">
+            <h3 id="sheet-title">Attendance Sheet</h3>
+            <div class="btn-group">
+              <button class="btn btn-success btn-sm" onclick="saveAttendance()">&#128190; Save Attendance</button>
+              <button class="btn btn-secondary btn-sm" onclick="exportCsv()">&#8595; Download CSV</button>
+            </div>
+          </div>
+          <div class="fp-card-body" style="padding:0; overflow-x:auto;">
+            <table class="data-table" id="att-table">
+              <thead>
+                <tr>
+                  <th>Seat No</th>
+                  <th>Roll No</th>
+                  <th>Name</th>
+                  <th>Branch</th>
+                  <th>Sem</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="att-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+<script src="../js/script.js"></script>
+<script>
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+async function doLogout() {
+  await fetch('../api/auth.php', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'logout'}) });
+  window.location.href = '../index.html';
+}
+
+// ── Load exam dropdown ────────────────────────────────────────
+async function loadExams() {
+  var sel = document.getElementById('att-exam-select');
+  sel.innerHTML = '<option value="">Loading...</option>';
+  try {
+    var res  = await fetch('../api/attendance.php?action=list_exams');
+    var data = await res.json();
+    sel.innerHTML = '<option value="">&#8212; Select Exam &#8212;</option>';
+    if (data.success && data.data && data.data.length) {
+      data.data.forEach(function(e) {
+        sel.innerHTML += '<option value="' + esc(e.exam_id) + '">' +
+          esc(e.exam_name) + ' &mdash; ' + esc(e.date) + ' (' + esc(e.session) + ')</option>';
+      });
+    } else {
+      sel.innerHTML = '<option value="">No exams available</option>';
+    }
+  } catch(e) {
+    sel.innerHTML = '<option value="">Error loading exams</option>';
+  }
+}
+
+// ── Load rooms for selected exam ──────────────────────────────
+async function loadRooms() {
+  var examId  = document.getElementById('att-exam-select').value;
+  var roomSel = document.getElementById('att-room-select');
+  roomSel.innerHTML = '<option value="">&#8212; Select Room &#8212;</option>';
+  roomSel.disabled  = true;
+  document.getElementById('sheet-wrap').style.display = 'none';
+  if (!examId) return;
+  roomSel.innerHTML = '<option value="">Loading rooms...</option>';
+  try {
+    var res  = await fetch('../api/attendance.php?action=get_rooms&exam_id=' + encodeURIComponent(examId));
+    var data = await res.json();
+    roomSel.innerHTML = '<option value="">&#8212; Select Room &#8212;</option>';
+    if (data.success && data.data && data.data.length) {
+      data.data.forEach(function(r) {
+        roomSel.innerHTML += '<option value="' + esc(r.room_id) + '">' +
+          esc(r.room_no) + ' &mdash; ' + esc(r.building) + '</option>';
+      });
+      roomSel.disabled = false;
+    } else {
+      roomSel.innerHTML = '<option value="">No rooms found for your duties</option>';
+    }
+  } catch(e) {
+    roomSel.innerHTML = '<option value="">Error loading rooms</option>';
+  }
+}
+
+// ── Load attendance sheet ─────────────────────────────────────
+async function loadSheet() {
+  var examId = document.getElementById('att-exam-select').value;
+  var roomId = document.getElementById('att-room-select').value;
+  if (!examId || !roomId) { showToast('Select both exam and room first.', 'warning'); return; }
+
+  var wrap  = document.getElementById('sheet-wrap');
+  var tbody = document.getElementById('att-tbody');
+  wrap.style.display = 'none';
+  tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted" style="padding:28px;">Loading students...</td></tr>';
+
+  try {
+    var res  = await fetch('../api/attendance.php?action=get_sheet&exam_id=' + encodeURIComponent(examId) + '&room_id=' + encodeURIComponent(roomId));
+    var data = await res.json();
+    if (!data.success) { showToast(data.message || 'Failed to load sheet.', 'error'); return; }
+
+    var examSel = document.getElementById('att-exam-select');
+    var roomSel = document.getElementById('att-room-select');
+    document.getElementById('sheet-title').textContent =
+      'Attendance — ' + examSel.options[examSel.selectedIndex].text +
+      ' | Room ' + roomSel.options[roomSel.selectedIndex].text;
+
+    var rows = data.data || [];
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="6"><div class="fp-empty"><div class="fp-empty-icon">&#128186;</div><p>No students allocated to this room.</p></div></td></tr>';
+      wrap.style.display = 'block';
+      return;
+    }
+    tbody.innerHTML = rows.map(function(s) {
+      var sc = s.status === 'Present' ? 'present' : (s.status === 'Late' ? 'late' : 'absent');
+      return '<tr>' +
+        '<td>' + esc(s.seat_no) + '</td>' +
+        '<td>' + esc(s.roll_no) + '</td>' +
+        '<td>' + esc(s.name) + '</td>' +
+        '<td>' + esc(s.branch) + '</td>' +
+        '<td>' + esc(s.semester) + '</td>' +
+        '<td><select class="status-select ' + sc + '" data-alloc="' + esc(s.allocation_id) + '" onchange="this.className=\'status-select \'+this.value.toLowerCase()">' +
+          '<option value="Present"' + (s.status==='Present'?' selected':'') + '>Present</option>' +
+          '<option value="Late"'    + (s.status==='Late'   ?' selected':'') + '>Late</option>' +
+          '<option value="Absent"'  + (s.status==='Absent' ?' selected':'') + '>Absent</option>' +
+        '</select></td>' +
+        '</tr>';
+    }).join('');
+    wrap.style.display = 'block';
+  } catch(e) {
+    showToast('Error loading attendance sheet.', 'error');
+  }
+}
+
+// ── Save attendance ───────────────────────────────────────────
+async function saveAttendance() {
+  var examId = document.getElementById('att-exam-select').value;
+  var roomId = document.getElementById('att-room-select').value;
+  if (!examId || !roomId) { showToast('No exam/room selected.', 'warning'); return; }
+  var selects = document.querySelectorAll('#att-tbody .status-select');
+  if (!selects.length) { showToast('No students loaded.', 'warning'); return; }
+  var records = Array.from(selects).map(function(s) {
+    return { allocation_id: parseInt(s.dataset.alloc, 10), status: s.value };
+  });
+  try {
+    var res  = await fetch('../api/attendance.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action:'mark', exam_id:parseInt(examId,10), room_id:parseInt(roomId,10), records:records })
+    });
+    var data = await res.json();
+    showToast(data.message || (data.success ? 'Saved!' : 'Failed.'), data.success ? 'success' : 'error');
+  } catch(e) {
+    showToast('Error saving attendance.', 'error');
+  }
+}
+
+// ── Export CSV ────────────────────────────────────────────────
+function exportCsv() {
+  var rows = document.querySelectorAll('#att-table tr');
+  if (rows.length <= 1) { showToast('No data to export.', 'warning'); return; }
+  var csv = [];
+  rows.forEach(function(row) {
+    var cols = [];
+    row.querySelectorAll('th,td').forEach(function(cell) {
+      var sel = cell.querySelector('select');
+      cols.push('"' + (sel ? sel.value : cell.innerText.trim()).replace(/"/g,'""') + '"');
+    });
+    csv.push(cols.join(','));
+  });
+  var examSel = document.getElementById('att-exam-select');
+  downloadCSV(csv.join('\n'), 'attendance_' + examSel.options[examSel.selectedIndex].text.replace(/[^a-z0-9]/gi,'_') + '.csv');
+}
+
+// ── Bootstrap ─────────────────────────────────────────────────
+(async function() {
+  try {
+    var res  = await fetch('../api/auth.php?action=check');
+    var auth = await res.json();
+    if (!auth.logged_in || auth.role !== 'faculty') {
+      window.location.href = '../index.html'; return;
+    }
+    document.getElementById('user-label').textContent = auth.username + ' (Faculty)';
+    await loadExams();
+
+    // Auto-select exam+room if passed via URL (from "Mark Attendance" button)
+    var params = new URLSearchParams(window.location.search);
+    var examId = params.get('exam_id');
+    var roomId = params.get('room_id');
+    if (examId) {
+      document.getElementById('att-exam-select').value = examId;
+      await loadRooms();
+      if (roomId) {
+        document.getElementById('att-room-select').value = roomId;
+        await loadSheet();
+      }
+    }
+  } catch(e) {
+    window.location.href = '../index.html';
+  }
+})();
+</script>
+</body>
+</html>

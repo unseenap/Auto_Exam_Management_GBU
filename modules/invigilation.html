@@ -5,6 +5,127 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Invigilation | Exam Management</title>
 <link rel="stylesheet" href="../css/style.css">
+<style>
+  .inv-shell {
+    display: grid;
+    gap: 16px;
+  }
+
+  .inv-hero {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 14px;
+  }
+
+  .hero-main {
+    border-radius: 16px;
+    padding: 20px;
+    color: #fff;
+    background: linear-gradient(130deg, #173a67 0%, #1f6fb5 62%, #38a3d1 100%);
+    box-shadow: 0 16px 36px rgba(17, 47, 86, 0.2);
+  }
+
+  .hero-main h2 {
+    margin: 0 0 8px;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-main p {
+    margin: 0;
+    opacity: 0.92;
+    line-height: 1.5;
+  }
+
+  .hero-rules {
+    border-radius: 16px;
+    border: 1px solid #d7e6f8;
+    background: #f8fbff;
+    padding: 16px;
+    box-shadow: 0 10px 24px rgba(18, 49, 98, 0.08);
+  }
+
+  .hero-rules h3 {
+    margin: 0 0 8px;
+    font-size: 15px;
+    color: #1b4d79;
+  }
+
+  .hero-rules p {
+    margin: 0;
+    color: #4e657e;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .slot-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .slot-card {
+    border: 1px solid #d7e6f8;
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px;
+  }
+
+  .slot-card .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #667b91;
+    margin-bottom: 4px;
+  }
+
+  .slot-card .value {
+    font-size: 24px;
+    line-height: 1;
+    font-weight: 800;
+    color: #183f68;
+  }
+
+  .toolbar-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1.2fr auto;
+    gap: 12px;
+    align-items: end;
+  }
+
+  .duty-table select {
+    min-width: 190px;
+  }
+
+  .duty-table .compact-select {
+    min-width: 130px;
+  }
+
+  .duty-table td small {
+    color: #6a7f94;
+    display: block;
+    margin-top: 2px;
+  }
+
+  .table-note {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #5e7288;
+  }
+
+  .warn-text {
+    color: #a35900;
+    font-weight: 600;
+  }
+
+  @media (max-width: 1150px) {
+    .inv-hero,
+    .toolbar-grid,
+    .slot-stats {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
 </head>
 <body>
 <div class="app-wrapper">
@@ -16,8 +137,8 @@
       <a href="faculty.html"><i>👨‍🏫</i> Faculty</a>
       <a href="rooms.html"><i>🚪</i> Rooms</a>
       <a href="schedule.html"><i>📅</i> Schedule</a>
-      <a href="seating.html"><i>💺</i> Seating</a>
       <a href="invigilation.html" class="active"><i>📋</i> Invigilation</a>
+      <a href="seating.html"><i>💺</i> Seating</a>
       <a href="attendance.html"><i>✅</i> Attendance</a>
       <a href="replacement.html"><i>🔄</i> Replacement</a>
       <a href="reports.html"><i>📊</i> Reports</a>
@@ -28,38 +149,75 @@
   <main class="main-content">
     <header class="top-bar">
       <button onclick="toggleSidebar()" class="menu-btn">☰</button>
-      <h1>Invigilation Duties</h1>
+      <h1>Invigilation Control Center</h1>
     </header>
     <div class="page-body">
-      <div class="card mb-4">
-        <div class="card-body row-flex">
-          <div class="form-group mb-0 flex-1">
-            <label>Select Exam</label>
-            <select id="exam-select" onchange="loadDuties()">
-              <option value="">-- Select Exam --</option>
-            </select>
+      <div class="inv-shell">
+        <section class="inv-hero">
+          <div class="hero-main">
+            <h2>Exam Invigilation Management</h2>
+            <p>Auto-assigns faculty room-wise using your policy: capacity <= 10 gets 1 invigilator, capacity > 10 gets 2. Assignments are persistent and fully editable.</p>
           </div>
-          <div class="btn-group ml-auto">
-            <button class="btn btn-primary" onclick="allocate()">🔧 Auto Assign</button>
-            <button class="btn btn-danger" onclick="clearDuties()">🗑 Clear</button>
-            <button class="btn btn-success" onclick="exportCSV()">⬇ Export</button>
-            <button class="btn btn-secondary" onclick="window.print()">🖨 Print</button>
+          <div class="hero-rules">
+            <h3>Conflict Guardrails</h3>
+            <p>No faculty can be assigned to multiple rooms for the same exam/date/shift. Existing same-slot assignments in other exams are also blocked.</p>
+          </div>
+        </section>
+
+        <div class="card">
+          <div class="card-body">
+            <div class="toolbar-grid">
+              <div class="form-group mb-0">
+                <label>Exam Type</label>
+                <select id="exam-type-select" onchange="onExamTypeChange()">
+                  <option value="">-- Select Exam Type --</option>
+                </select>
+              </div>
+              <div class="form-group mb-0">
+                <label>Date</label>
+                <input id="exam-date" type="date" class="form-control" onchange="onExamDateChange()" disabled>
+              </div>
+              <div class="form-group mb-0">
+                <label>Shift</label>
+                <select id="exam-shift" onchange="onShiftChange()" disabled>
+                  <option value="">-- Select Shift --</option>
+                </select>
+              </div>
+              <div class="form-group mb-0">
+                <label>Exam (Auto)</label>
+                <input id="selected-exam-display" type="text" class="form-control" readonly placeholder="Auto selected from Exam Type + Date + Shift">
+              </div>
+              <div class="btn-group" style="justify-self:end;">
+                <button class="btn btn-primary" onclick="allocate()">Auto Assign</button>
+                <button class="btn btn-warning" onclick="saveManualChanges()">Save Manual Changes</button>
+                <button class="btn btn-danger" onclick="clearDuties()">Clear</button>
+                <button class="btn btn-success" onclick="exportCSV()">Export</button>
+                <button class="btn btn-secondary" onclick="window.print()">Print</button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="card">
-        <div class="card-header"><h2>Duty Chart</h2></div>
-        <div class="card-body">
-          <table class="data-table" id="duty-table">
-            <thead>
-              <tr>
-                <th>Room No</th><th>Building</th><th>Faculty Name</th>
-                <th>Department</th><th>Duty Type</th>
-              </tr>
-            </thead>
-            <tbody id="duty-tbody"><tr><td colspan="5" class="text-center">Select an exam.</td></tr></tbody>
-          </table>
+        <div id="slot-stats" class="slot-stats"></div>
+
+        <div class="card">
+          <div class="card-header"><h2>Duty Chart (Editable)</h2></div>
+          <div class="card-body">
+            <table class="data-table duty-table" id="duty-table">
+              <thead>
+                <tr>
+                  <th>Room</th>
+                  <th>Capacity</th>
+                  <th>Required</th>
+                  <th>Assigned Faculty</th>
+                  <th>Department</th>
+                  <th>Duty Type</th>
+                </tr>
+              </thead>
+              <tbody id="duty-tbody"><tr><td colspan="6" class="text-center">Select Exam Type, Date and Shift.</td></tr></tbody>
+            </table>
+            <div class="table-note" id="duty-note">Tip: Edit faculty/duty type and click <strong>Save Manual Changes</strong>.</div>
+          </div>
         </div>
       </div>
     </div>
@@ -70,61 +228,337 @@
 <script src="../js/script.js"></script>
 <script>
 const API = '../api/invigilation.php';
+let facultyList = [];
+let dutyRows = [];
+let availableDates = [];
+let selectedExamId = 0;
 
 (async () => {
   const res  = await fetch('../api/auth.php?action=check');
   const auth = await res.json();
   if (!auth.logged_in) { window.location.href = '../index.html'; return; }
   document.getElementById('user-label').textContent = auth.username + ' (' + auth.role + ')';
-  loadExams();
+  await loadFaculty();
+  await loadExamTypes();
 })();
 
-async function loadExams() {
-  const res  = await fetch(API + '?action=list_exams');
-  const data = await res.json();
-  const sel  = document.getElementById('exam-select');
-  if (data.data) data.data.forEach(e => {
-    const opt = document.createElement('option');
-    opt.value = e.exam_id;
-    opt.textContent = `${e.exam_name} (${e.date})`;
-    sel.appendChild(opt);
+function escapeHtml(v) {
+  return String(v ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+async function apiGet(url) {
+  const res = await fetch(url, { cache: 'no-store' });
+  const text = await res.text();
+  if (!text) throw new Error('Server returned an empty response');
+  return JSON.parse(text);
+}
+
+async function apiPost(payload) {
+  const res = await fetch(API, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
   });
+  const text = await res.text();
+  if (!text) throw new Error('Server returned an empty response');
+  return JSON.parse(text);
+}
+
+async function loadFaculty() {
+  const data = await apiGet(API + '?action=list_faculty');
+  facultyList = Array.isArray(data.data) ? data.data : [];
+}
+
+async function loadExamTypes() {
+  const sel = document.getElementById('exam-type-select');
+  const data = await apiGet(API + '?action=list_exam_types');
+  const labels = { back: 'Back', repeat: 'Repeat', midsem: 'Mid Sem', end: 'End Sem', practical: 'Practical' };
+  if (Array.isArray(data.data)) {
+    data.data.forEach((v) => {
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.textContent = labels[v] || v;
+      sel.appendChild(opt);
+    });
+  }
+}
+
+function resetDateControl() {
+  const date = document.getElementById('exam-date');
+  date.value = '';
+  date.min = '';
+  date.max = '';
+  date.disabled = true;
+  availableDates = [];
+}
+
+function resetShiftControl() {
+  const shift = document.getElementById('exam-shift');
+  shift.innerHTML = '<option value="">-- Select Shift --</option>';
+  shift.disabled = true;
+}
+
+function resetExamControl() {
+  selectedExamId = 0;
+  document.getElementById('selected-exam-display').value = '';
+}
+
+function resetDutyView(message = 'Select exam filters first.') {
+  dutyRows = [];
+  document.getElementById('duty-tbody').innerHTML = `<tr><td colspan="6" class="text-center">${message}</td></tr>`;
+  renderStats([]);
+}
+
+async function onExamTypeChange() {
+  resetDateControl();
+  resetShiftControl();
+  resetExamControl();
+  resetDutyView();
+
+  const examType = document.getElementById('exam-type-select').value;
+  if (!examType) return;
+
+  const data = await apiGet(`${API}?action=list_dates&exam_type=${encodeURIComponent(examType)}`);
+  if (!Array.isArray(data.data) || data.data.length === 0) {
+    showToast('No scheduled dates found in Schedule module for selected exam type.', 'warning');
+    return;
+  }
+
+  availableDates = data.data.filter(Boolean).sort();
+  const date = document.getElementById('exam-date');
+  date.min = availableDates[0];
+  date.max = availableDates[availableDates.length - 1];
+  date.value = availableDates[0];
+  date.disabled = false;
+  await onExamDateChange();
+}
+
+async function onExamDateChange() {
+  resetShiftControl();
+  resetExamControl();
+  resetDutyView();
+
+  const examType = document.getElementById('exam-type-select').value;
+  const date = document.getElementById('exam-date').value;
+  if (!examType || !date) return;
+
+  if (availableDates.length > 0 && !availableDates.includes(date)) {
+    showToast('Select a date available in the Schedule module.', 'error');
+    return;
+  }
+
+  const data = await apiGet(`${API}?action=list_shifts&exam_type=${encodeURIComponent(examType)}&date=${encodeURIComponent(date)}`);
+  const shiftSel = document.getElementById('exam-shift');
+  if (Array.isArray(data.data) && data.data.length > 0) {
+    data.data.forEach((s) => {
+      const opt = document.createElement('option');
+      opt.value = s;
+      opt.textContent = s;
+      shiftSel.appendChild(opt);
+    });
+    shiftSel.disabled = false;
+    if (data.data.length === 1) {
+      shiftSel.value = data.data[0];
+      await onShiftChange();
+    }
+  }
+}
+
+async function onShiftChange() {
+  resetExamControl();
+  resetDutyView();
+
+  const examType = document.getElementById('exam-type-select').value;
+  const date = document.getElementById('exam-date').value;
+  const shift = document.getElementById('exam-shift').value;
+  if (!examType || !date || !shift) return;
+
+  const data = await apiGet(`${API}?action=list_exams_filtered&exam_type=${encodeURIComponent(examType)}&date=${encodeURIComponent(date)}&shift=${encodeURIComponent(shift)}`);
+  if (Array.isArray(data.data) && data.data.length > 0) {
+    const exam = data.data[0];
+    selectedExamId = Number(exam.exam_id || 0);
+    document.getElementById('selected-exam-display').value = `${exam.exam_name || '-'} (${exam.date || '-'} - ${exam.session || '-'})`;
+    await loadDuties();
+  } else {
+    showToast('No exam record found for selected type/date/shift.', 'warning');
+  }
+}
+
+function getFacultySelectOptions(selectedId) {
+  return ['<option value="">-- Select Faculty --</option>'].concat(
+    facultyList.map(f => {
+      const selected = Number(selectedId) === Number(f.faculty_id) ? 'selected' : '';
+      return `<option value="${f.faculty_id}" ${selected}>${escapeHtml(f.name)} (${escapeHtml(f.department)} · duties ${Number(f.total_duties || 0)})</option>`;
+    })
+  ).join('');
+}
+
+function renderStats(rows) {
+  const host = document.getElementById('slot-stats');
+  if (!rows.length) {
+    host.innerHTML = '';
+    return;
+  }
+  const roomSet = new Set(rows.map(r => Number(r.room_id)));
+  const requiredTotal = rows.reduce((sum, r) => sum + Number(r.required_invigilators || 1), 0);
+  const assignedTotal = rows.filter(r => Number(r.faculty_id) > 0).length;
+  const unassigned = Math.max(requiredTotal - assignedTotal, 0);
+
+  host.innerHTML = `
+    <div class="slot-card"><div class="label">Rooms</div><div class="value">${roomSet.size}</div></div>
+    <div class="slot-card"><div class="label">Required Slots</div><div class="value">${requiredTotal}</div></div>
+    <div class="slot-card"><div class="label">Assigned Slots</div><div class="value">${assignedTotal}</div></div>
+    <div class="slot-card"><div class="label">Pending Slots</div><div class="value ${unassigned ? 'warn-text' : ''}">${unassigned}</div></div>
+  `;
 }
 
 async function loadDuties() {
-  const eid = document.getElementById('exam-select').value;
-  if (!eid) return;
-  const res  = await fetch(`${API}?action=get_duties&exam_id=${eid}`);
-  const data = await res.json();
+  const eid = Number(selectedExamId || 0);
   const tbody = document.getElementById('duty-tbody');
-  tbody.innerHTML = data.data && data.data.length
-    ? data.data.map(d => `
+  if (eid <= 0) {
+    resetDutyView('Select Exam Type, Date and Shift.');
+    return;
+  }
+
+  const data = await apiGet(`${API}?action=get_duties&exam_id=${eid}`);
+  dutyRows = Array.isArray(data.data) ? data.data : [];
+
+  renderStats(dutyRows);
+
+  tbody.innerHTML = dutyRows.length
+    ? dutyRows.map((d, idx) => `
         <tr>
-          <td>${d.room_no}</td><td>${d.building}</td><td>${d.faculty_name}</td>
-          <td>${d.department}</td>
-          <td><span class="status-badge ${d.duty_type === 'Chief Invigilator' ? 'badge-blue' : 'badge-green'}">${d.duty_type}</span></td>
+          <td>
+            <strong>${escapeHtml(d.room_no)}</strong>
+            <small>${escapeHtml(d.building)}</small>
+          </td>
+          <td>${Number(d.room_capacity || 0)}</td>
+          <td>${Number(d.required_invigilators || 1)}</td>
+          <td>
+            <select class="form-control duty-faculty" data-index="${idx}">
+              ${getFacultySelectOptions(d.faculty_id)}
+            </select>
+          </td>
+          <td>${escapeHtml(d.department || '-')}</td>
+          <td>
+            <select class="form-control compact-select duty-type" data-index="${idx}">
+              <option value="Chief Invigilator" ${d.duty_type === 'Chief Invigilator' ? 'selected' : ''}>Chief</option>
+              <option value="Invigilator" ${d.duty_type === 'Invigilator' ? 'selected' : ''}>Invigilator</option>
+            </select>
+          </td>
         </tr>`).join('')
-    : '<tr><td colspan="5" class="text-center">No duties assigned yet.</td></tr>';
+    : '<tr><td colspan="6" class="text-center">No duties assigned yet. Click Auto Assign to generate duties.</td></tr>';
+
+  bindRowHandlers();
+}
+
+function bindRowHandlers() {
+  document.querySelectorAll('.duty-faculty').forEach(select => {
+    select.addEventListener('change', (e) => {
+      const idx = Number(e.target.getAttribute('data-index'));
+      const row = dutyRows[idx];
+      if (!row) return;
+      row.faculty_id = Number(e.target.value || 0);
+      const faculty = facultyList.find(f => Number(f.faculty_id) === row.faculty_id);
+      row.faculty_name = faculty ? faculty.name : '';
+      row.department = faculty ? faculty.department : '-';
+      loadDutiesFromState();
+    });
+  });
+
+  document.querySelectorAll('.duty-type').forEach(select => {
+    select.addEventListener('change', (e) => {
+      const idx = Number(e.target.getAttribute('data-index'));
+      const row = dutyRows[idx];
+      if (!row) return;
+      row.duty_type = e.target.value || 'Invigilator';
+    });
+  });
+}
+
+function loadDutiesFromState() {
+  const tbody = document.getElementById('duty-tbody');
+  tbody.innerHTML = dutyRows.map((d, idx) => `
+    <tr>
+      <td>
+        <strong>${escapeHtml(d.room_no)}</strong>
+        <small>${escapeHtml(d.building)}</small>
+      </td>
+      <td>${Number(d.room_capacity || 0)}</td>
+      <td>${Number(d.required_invigilators || 1)}</td>
+      <td>
+        <select class="form-control duty-faculty" data-index="${idx}">
+          ${getFacultySelectOptions(d.faculty_id)}
+        </select>
+      </td>
+      <td>${escapeHtml(d.department || '-')}</td>
+      <td>
+        <select class="form-control compact-select duty-type" data-index="${idx}">
+          <option value="Chief Invigilator" ${d.duty_type === 'Chief Invigilator' ? 'selected' : ''}>Chief</option>
+          <option value="Invigilator" ${d.duty_type === 'Invigilator' ? 'selected' : ''}>Invigilator</option>
+        </select>
+      </td>
+    </tr>
+  `).join('');
+  bindRowHandlers();
 }
 
 async function allocate() {
-  const eid = document.getElementById('exam-select').value;
-  if (!eid) { showToast('Select an exam first.', 'error'); return; }
+  const eid = Number(selectedExamId || 0);
+  if (eid <= 0) { showToast('Select Exam Type, Date and Shift first.', 'error'); return; }
   if (!confirm('Auto-assign invigilation duties?')) return;
-  const res  = await fetch(API, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'allocate', exam_id: eid}) });
-  const data = await res.json();
+  const data = await apiPost({action:'allocate', exam_id: eid});
   showToast(data.message, data.success ? 'success' : 'error');
-  if (data.success) loadDuties();
+  await loadFaculty();
+  await loadDuties();
+}
+
+async function saveManualChanges() {
+  const eid = Number(selectedExamId || 0);
+  if (eid <= 0) { showToast('Select Exam Type, Date and Shift first.', 'error'); return; }
+  if (!dutyRows.length) { showToast('No duties to update.', 'error'); return; }
+
+  const facultyIds = dutyRows.map(r => Number(r.faculty_id || 0));
+  if (facultyIds.some(fid => fid <= 0)) {
+    showToast('Please select faculty for all duty rows.', 'error');
+    return;
+  }
+
+  const uniqueCount = new Set(facultyIds).size;
+  if (uniqueCount !== facultyIds.length) {
+    showToast('Same faculty cannot be assigned to multiple rooms in the same exam slot.', 'error');
+    return;
+  }
+
+  const updates = dutyRows.map(r => ({
+    duty_id: Number(r.duty_id),
+    faculty_id: Number(r.faculty_id),
+    duty_type: r.duty_type || 'Invigilator'
+  }));
+
+  const data = await apiPost({ action:'update_duties', exam_id: Number(eid), updates });
+  showToast(data.message, data.success ? 'success' : 'error');
+  if (data.success) {
+    await loadFaculty();
+    await loadDuties();
+  }
 }
 
 async function clearDuties() {
-  const eid = document.getElementById('exam-select').value;
-  if (!eid) { showToast('Select an exam first.', 'error'); return; }
+  const eid = Number(selectedExamId || 0);
+  if (eid <= 0) { showToast('Select Exam Type, Date and Shift first.', 'error'); return; }
   if (!confirm('Clear all duties for this exam?')) return;
-  const res  = await fetch(API, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'clear', exam_id: eid}) });
-  const data = await res.json();
+  const data = await apiPost({action:'clear', exam_id: eid});
   showToast(data.message, data.success ? 'success' : 'error');
-  if (data.success) loadDuties();
+  if (data.success) {
+    await loadFaculty();
+    await loadDuties();
+  }
 }
 
 function exportCSV() { exportTableToCSV('duty-table', 'invigilation.csv'); }

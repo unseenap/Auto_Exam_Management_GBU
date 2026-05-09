@@ -3,8 +3,221 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Dashboard | Exam Management</title>
 <link rel="stylesheet" href="css/style.css">
+<style>
+  .dashboard-shell {
+    display: grid;
+    gap: 18px;
+  }
+
+  .hero-strip {
+    background: linear-gradient(120deg, #113a70 0%, #1b5fa5 45%, #2d8bc7 100%);
+    color: #fff;
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 14px 34px rgba(18, 49, 98, 0.25);
+    display: grid;
+    grid-template-columns: 1.4fr auto;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .hero-strip h2 {
+    margin: 0 0 6px;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-strip p {
+    margin: 0;
+    opacity: 0.92;
+  }
+
+  .hero-time {
+    text-align: right;
+  }
+
+  .hero-time .time {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .hero-time .date {
+    font-size: 13px;
+    opacity: 0.9;
+  }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 18px;
+    align-items: start;
+  }
+
+  .quick-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+  }
+
+  .quick-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid #d7e3f2;
+    border-radius: 10px;
+    background: #f8fbff;
+    color: #184772;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+
+  .quick-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(27, 79, 132, 0.14);
+    background: #ffffff;
+  }
+
+  .notify-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #dce8f5;
+    box-shadow: 0 10px 26px rgba(18, 49, 98, 0.09);
+    overflow: hidden;
+  }
+
+  .notify-head {
+    background: #f1f7ff;
+    color: #194a76;
+    padding: 12px 14px;
+    border-bottom: 1px solid #d8e7f8;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .notify-wrap {
+    max-height: 320px;
+    height: 320px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fcff 100%);
+  }
+
+  .notify-list {
+    list-style: none;
+    margin: 0;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .notify-item {
+    border: 1px solid #deebf8;
+    border-radius: 10px;
+    background: #fff;
+    padding: 10px;
+  }
+
+  .notify-item .title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e4c78;
+    margin-bottom: 5px;
+  }
+
+  .notify-item .meta {
+    font-size: 12px;
+    color: #5f7087;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .notify-empty {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6d7f94;
+    font-size: 13px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .notify-tools {
+    padding: 12px;
+    border-top: 1px solid #d8e7f8;
+    background: #fcfeff;
+    display: none;
+    gap: 8px;
+    flex-direction: column;
+  }
+
+  .notify-tools.active {
+    display: flex;
+  }
+
+  .notify-tools input,
+  .notify-tools select,
+  .notify-tools textarea {
+    width: 100%;
+    border: 1px solid #cfe0f4;
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 13px;
+  }
+
+  .notify-tools textarea {
+    min-height: 84px;
+    resize: vertical;
+  }
+
+  .notify-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .notify-item .controls {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+
+  .dashboard-table .data-table thead {
+    background: #1f4f7f;
+  }
+
+  @media (max-width: 1100px) {
+    .hero-strip,
+    .dashboard-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .hero-time {
+      text-align: left;
+    }
+
+    .quick-actions {
+      grid-template-columns: 1fr;
+    }
+
+    .notify-wrap {
+      height: 220px;
+    }
+  }
+</style>
 </head>
 <body>
 <div class="app-wrapper">
@@ -20,8 +233,8 @@
       <a href="modules/faculty.html"><i>👨‍🏫</i> Faculty</a>
       <a href="modules/rooms.html"><i>🚪</i> Rooms</a>
       <a href="modules/schedule.html"><i>📅</i> Schedule</a>
-      <a href="modules/seating.html"><i>💺</i> Seating</a>
       <a href="modules/invigilation.html"><i>📋</i> Invigilation</a>
+      <a href="modules/seating.html"><i>💺</i> Seating</a>
       <a href="modules/attendance.html"><i>✅</i> Attendance</a>
       <a href="modules/replacement.html"><i>🔄</i> Replacement</a>
       <a href="modules/reports.html"><i>📊</i> Reports</a>
@@ -34,16 +247,17 @@
       <a href="modules/faculty.html"><i>👨‍🏫</i> Faculty</a>
       <a href="modules/rooms.html"><i>🚪</i> Rooms</a>
       <a href="modules/schedule.html"><i>📅</i> Schedule</a>
-      <a href="modules/seating.html"><i>💺</i> Seating</a>
       <a href="modules/invigilation.html"><i>📋</i> Invigilation</a>
+      <a href="modules/seating.html"><i>💺</i> Seating</a>
       <a href="modules/reports.html"><i>📊</i> Reports</a>
       <hr>
       <a href="#" onclick="logout()"><i>🚪</i> Logout</a>
     </nav>
     <nav id="faculty-nav" class="nav-links" style="display:none">
-      <a href="dashboard.html" class="active"><i>⊞</i> Dashboard</a>
-      <a href="modules/attendance.html"><i>✅</i> Attendance</a>
-      <a href="modules/replacement.html"><i>🔄</i> Replacement</a>
+      <a href="modules/faculty_portal.html" class="active"><i>⊞</i> Dashboard</a>
+      <a href="modules/faculty_portal.html?tab=duties"><i>🏠</i> My Duties</a>
+      <a href="modules/faculty_portal.html?tab=attendance"><i>✅</i> Attendance</a>
+      <a href="modules/faculty_portal.html?tab=replacement"><i>🔄</i> Replacement</a>
       <hr>
       <a href="#" onclick="logout()"><i>🚪</i> Logout</a>
     </nav>
@@ -57,54 +271,120 @@
     </header>
 
     <div class="page-body">
-      <!-- Stats Cards -->
-      <div class="stats-grid">
-        <div class="stat-card blue">
-          <div class="stat-icon">👥</div>
-          <div class="stat-info">
-            <h3 id="cnt-students">—</h3>
-            <p>Total Students</p>
+      <div class="dashboard-shell">
+        <section class="hero-strip">
+          <div>
+            <h2>Exam Operations Dashboard</h2>
+            <p>Track institutional exam readiness, staffing, rooming, and allocations from one place.</p>
           </div>
-        </div>
-        <div class="stat-card green">
-          <div class="stat-icon">👨‍🏫</div>
-          <div class="stat-info">
-            <h3 id="cnt-faculty">—</h3>
-            <p>Total Faculty</p>
+          <div class="hero-time">
+            <div class="time" id="live-time">--:--:--</div>
+            <div class="date" id="live-date">--</div>
           </div>
-        </div>
-        <div class="stat-card orange">
-          <div class="stat-icon">🚪</div>
-          <div class="stat-info">
-            <h3 id="cnt-rooms">—</h3>
-            <p>Total Rooms</p>
-          </div>
-        </div>
-        <div class="stat-card purple">
-          <div class="stat-icon">📋</div>
-          <div class="stat-info">
-            <h3 id="cnt-exams">—</h3>
-            <p>Total Exams</p>
-          </div>
-        </div>
-        <div class="stat-card red">
-          <div class="stat-icon">💺</div>
-          <div class="stat-info">
-            <h3 id="cnt-allocated">—</h3>
-            <p>Seating Allocated</p>
-          </div>
-        </div>
-      </div>
+        </section>
 
-      <!-- Recent Exams -->
-      <div class="card mt-4">
-        <div class="card-header"><h2>Upcoming / Recent Exams</h2></div>
-        <div class="card-body">
-          <table class="data-table" id="recent-table">
-            <thead><tr><th>Exam Name</th><th>Date</th><th>Session</th></tr></thead>
-            <tbody></tbody>
-          </table>
+        <div class="stats-grid">
+          <div class="stat-card blue">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+              <h3 id="cnt-students">—</h3>
+              <p>Total Students</p>
+            </div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-icon">👨‍🏫</div>
+            <div class="stat-info">
+              <h3 id="cnt-faculty">—</h3>
+              <p>Total Faculty</p>
+            </div>
+          </div>
+          <div class="stat-card orange">
+            <div class="stat-icon">🚪</div>
+            <div class="stat-info">
+              <h3 id="cnt-rooms">—</h3>
+              <p>Total Rooms</p>
+            </div>
+          </div>
+          <div class="stat-card purple">
+            <div class="stat-icon">📋</div>
+            <div class="stat-info">
+              <h3 id="cnt-exams">—</h3>
+              <p>Total Exams</p>
+            </div>
+          </div>
+          <div class="stat-card red">
+            <div class="stat-icon">💺</div>
+            <div class="stat-info">
+              <h3 id="cnt-allocated">—</h3>
+              <p>Seating Allocated</p>
+            </div>
+          </div>
         </div>
+
+        <section class="dashboard-grid">
+          <div class="card dashboard-table">
+            <div class="card-header"><h2>Upcoming / Recent Exams</h2></div>
+            <div class="card-body">
+              <table class="data-table" id="recent-table">
+                <thead><tr><th>Exam Name</th><th>Date</th><th>Session</th></tr></thead>
+                <tbody></tbody>
+              </table>
+
+              <div class="quick-actions">
+                <a class="quick-link" href="modules/schedule.html">📅 Schedule Exams</a>
+                <a class="quick-link" href="modules/seating.html">💺 Allocate Seating</a>
+                <a class="quick-link" href="modules/invigilation.html">📋 Assign Invigilation</a>
+              </div>
+            </div>
+          </div>
+
+          <aside class="notify-card">
+            <div class="notify-head row-flex">
+              <span>Exam Notifications</span>
+              <button id="notify-new-btn" class="btn btn-sm btn-primary ml-auto" style="display:none;">+ New</button>
+            </div>
+            <div class="notify-wrap" id="notify-wrap">
+              <div class="notify-empty" id="notify-empty">No exam notifications available right now.</div>
+              <ul class="notify-list" id="notify-list" style="display:none;"></ul>
+            </div>
+            <div class="notify-tools" id="notify-tools">
+              <input type="hidden" id="notify-id" value="">
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Title</label>
+                <input id="notify-title" type="text" placeholder="Notification title">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Message</label>
+                <textarea id="notify-body" placeholder="Notification details"></textarea>
+              </div>
+              <div class="row-flex" style="gap:8px; flex-wrap:wrap;">
+                <div class="form-group" style="flex:1; min-width:120px; margin-bottom:0;">
+                  <label>Priority</label>
+                  <select id="notify-priority">
+                    <option value="Normal">Normal</option>
+                    <option value="Important">Important</option>
+                    <option value="Urgent">Urgent</option>
+                  </select>
+                </div>
+                <div class="form-group" style="flex:1; min-width:120px; margin-bottom:0;">
+                  <label>Publish Date</label>
+                  <input id="notify-date" type="date">
+                </div>
+                <div class="form-group" style="flex:1; min-width:120px; margin-bottom:0;">
+                  <label>Status</label>
+                  <select id="notify-active">
+                    <option value="1">Active</option>
+                    <option value="0">Inactive</option>
+                  </select>
+                </div>
+              </div>
+              <div class="notify-actions">
+                <button class="btn btn-success" id="notify-save-btn">Save</button>
+                <button class="btn btn-secondary" id="notify-cancel-btn">Cancel</button>
+              </div>
+            </div>
+          </aside>
+        </section>
       </div>
     </div>
   </main>
@@ -114,33 +394,229 @@
 
 <script src="js/script.js"></script>
 <script>
+const NOTIFY_API = 'api/notifications.php';
+let currentRole = '';
+let notificationRows = [];
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function toDisplayDate(dateStr) {
+  if (!dateStr) return '-';
+  const normalized = String(dateStr).trim();
+  const isoDate = normalized.length >= 10 ? normalized.slice(0, 10) : normalized;
+  const d = new Date(isoDate + 'T00:00:00');
+  if (isNaN(d.getTime())) return escapeHtml(dateStr);
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById('live-time').textContent = now.toLocaleTimeString('en-GB');
+  document.getElementById('live-date').textContent = now.toLocaleDateString('en-GB', {
+    weekday: 'short', day: '2-digit', month: 'short', year: 'numeric'
+  });
+}
+
+function renderNotifications(rows) {
+  const empty = document.getElementById('notify-empty');
+  const list = document.getElementById('notify-list');
+
+  if (!Array.isArray(rows) || rows.length === 0) {
+    empty.style.display = 'flex';
+    list.style.display = 'none';
+    list.innerHTML = '';
+    return;
+  }
+
+  const source = rows.map((n) => `
+    <li class="notify-item">
+      <div class="title">${escapeHtml(n.title || 'Exam Notification')}</div>
+      <div style="font-size:12px; color:#4d6177; margin-top:5px; line-height:1.5;">${escapeHtml(n.body || '')}</div>
+      <div class="meta">
+        <span>📌 ${escapeHtml(n.priority || 'Normal')}</span>
+        <span>📅 ${toDisplayDate(n.publish_date || (n.created_at || '').slice(0, 10))}</span>
+        ${(currentRole === 'admin' && Number(n.is_active) === 0) ? '<span>Inactive</span>' : ''}
+      </div>
+      ${currentRole === 'admin' ? `
+      <div class="controls">
+        <button class="btn btn-sm btn-secondary" onclick="startEditNotification(${Number(n.notification_id)})">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteNotification(${Number(n.notification_id)})">Delete</button>
+      </div>
+      ` : ''}
+    </li>
+  `).join('');
+
+  list.innerHTML = source;
+  empty.style.display = 'none';
+  list.style.display = 'flex';
+  // Always-on auto-scroll — no hover stop
+  setupNotificationAutoScroll(document.getElementById('notify-wrap'));
+}
+
+function resetNotificationEditor() {
+  document.getElementById('notify-id').value = '';
+  document.getElementById('notify-title').value = '';
+  document.getElementById('notify-body').value = '';
+  document.getElementById('notify-priority').value = 'Normal';
+  document.getElementById('notify-date').value = '';
+  document.getElementById('notify-active').value = '1';
+}
+
+function openNotificationEditor() {
+  if (currentRole !== 'admin') return;
+  document.getElementById('notify-tools').classList.add('active');
+}
+
+function closeNotificationEditor() {
+  document.getElementById('notify-tools').classList.remove('active');
+  resetNotificationEditor();
+}
+
+function startEditNotification(id) {
+  if (currentRole !== 'admin') return;
+  const row = notificationRows.find((n) => Number(n.notification_id) === Number(id));
+  if (!row) return;
+
+  document.getElementById('notify-id').value = String(row.notification_id);
+  document.getElementById('notify-title').value = row.title || '';
+  document.getElementById('notify-body').value = row.body || '';
+  document.getElementById('notify-priority').value = row.priority || 'Normal';
+  document.getElementById('notify-date').value = row.publish_date || '';
+  document.getElementById('notify-active').value = String(Number(row.is_active || 1));
+  openNotificationEditor();
+}
+
+async function loadNotifications() {
+  try {
+    const includeInactive = currentRole === 'admin' ? '&include_inactive=1' : '';
+    const res = await fetch(`${NOTIFY_API}?action=list${includeInactive}`);
+    const data = await res.json();
+    notificationRows = data.success && Array.isArray(data.data) ? data.data : [];
+    renderNotifications(notificationRows);
+  } catch (err) {
+    notificationRows = [];
+    renderNotifications([]);
+  }
+}
+
+async function saveNotification() {
+  if (currentRole !== 'admin') return;
+
+  const notificationId = Number(document.getElementById('notify-id').value || 0);
+  const title = document.getElementById('notify-title').value.trim();
+  const body = document.getElementById('notify-body').value.trim();
+  const priority = document.getElementById('notify-priority').value;
+  const publishDate = document.getElementById('notify-date').value;
+  const isActive = Number(document.getElementById('notify-active').value || 1);
+
+  if (!title || !body) {
+    showToast('Title and message are required.', 'error');
+    return;
+  }
+
+  const payload = {
+    action: notificationId > 0 ? 'update' : 'create',
+    title,
+    body,
+    priority,
+    publish_date: publishDate,
+    is_active: isActive,
+  };
+
+  if (notificationId > 0) {
+    payload.notification_id = notificationId;
+  }
+
+  const res = await fetch(NOTIFY_API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  showToast(data.message || 'Notification saved.', data.success ? 'success' : 'error');
+  if (data.success) {
+    closeNotificationEditor();
+    await loadNotifications();
+  }
+}
+
+async function deleteNotification(id) {
+  if (currentRole !== 'admin') return;
+  if (!confirm('Delete this notification?')) return;
+
+  const res = await fetch(NOTIFY_API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'delete', notification_id: Number(id) })
+  });
+  const data = await res.json();
+  showToast(data.message || 'Notification deleted.', data.success ? 'success' : 'error');
+  if (data.success) {
+    await loadNotifications();
+  }
+}
+
 (async () => {
+  updateClock();
+  setInterval(updateClock, 1000);
+
   // Auth check
   const res  = await fetch('api/auth.php?action=check');
   const auth = await res.json();
   if (!auth.logged_in) { window.location.href = 'index.html'; return; }
 
   document.getElementById('user-label').textContent = auth.username + ' (' + auth.role + ')';
-  const role = auth.role;
+  currentRole = auth.role;
+  const role = currentRole;
+  if (role === 'faculty') {
+    window.location.href = 'modules/faculty_portal.html';
+    return;
+  }
   if (role === 'admin')     document.getElementById('admin-nav').style.display = '';
   if (role === 'exam_cell') document.getElementById('examcell-nav').style.display = '';
-  if (role === 'faculty')   document.getElementById('faculty-nav').style.display = '';
+
+  if (role === 'admin') {
+    document.getElementById('notify-new-btn').style.display = 'inline-flex';
+  }
+
+  document.getElementById('notify-new-btn').addEventListener('click', () => {
+    resetNotificationEditor();
+    openNotificationEditor();
+  });
+  document.getElementById('notify-save-btn').addEventListener('click', saveNotification);
+  document.getElementById('notify-cancel-btn').addEventListener('click', closeNotificationEditor);
+
+  // Boot chatbot now that we know the role — avoids a second auth fetch
+  addChatbotWidget(role === 'exam_cell' ? 'admin' : role);
 
   // Load stats
-  const sr   = await fetch('api/dashboard.php?action=stats');
-  const data = await sr.json();
-  if (!data.success) return;
+  try {
+    const sr = await fetch('api/dashboard.php?action=stats');
+    const data = await sr.json();
+    if (data.success) {
+      document.getElementById('cnt-students').textContent  = data.students;
+      document.getElementById('cnt-faculty').textContent   = data.faculty;
+      document.getElementById('cnt-rooms').textContent     = data.rooms;
+      document.getElementById('cnt-exams').textContent     = data.exams;
+      document.getElementById('cnt-allocated').textContent = data.allocated;
 
-  document.getElementById('cnt-students').textContent  = data.students;
-  document.getElementById('cnt-faculty').textContent   = data.faculty;
-  document.getElementById('cnt-rooms').textContent     = data.rooms;
-  document.getElementById('cnt-exams').textContent     = data.exams;
-  document.getElementById('cnt-allocated').textContent = data.allocated;
+      const tbody = document.querySelector('#recent-table tbody');
+      tbody.innerHTML = data.recent.length
+        ? data.recent.map(e => `<tr><td>${escapeHtml(e.exam_name)}</td><td>${toDisplayDate(e.date)}</td><td>${escapeHtml(e.session)}</td></tr>`).join('')
+        : '<tr><td colspan="3" class="text-center">No exams yet.</td></tr>';
+    }
+  } catch (err) {
+    // Keep dashboard functional even if stats endpoint is temporarily unavailable.
+  }
 
-  const tbody = document.querySelector('#recent-table tbody');
-  tbody.innerHTML = data.recent.length
-    ? data.recent.map(e => `<tr><td>${e.exam_name}</td><td>${e.date}</td><td>${e.session}</td></tr>`).join('')
-    : '<tr><td colspan="3" class="text-center">No exams yet.</td></tr>';
+  await loadNotifications();
 })();
 
 async function logout() {

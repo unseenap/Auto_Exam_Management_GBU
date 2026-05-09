@@ -16,8 +16,8 @@
       <a href="faculty.html"><i>👨‍🏫</i> Faculty</a>
       <a href="rooms.html"><i>🚪</i> Rooms</a>
       <a href="schedule.html"><i>📅</i> Schedule</a>
-      <a href="seating.html"><i>💺</i> Seating</a>
       <a href="invigilation.html"><i>📋</i> Invigilation</a>
+      <a href="seating.html"><i>💺</i> Seating</a>
       <a href="attendance.html" class="active"><i>✅</i> Attendance</a>
       <a href="replacement.html"><i>🔄</i> Replacement</a>
       <a href="reports.html"><i>📊</i> Reports</a>
@@ -54,6 +54,7 @@
           <div class="btn-group ml-auto">
             <button class="btn btn-success" onclick="saveAttendance()">💾 Save</button>
             <button class="btn btn-secondary" onclick="markAll('Present')">✅ Mark All Present</button>
+            <button class="btn btn-secondary" onclick="markAll('Late')">⏰ Mark All Late</button>
             <button class="btn btn-secondary" onclick="markAll('Absent')">❌ Mark All Absent</button>
             <button class="btn btn-success" onclick="exportCSV()">⬇ Export</button>
           </div>
@@ -63,11 +64,11 @@
             <thead>
               <tr>
                 <th>Seat</th><th>Roll No</th><th>Name</th><th>Branch</th>
-                <th>Present</th><th>Absent</th>
+                <th>Present</th><th>Late</th><th>Absent</th>
               </tr>
             </thead>
             <tbody id="attendance-tbody">
-              <tr><td colspan="6" class="text-center">Select exam and room.</td></tr>
+              <tr><td colspan="7" class="text-center">Select exam and room.</td></tr>
             </tbody>
           </table>
         </div>
@@ -116,7 +117,7 @@ async function loadRooms() {
     sel.appendChild(opt);
   });
   document.getElementById('attendance-tbody').innerHTML =
-    '<tr><td colspan="6" class="text-center">Select a room.</td></tr>';
+    '<tr><td colspan="7" class="text-center">Select a room.</td></tr>';
 }
 
 async function loadSheet() {
@@ -136,9 +137,10 @@ function renderSheet() {
         <tr>
           <td>${s.seat_no}</td><td>${s.roll_no}</td><td>${s.name}</td><td>${s.branch}</td>
           <td><input type="radio" name="att_${i}" value="Present" ${s.status==='Present'?'checked':''}></td>
+          <td><input type="radio" name="att_${i}" value="Late" ${s.status==='Late'?'checked':''}></td>
           <td><input type="radio" name="att_${i}" value="Absent"  ${s.status==='Absent' ?'checked':''}></td>
         </tr>`).join('')
-    : '<tr><td colspan="6" class="text-center">No students found for this exam/room.</td></tr>';
+    : '<tr><td colspan="7" class="text-center">No students found for this exam/room.</td></tr>';
 }
 
 function markAll(status) {

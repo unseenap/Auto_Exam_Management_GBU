@@ -3,91 +3,446 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Student Portal | Exam Management</title>
+<title>Student Dashboard | Exam Management</title>
 <link rel="stylesheet" href="../css/style.css">
 <style>
-.slip-card {
-  border: 2px solid var(--primary-color);
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
-  background: #fff;
-}
-.slip-card h3 {
-  color: var(--primary-color);
-  border-bottom: 1px solid #e0e0e0;
-  padding-bottom: 8px;
-  margin-bottom: 14px;
-}
-.slip-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px 20px;
-}
-.slip-field label { font-size: 0.78rem; color: #888; display: block; }
-.slip-field span  { font-weight: 600; font-size: 0.95rem; }
-@media print {
-  .sidebar, .top-bar, .no-print { display: none !important; }
-  .main-content { margin-left: 0 !important; }
-}
+  :root {
+    --dash-bg: #f4f7fb;
+    --dash-card: rgba(255, 255, 255, 0.92);
+    --dash-border: #d9e5f1;
+    --dash-text: #17324a;
+    --dash-muted: #62758a;
+    --dash-primary: #143d66;
+    --dash-accent: #0b6bcb;
+  }
+
+  body {
+    background:
+      radial-gradient(circle at top left, rgba(18, 100, 175, 0.10), transparent 26%),
+      radial-gradient(circle at top right, rgba(6, 143, 111, 0.08), transparent 22%),
+      linear-gradient(180deg, #f7faff 0%, #eef4fb 100%);
+    color: var(--dash-text);
+  }
+
+  .dashboard-shell {
+    min-height: 100vh;
+  }
+
+  .dashboard-hero {
+    display: grid;
+    grid-template-columns: 92px 1fr auto;
+    gap: 16px;
+    align-items: center;
+    padding: 18px 22px;
+    border: 1px solid rgba(215, 226, 238, 0.9);
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(20, 61, 102, 0.98), rgba(11, 107, 203, 0.92));
+    color: #fff;
+    box-shadow: 0 22px 45px rgba(16, 39, 72, 0.12);
+    margin-bottom: 18px;
+  }
+
+  .dashboard-hero img {
+    width: 82px;
+    height: 82px;
+    object-fit: contain;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+  }
+
+  .dashboard-hero h1 {
+    margin: 0;
+    font-size: 26px;
+    line-height: 1.1;
+  }
+
+  .dashboard-hero p {
+    margin: 6px 0 0;
+    font-size: 13px;
+    opacity: 0.92;
+    line-height: 1.5;
+  }
+
+  .hero-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    font-weight: 700;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 16px;
+  }
+
+  .panel-card,
+  .module-card {
+    border: 1px solid var(--dash-border);
+    border-radius: 18px;
+    background: var(--dash-card);
+    box-shadow: 0 16px 36px rgba(22, 43, 66, 0.08);
+    backdrop-filter: blur(10px);
+  }
+
+  .panel-head {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--dash-border);
+  }
+
+  .panel-head h3,
+  .panel-head h2 {
+    margin: 0;
+    color: var(--dash-primary);
+  }
+
+  .panel-body {
+    padding: 16px;
+  }
+
+  .form-group {
+    margin-bottom: 14px;
+  }
+
+  .form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--dash-primary);
+    font-size: 13px;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--dash-border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    background: #fff;
+    color: var(--dash-text);
+  }
+
+  .form-control:focus {
+    outline: none;
+    border-color: var(--dash-accent);
+    box-shadow: 0 0 0 3px rgba(11, 107, 203, 0.1);
+  }
+
+  .form-control:disabled {
+    background-color: #f0f4f8;
+    color: var(--dash-muted);
+    cursor: not-allowed;
+  }
+
+  .profile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 14px;
+  }
+
+  .profile-pill {
+    border: 1px solid #dbe6f2;
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: #fff;
+  }
+
+  .profile-pill label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--dash-muted);
+    margin-bottom: 4px;
+  }
+
+  .profile-pill span {
+    display: block;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--dash-primary);
+  }
+
+  .module-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .module-card {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 180px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .module-card::after {
+    content: '';
+    position: absolute;
+    right: -24px;
+    top: -24px;
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: rgba(11, 107, 203, 0.08);
+  }
+
+  .module-card h3 {
+    margin: 0;
+    color: var(--dash-primary);
+    font-size: 18px;
+  }
+
+  .module-card p {
+    margin: 0;
+    color: var(--dash-muted);
+    line-height: 1.5;
+    font-size: 13px;
+  }
+
+  .module-card .btn {
+    margin-top: auto;
+    align-self: flex-start;
+  }
+
+  .notify-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .notify-list::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .notify-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  .notify-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+  }
+
+  .notify-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+
+  .notify-item {
+    border: 1px solid #dbe6f2;
+    border-radius: 12px;
+    padding: 11px 12px;
+    background: #fff;
+  }
+
+  .notify-item h4 {
+    margin: 0;
+    color: var(--dash-primary);
+    font-size: 14px;
+  }
+
+  .notify-item p {
+    margin: 6px 0 0;
+    color: var(--dash-muted);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .notify-meta {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+    color: #596f87;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .sidebar-links a {
+    display: block;
+    padding: 10px 12px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+    margin-bottom: 6px;
+  }
+
+  .sidebar-links a.active,
+  .sidebar-links a:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+  }
+
+  @media (max-width: 1100px) {
+    .dashboard-grid,
+    .module-grid,
+    .dashboard-hero,
+    .profile-grid {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>
 </head>
 <body>
-<div class="app-wrapper">
+<div class="app-wrapper dashboard-shell">
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-header"><h2>Exam System</h2><p id="user-label"></p></div>
-    <nav class="nav-links">
+    <div class="sidebar-header">
+      <h2>Exam System</h2>
+      <p id="user-label"></p>
+    </div>
+    <nav class="nav-links sidebar-links">
       <a href="student_portal.html" class="active"><i>🏠</i> Home</a>
-      <a href="#schedule-section"><i>📅</i> Exam Schedule</a>
-      <a href="#seating-section"><i>💺</i> Seating Slip</a>
+      <a href="student_datesheet.html"><i>📅</i> Datesheet</a>
+      <a href="student_seating_slip.html"><i>💺</i> Seating Slip</a>
+      <a href="student_admit_card.html"><i>🪪</i> Admit Card</a>
       <hr>
       <a href="#" onclick="logout()"><i>🚪</i> Logout</a>
     </nav>
   </aside>
+
   <main class="main-content">
-    <header class="top-bar">
-      <button onclick="toggleSidebar()" class="menu-btn">☰</button>
-      <h1>Student Portal</h1>
-      <div class="top-actions no-print">
-        <button class="btn btn-secondary" onclick="window.print()">🖨 Print Seating Slip</button>
+    <header class="dashboard-hero">
+      <img src="../logo.jpeg" alt="University logo">
+      <div>
+        <h1>Student Dashboard</h1>
+        <p>Use the module links to open your datesheet, seating slip, and admit card. This page shows your profile and the latest exam notifications from admin.</p>
       </div>
+      <div class="hero-chip" id="hero-chip">Loading profile...</div>
     </header>
+
     <div class="page-body">
-
-      <!-- Student Info Banner -->
-      <div class="card mb-4" id="info-card" style="display:none">
-        <div class="card-body">
-          <div class="slip-grid">
-            <div class="slip-field"><label>Roll Number</label><span id="s-roll"></span></div>
-            <div class="slip-field"><label>Full Name</label><span id="s-name"></span></div>
-            <div class="slip-field"><label>Branch</label><span id="s-branch"></span></div>
-            <div class="slip-field"><label>Semester</label><span id="s-sem"></span></div>
+      <div class="dashboard-grid mb-4">
+        <section class="panel-card">
+          <div class="panel-head" style="display: flex; justify-content: space-between; align-items: center;"><h2>Student Profile</h2><button class="btn btn-sm btn-primary" onclick="showProfileSection()">Edit Profile</button></div>
+          <div class="panel-body">
+            <div class="profile-grid" id="profile-grid">
+              <div class="profile-pill"><label>Username / Mail ID</label><span id="s-username">-</span></div>
+              <div class="profile-pill"><label>Roll Number / Enrollment No.</label><span id="s-roll">-</span></div>
+              <div class="profile-pill"><label>Enrollment Number</label><span id="s-enrollment-number">1234</span></div>
+              <div class="profile-pill"><label>Batch</label><span id="s-session">-</span></div>
+              <div class="profile-pill"><label>Branch</label><span id="s-branch">-</span></div>
+              <div class="profile-pill"><label>Year</label><span id="s-year">-</span></div>
+              <div class="profile-pill"><label>Semester</label><span id="s-sem">-</span></div>
+              <div class="profile-pill"><label>Father Name</label><span id="s-father">-</span></div>
+              <div class="profile-pill"><label>Mobile</label><span id="s-mobile">-</span></div>
+              <div class="profile-pill"><label>Address</label><span id="s-address">-</span></div>
+              <div class="profile-pill"><label>School</label><span id="s-school">-</span></div>
+              <div class="profile-pill"><label>Student ID</label><span id="s-id">-</span></div>
+            </div>
           </div>
-        </div>
+        </section>
+
+        <section class="panel-card">
+          <div class="panel-head"><h3>Exam Notifications</h3></div>
+          <div class="panel-body">
+            <div class="notify-list" id="student-notification-list">
+              <div class="text-muted">Loading notifications...</div>
+            </div>
+          </div>
+        </section>
       </div>
 
-      <!-- Exam Schedule -->
-      <div class="card mb-4" id="schedule-section">
-        <div class="card-header"><h2>Exam Schedule</h2></div>
-        <div class="card-body">
-          <table class="data-table">
-            <thead>
-              <tr><th>Exam Name</th><th>Subject</th><th>Date</th><th>Session</th><th>Start</th><th>End</th></tr>
-            </thead>
-            <tbody id="schedule-tbody">
-              <tr><td colspan="6" class="text-center">Loading...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <!-- PROFILE SECTION (Hidden by default) -->
+      <div class="dashboard-grid mb-4" id="profile-section-container" style="display: none;">
+        <section class="panel-card">
+          <div class="panel-head"><h2>Edit Profile</h2></div>
+          <div class="panel-body">
+            <form onsubmit="updateStudentProfile(event)">
+              <div class="form-group">
+                <label for="std-username">Username / Mail ID (Read-only)</label>
+                <input type="text" id="std-username" class="form-control" disabled>
+              </div>
+              <div class="form-group">
+                <label for="std-roll">Roll Number(Read-only)</label>
+                <input type="text" id="std-roll" class="form-control" disabled>
+              </div>
+              <div class="form-group">
+                <label for="std-enrollment-number">Enrollment Number (Optional)</label>
+                <input type="text" id="std-enrollment-number" class="form-control" value="1234">
+              </div>
+              <div class="form-group">
+                <label for="std-batch">Batch (Read-only)</label>
+                <input type="text" id="std-batch" class="form-control" disabled>
+              </div>
+              <div class="form-group">
+                <label for="std-branch">Branch (Read-only)</label>
+                <input type="text" id="std-branch" class="form-control" disabled>
+              </div>
+              <div class="form-group">
+                <label for="std-school">School (Read-only)</label>
+                <input type="text" id="std-school" class="form-control" disabled>
+              </div>
+              <div class="form-group">
+                <label for="std-name">Name</label>
+                <input type="text" id="std-name" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="std-sem">Semester (Read-only)</label>
+                <input type="text" id="std-sem" class="form-control" disabled>
+              </div>
+              <div class="form-group">
+                <label for="std-father">Father Name</label>
+                <input type="text" id="std-father" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="std-mobile">Mobile</label>
+                <input type="text" id="std-mobile" class="form-control">
+              </div>
+              <div class="form-group full">
+                <label for="std-address">Address</label>
+                <textarea id="std-address" class="form-control" rows="3"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="std-email">Email</label>
+                <input type="email" id="std-email" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="std-phone">Phone</label>
+                <input type="text" id="std-phone" class="form-control">
+              </div>
+              <button class="btn btn-primary" type="submit" style="width: 100%;">Update Profile</button>
+            </form>
+          </div>
+        </section>
 
-      <!-- Seating Slips -->
-      <div id="seating-section">
-        <h2 class="mb-3">My Seating Slips</h2>
-        <div id="slips-container">
-          <p class="text-center text-muted">Loading...</p>
-        </div>
+        <section class="panel-card">
+          <div class="panel-head"><h2>Change Password</h2></div>
+          <div class="panel-body">
+            <form onsubmit="changeStudentPassword(event)">
+              <div class="form-group">
+                <label for="std-oldpwd">Current Password</label>
+                <input type="password" id="std-oldpwd" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="std-newpwd">New Password</label>
+                <input type="password" id="std-newpwd" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="std-confirmpwd">Confirm New Password</label>
+                <input type="password" id="std-confirmpwd" class="form-control" required>
+              </div>
+              <button class="btn btn-primary" type="submit" style="width: 100%;">Change Password</button>
+            </form>
+          </div>
+        </section>
       </div>
+      <button class="btn btn-secondary" id="back-to-home-btn" onclick="hideProfileSection()" style="display: none; margin-bottom: 16px;">← Back to Home</button>
 
     </div>
   </main>
@@ -96,70 +451,226 @@
 <div id="toast" class="toast"></div>
 <script src="../js/script.js"></script>
 <script>
-const API = '../api/student.php';
+const NOTIFY_API = '../api/notifications.php';
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+async function loadNotifications() {
+  const box = document.getElementById('student-notification-list');
+  try {
+    const res = await fetch(NOTIFY_API + '?action=list');
+    const data = await res.json();
+
+    if (!data.success || !Array.isArray(data.data) || !data.data.length) {
+      box.innerHTML = '<div class="text-muted">No exam notifications available right now.</div>';
+      return;
+    }
+
+    box.innerHTML = data.data.map((n) => `
+      <article class="notify-item">
+        <h4>${escapeHtml(n.title)}</h4>
+        <p>${escapeHtml(n.body)}</p>
+        <div class="notify-meta">
+          <span>${escapeHtml(n.priority || 'Normal')}</span>
+          <span>${escapeHtml(n.publish_date || n.created_at || '-')}</span>
+        </div>
+      </article>
+    `).join('');
+    
+    // Always-on auto-scroll — defined in script.js
+    setupNotificationAutoScroll(box);
+  } catch (err) {
+    box.innerHTML = '<div class="text-muted">Unable to load notifications right now.</div>';
+  }
+}
+
 
 (async () => {
-  const res  = await fetch('../api/auth.php?action=check');
+  const res = await fetch('../api/auth.php?action=check');
   const auth = await res.json();
   if (!auth.logged_in || auth.role !== 'student') {
-    window.location.href = '../index.html'; return;
+    window.location.href = '../index.html';
+    return;
   }
+
   document.getElementById('user-label').textContent = auth.username + ' (Student)';
+  document.getElementById('hero-chip').textContent = auth.username;
 
-  const [infoR, schedR, seatR] = await Promise.all([
-    fetch(API + '?action=info').then(r => r.json()),
-    fetch(API + '?action=schedule').then(r => r.json()),
-    fetch(API + '?action=seating').then(r => r.json()),
-  ]);
+  // Boot chatbot with known role
+  addChatbotWidget('student');
 
-  // Student info
-  if (infoR.success && infoR.data) {
-    const s = infoR.data;
-    document.getElementById('info-card').style.display = '';
-    document.getElementById('s-roll').textContent   = s.roll_no;
-    document.getElementById('s-name').textContent   = s.name;
-    document.getElementById('s-branch').textContent = s.branch;
-    document.getElementById('s-sem').textContent    = s.semester;
+  const info = await fetch('../api/student.php?action=info').then((r) => r.json());
+  if (info.success && info.data) {
+    const s = info.data;
+    document.getElementById('s-username').textContent = s.username || '-';
+    document.getElementById('s-roll').textContent = s.enrollment_no || s.roll_no || '-';
+    document.getElementById('s-enrollment-number').textContent = s.enrollment_number || '1234';
+    document.getElementById('s-branch').textContent = s.branch || '-';
+    document.getElementById('s-year').textContent = s.year_label || ('Year ' + Math.ceil((Number(s.semester || 0) || 0) / 2) || '-');
+    document.getElementById('s-sem').textContent = s.semester || '-';
+    document.getElementById('s-session').textContent = s.session_label || '-';
+    document.getElementById('s-father').textContent = s.father_name || '-';
+    document.getElementById('s-mobile').textContent = s.mobile || '-';
+    document.getElementById('s-address').textContent = s.address || '-';
+    document.getElementById('s-school').textContent = s.school || '-';
+    document.getElementById('s-id').textContent = s.student_id || '-';
   }
 
-  // Schedule
-  const stb = document.getElementById('schedule-tbody');
-  stb.innerHTML = schedR.data && schedR.data.length
-    ? schedR.data.map(e => `
-        <tr>
-          <td>${e.exam_name}</td><td>${e.subject_name||'-'}</td>
-          <td>${e.exam_date||'-'}</td><td>${e.session}</td>
-          <td>${e.start_time||'-'}</td><td>${e.end_time||'-'}</td>
-        </tr>`).join('')
-    : '<tr><td colspan="6" class="text-center">No exams scheduled.</td></tr>';
-
-  // Seating slips
-  const sc = document.getElementById('slips-container');
-  if (seatR.data && seatR.data.length) {
-    sc.innerHTML = seatR.data.map(s => `
-      <div class="slip-card">
-        <h3>📋 ${s.exam_name} — ${s.date}</h3>
-        <div class="slip-grid">
-          <div class="slip-field"><label>Student Name</label><span>${s.name}</span></div>
-          <div class="slip-field"><label>Roll Number</label><span>${s.roll_no}</span></div>
-          <div class="slip-field"><label>Branch / Semester</label><span>${s.branch} — Sem ${s.semester}</span></div>
-          <div class="slip-field"><label>Subject</label><span>${s.subject_name||'-'}</span></div>
-          <div class="slip-field"><label>Room</label><span>${s.room_no} (${s.building})</span></div>
-          <div class="slip-field"><label>Seat No / Row</label><span>${s.seat_no} / Row ${s.row_no}</span></div>
-          <div class="slip-field"><label>Start Time</label><span>${s.start_time||'-'}</span></div>
-          <div class="slip-field"><label>End Time</label><span>${s.end_time||'-'}</span></div>
-        </div>
-      </div>`).join('');
-  } else {
-    sc.innerHTML = '<p class="text-center text-muted">No seating allocated yet.</p>';
-  }
+  await loadNotifications();
 })();
 
 async function logout() {
-  await fetch('../api/auth.php', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'logout'}) });
+  await fetch('../api/auth.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'logout' })
+  });
   window.location.href = '../index.html';
 }
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+
+function showProfileSection() {
+  document.querySelector('.dashboard-grid.mb-4').style.display = 'none';
+  document.getElementById('profile-section-container').style.display = 'grid';
+  document.getElementById('back-to-home-btn').style.display = 'inline-block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  loadStudentProfile();
+}
+
+function hideProfileSection() {
+  document.querySelector('.dashboard-grid.mb-4').style.display = 'grid';
+  document.getElementById('profile-section-container').style.display = 'none';
+  document.getElementById('back-to-home-btn').style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function loadStudentProfile() {
+  try {
+    const res = await fetch('../api/student.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'get_profile' })
+    });
+    
+    const data = await res.json();
+    if (!data.success || !data.data) {
+      showToast('Unable to load profile', 'error');
+      return;
+    }
+    
+    const profile = data.data;
+    document.getElementById('std-name').value = profile.name || '';
+    document.getElementById('std-username').value = profile.username || '';
+    document.getElementById('std-roll').value = profile.enrollment_no || profile.roll_no || '';
+    document.getElementById('std-enrollment-number').value = profile.enrollment_number || '1234';
+    document.getElementById('std-school').value = profile.school || '';
+    document.getElementById('std-branch').value = profile.branch || '';
+    document.getElementById('std-batch').value = profile.batch_label || profile.session_label || '';
+    document.getElementById('std-sem').value = profile.semester || '';
+    document.getElementById('std-father').value = profile.father_name || '';
+    document.getElementById('std-mobile').value = profile.mobile || '';
+    document.getElementById('std-address').value = profile.address || '';
+    document.getElementById('std-email').value = profile.email || '';
+    document.getElementById('std-phone').value = profile.phone || '';
+  } catch (err) {
+    showToast('Error loading profile: ' + err.message, 'error');
+  }
+}
+
+async function updateStudentProfile(e) {
+  e.preventDefault();
+  
+  const name = document.getElementById('std-name').value.trim();
+  const enrollmentNumber = document.getElementById('std-enrollment-number').value.trim() || '1234';
+  const fatherName = document.getElementById('std-father').value.trim();
+  const mobile = document.getElementById('std-mobile').value.trim();
+  const address = document.getElementById('std-address').value.trim();
+  const email = document.getElementById('std-email').value.trim();
+  const phone = document.getElementById('std-phone').value.trim();
+  
+  if (!name) {
+    showToast('Name is required', 'error');
+    return;
+  }
+  
+  try {
+    const res = await fetch('../api/student.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'update_profile',
+        name,
+        enrollment_number: enrollmentNumber,
+        father_name: fatherName,
+        mobile,
+        address,
+        email,
+        phone
+      })
+    });
+    
+    const data = await res.json();
+    showToast(data.message || 'Profile updated', data.success ? 'success' : 'error');
+    if (data.success) {
+      await loadStudentProfile();
+    }
+  } catch (err) {
+    showToast('Error updating profile: ' + err.message, 'error');
+  }
+}
+
+async function changeStudentPassword(e) {
+  e.preventDefault();
+  
+  const oldPassword = document.getElementById('std-oldpwd').value;
+  const newPassword = document.getElementById('std-newpwd').value;
+  const confirmPassword = document.getElementById('std-confirmpwd').value;
+  
+  if (!oldPassword || !newPassword || !confirmPassword) {
+    showToast('All password fields are required', 'error');
+    return;
+  }
+  
+  if (newPassword !== confirmPassword) {
+    showToast('New passwords do not match', 'error');
+    return;
+  }
+  
+  if (newPassword.length < 6) {
+    showToast('Password must be at least 6 characters', 'error');
+    return;
+  }
+  
+  try {
+    const res = await fetch('../api/student.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'change_password',
+        old_password: oldPassword,
+        new_password: newPassword,
+        confirm_password: confirmPassword
+      })
+    });
+    
+    const data = await res.json();
+    showToast(data.message || 'Password changed', data.success ? 'success' : 'error');
+    if (data.success) {
+      document.getElementById('std-oldpwd').value = '';
+      document.getElementById('std-newpwd').value = '';
+      document.getElementById('std-confirmpwd').value = '';
+    }
+  } catch (err) {
+    showToast('Error changing password: ' + err.message, 'error');
+  }
+}
+
 </script>
 </body>
 </html>

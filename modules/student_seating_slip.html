@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seating Slip | Student Portal</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  .page-wrap { min-height: 100vh; }
+  .module-shell { border: 1px solid #d9e5f1; border-radius: 18px; background: rgba(255,255,255,0.94); box-shadow: 0 16px 36px rgba(22,43,66,.08); }
+  .module-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:18px 20px; border-bottom:1px solid #e5edf5; }
+  .module-head h1 { margin:0; font-size:24px; color:#143d66; }
+  .module-head p { margin:4px 0 0; color:#62758a; font-size:13px; }
+  .slip-card { border:2px solid var(--primary-color); border-radius:14px; padding:18px; margin-top:16px; background:#fff; box-shadow:0 8px 22px rgba(18,49,79,0.06); }
+  .slip-header { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; border-bottom:1px solid #e0e0e0; padding-bottom:10px; margin-bottom:14px; }
+  .slip-header h3 { color:var(--primary-color); margin:0; }
+  .slip-header .subline { margin-top:4px; font-size:12px; color:#6c7c8f; }
+  .slip-badge { display:inline-flex; align-items:center; padding:6px 10px; border-radius:999px; background:#e7f3ff; color:#0f4d87; font-weight:800; font-size:11px; white-space:nowrap; }
+  .slip-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px 16px; }
+  .slip-field label { font-size:0.78rem; color:#888; display:block; }
+  .slip-field span { font-weight:600; font-size:0.95rem; }
+  .room-matrix-preview { border:1px solid #d8e4f1; border-radius:12px; background:#fff; padding:12px; margin-top:12px; }
+  .room-matrix-head { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:10px; }
+  .room-matrix-head strong { color:#153656; }
+  .room-matrix-grid { display:grid; gap:6px; }
+  .room-matrix-cell { min-height:48px; border:1px solid #cfdced; border-radius:8px; padding:6px; background:#f8fbff; font-size:11px; color:#3d4c5f; }
+  .room-matrix-cell.mine { background:#dff2ff; border-color:#7cb8e6; font-weight:800; color:#0f3860; }
+  .room-matrix-cell.blocked { background:#f3f5f8; border-style:dashed; color:#7a8795; }
+  .slip-filter { display:flex; gap:10px; align-items:center; justify-content:flex-end; margin-bottom:14px; flex-wrap:wrap; }
+  .slip-filter label { font-size:12px; font-weight:700; color:#153656; }
+  .slip-filter select { min-width: 240px; }
+  @media (max-width: 1050px) { .slip-grid { grid-template-columns:1fr; } .slip-header { flex-direction:column; } }
+</style>
+</head>
+<body>
+<div class="app-wrapper page-wrap">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header"><h2>Exam System</h2><p id="user-label"></p></div>
+    <nav class="nav-links">
+      <a href="student_portal.html"><i>🏠</i> Home</a>
+      <a href="student_datesheet.html"><i>📅</i> Datesheet</a>
+      <a href="student_seating_slip.html" class="active"><i>💺</i> Seating Slip</a>
+      <a href="student_admit_card.html"><i>🪪</i> Admit Card</a>
+      <hr>
+      <a href="#" onclick="logout()"><i>🚪</i> Logout</a>
+    </nav>
+  </aside>
+  <main class="main-content">
+    <header class="top-bar">
+      <button onclick="toggleSidebar()" class="menu-btn">☰</button>
+      <h1>Seating Slip</h1>
+      <div class="top-actions no-print">
+        <a class="btn btn-secondary" href="student_portal.html">Home</a>
+        <button class="btn btn-secondary" onclick="window.print()">Print</button>
+      </div>
+    </header>
+    <div class="page-body">
+      <div class="module-shell">
+        <div class="module-head">
+          <div>
+            <h1>My Seating Slips</h1>
+            <p>Room, seat, and matrix preview for your allocated exam seat.</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="slip-filter">
+            <label for="slip-date-filter">Show date</label>
+            <select id="slip-date-filter">
+              <option value="">All dates</option>
+            </select>
+          </div>
+          <div id="slips-container"><p class="text-center text-muted">Loading...</p></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<div id="toast" class="toast"></div>
+<script src="../js/script.js"></script>
+<script>
+function escapeHtml(value) { return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+function formatDateKey(value) { return String(value || '').slice(0, 10); }
+function formatDateLabel(value) {
+  const date = new Date(value + 'T00:00:00');
+  if (Number.isNaN(date.getTime())) return value || '-';
+  return new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
+}
+async function logout() {
+  await fetch('../api/auth.php', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'logout'}) });
+  window.location.href = '../index.html';
+}
+async function fetchJson(url, fallbackMessage) {
+  const response = await fetch(url);
+  const text = await response.text();
+  let data = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (error) {
+    throw new Error(fallbackMessage);
+  }
+  if (!response.ok || data.success === false) {
+    throw new Error(data.message || fallbackMessage);
+  }
+  return data;
+}
+function parseBlockedSeats(value) {
+  try { const parsed = JSON.parse(value || '[]'); return Array.isArray(parsed) ? parsed.map(item => String(item || '').toUpperCase()) : []; } catch (err) { return []; }
+}
+function renderRoomMatrixPreview(entry) {
+  const matrixRows = Number.parseInt(entry.matrix_rows || 0, 10);
+  const matrixCols = Number.parseInt(entry.matrix_cols || 0, 10);
+  if (!matrixRows || !matrixCols) return '<div class="room-matrix-preview"><div class="room-matrix-head"><strong>Seat Preview</strong><span>No room matrix configured</span></div></div>';
+  const blockedSeats = new Set(parseBlockedSeats(entry.blocked_seats_json));
+  const seatNo = Number.parseInt(entry.seat_no || 0, 10);
+  const cells = [];
+  for (let rowNo = 1; rowNo <= matrixRows; rowNo++) {
+    for (let colNo = 1; colNo <= matrixCols; colNo++) {
+      const currentSeatNo = ((colNo - 1) * matrixRows) + rowNo;
+      const seatKey = `R${rowNo}C${colNo}`;
+      const isMine = currentSeatNo === seatNo;
+      const isBlocked = blockedSeats.has(seatKey);
+      cells.push(`<div class="room-matrix-cell ${isMine ? 'mine' : ''} ${isBlocked ? 'blocked' : ''}"><div>Seat ${currentSeatNo}</div><div>${isMine ? 'Your seat' : (isBlocked ? 'Blocked' : '&nbsp;')}</div></div>`);
+    }
+  }
+  return `<div class="room-matrix-preview"><div class="room-matrix-head"><strong>${escapeHtml(entry.room_no || '-')} ${entry.building ? '(' + escapeHtml(entry.building) + ')' : ''}</strong><span>${matrixRows} x ${matrixCols} matrix</span></div><div class="room-matrix-grid" style="grid-template-columns: repeat(${matrixCols}, minmax(0, 1fr));">${cells.join('')}</div></div>`;
+}
+
+function renderWhiteboardInfo(entry) {
+  const area = String(entry.whiteboard_area || '').trim();
+  const label = area ? area.charAt(0).toUpperCase() + area.slice(1) : '-';
+  return `<div class="room-matrix-preview"><div class="room-matrix-head"><strong>Whiteboard</strong><span>${escapeHtml(label)}</span></div></div>`;
+}
+
+function renderSlips(entries) {
+  const filter = document.getElementById('slip-date-filter');
+  const selectedDate = filter ? filter.value : '';
+  const visibleEntries = selectedDate ? entries.filter((entry) => formatDateKey(entry.exam_date || entry.date || '') === selectedDate) : entries;
+
+  const sc = document.getElementById('slips-container');
+  if (!visibleEntries.length) {
+    sc.innerHTML = '<p class="text-center text-muted">No seating allocation found for the selected date.</p>';
+    return;
+  }
+
+  sc.innerHTML = visibleEntries.map((s) => `
+      <div class="slip-card">
+        <div class="slip-header">
+          <div>
+            <h3>${escapeHtml(s.subject_name || s.exam_name || 'Seating Slip')}</h3>
+            <div class="subline">${escapeHtml(s.subject_code || '')}${s.subject_code ? ' · ' : ''}${escapeHtml(s.exam_date || s.date || '-')}</div>
+          </div>
+          <span class="slip-badge">Seat ${escapeHtml(s.seat_no || '-')} / Row ${escapeHtml(s.row_no || '-')}</span>
+        </div>
+        <div class="slip-grid">
+          <div class="slip-field"><label>Student Name</label><span>${escapeHtml(s.name)}</span></div>
+          <div class="slip-field"><label>Roll Number</label><span>${escapeHtml(s.roll_no)}</span></div>
+          <div class="slip-field"><label>Branch / Semester</label><span>${escapeHtml((s.branch || '-') + ' - Sem ' + (s.semester || '-'))}</span></div>
+          <div class="slip-field"><label>Subject / Exam Name</label><span>${escapeHtml(s.subject_name || s.exam_name || '-')}</span>${s.subject_code ? `<div class="subline">${escapeHtml(s.subject_code)}</div>` : ''}</div>
+          <div class="slip-field"><label>Room</label><span>${escapeHtml((s.room_no || '-') + ' (' + (s.building || '-') + ')')}</span></div>
+          <div class="slip-field"><label>Seat No / Row</label><span>${escapeHtml((s.seat_no || '-') + ' / Row ' + (s.row_no || '-'))}</span></div>
+        </div>
+        ${renderWhiteboardInfo(s)}
+        ${renderRoomMatrixPreview(s)}
+      </div>
+    `).join('');
+}
+
+(async () => {
+  try {
+    const auth = await fetchJson('../api/auth.php?action=check', 'Unable to verify your session. Please log in again.');
+    if (!auth.logged_in || auth.role !== 'student') { window.location.href = '../index.html'; return; }
+    document.getElementById('user-label').textContent = auth.username + ' (Student)';
+    addChatbotWidget('student');
+    const seatR = await fetchJson('../api/student.php?action=seating', 'Unable to load seating slips right now.');
+    const slips = Array.isArray(seatR.data) ? seatR.data : [];
+    const dateFilter = document.getElementById('slip-date-filter');
+
+    if (slips.length) {
+      const dates = [...new Set(slips.map((entry) => formatDateKey(entry.exam_date || entry.date || '')).filter(Boolean))].sort();
+      dateFilter.innerHTML = '<option value="">All dates</option>' + dates.map((dateKey) => `<option value="${escapeHtml(dateKey)}">${escapeHtml(formatDateLabel(dateKey))}</option>`).join('');
+      dateFilter.addEventListener('change', () => renderSlips(slips));
+      renderSlips(slips);
+    } else {
+      document.getElementById('slips-container').innerHTML = '<p class="text-center text-muted">No seating allocated yet.</p>';
+    }
+  } catch (error) {
+    document.getElementById('slips-container').innerHTML = '<p class="text-center text-danger">' + escapeHtml(error.message || 'Unable to load seating slips right now.') + '</p>';
+  }
+})();
+</script>
+</body>
+</html>

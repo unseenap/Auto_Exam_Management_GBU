@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<title>My Duties | Faculty Portal</title>
+<link rel="stylesheet" href="../css/style.css?v=2">
+<style>
+:root {
+  --fp-primary: #2563eb;
+  --fp-primary-dark: #1d4ed8;
+  --fp-primary-light: #eff6ff;
+  --fp-bg: #f1f5f9;
+  --fp-card: #ffffff;
+  --fp-border: #e2e8f0;
+  --fp-text: #1e293b;
+  --fp-muted: #64748b;
+  --fp-radius: 12px;
+  --fp-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.06);
+  --fp-shadow-lg: 0 8px 32px rgba(37,99,235,0.10), 0 2px 8px rgba(0,0,0,0.08);
+}
+body { background: var(--fp-bg); color: var(--fp-text); }
+
+/* ── Hero ── */
+.fp-hero {
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #0ea5e9 100%);
+  border-radius: var(--fp-radius);
+  padding: 28px 32px;
+  color: #fff;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--fp-shadow-lg);
+}
+.fp-hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 260px; height: 260px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+}
+.fp-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -80px; left: 30%;
+  width: 320px; height: 320px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+}
+.fp-hero-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+}
+.fp-hero-name  { font-size: 26px; font-weight: 700; line-height: 1.2; margin-bottom: 4px; }
+.fp-hero-meta  { font-size: 13px; opacity: 0.85; display: flex; gap: 16px; flex-wrap: wrap; }
+.fp-hero-badge {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+}
+.fp-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  position: relative;
+  z-index: 1;
+}
+.fp-kpi {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 10px;
+  padding: 14px 16px;
+  backdrop-filter: blur(6px);
+  transition: background 0.2s;
+}
+.fp-kpi:hover { background: rgba(255,255,255,0.18); }
+.fp-kpi-val { font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+.fp-kpi-lbl { font-size: 11px; opacity: 0.82; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* ── Cards ── */
+.fp-card {
+  background: var(--fp-card);
+  border-radius: var(--fp-radius);
+  box-shadow: var(--fp-shadow);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.fp-card-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--fp-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.fp-card-header h2 { font-size: 15px; font-weight: 600; color: var(--fp-text); margin: 0; }
+.fp-card-body { padding: 20px; }
+
+/* ── Empty state ── */
+.fp-empty { text-align: center; padding: 48px 20px; color: var(--fp-muted); }
+.fp-empty-icon { font-size: 44px; margin-bottom: 12px; }
+.fp-empty p { font-size: 14px; }
+
+/* ── Active sidebar link ── */
+.sidebar .nav-links a.active {
+  background: linear-gradient(90deg, rgba(37,99,235,0.28) 0%, rgba(37,99,235,0.10) 100%);
+  color: #fff;
+  border-left-color: #60a5fa;
+  font-weight: 600;
+}
+/* ── Force sidebar nav into strict vertical source order ── */
+.sidebar .nav-links {
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+}
+.sidebar .nav-links a,
+.sidebar .nav-links hr {
+  order: unset !important;
+  float: none !important;
+  position: static !important;
+}
+
+/* ── Two-column layout ── */
+.fp-two-col {
+  display: grid;
+  grid-template-columns: 1.4fr 0.6fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* ── Notification scroll box ── */
+.notif-scroll-box {
+  height: 420px;
+  overflow: hidden;
+  position: relative;
+}
+.notif-scroll-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.notif-card-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--fp-border);
+}
+.notif-card-item:last-child { border-bottom: none; }
+.notif-card-item h4 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fp-text);
+}
+.notif-card-item p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--fp-muted);
+  line-height: 1.45;
+}
+.notif-card-meta {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #94a3b8;
+  display: flex;
+  gap: 10px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1200px) { .fp-two-col { grid-template-columns: 1fr; } }
+@media (max-width: 1100px) { .fp-kpi-row { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px)  { .fp-hero { padding: 20px 18px; } .fp-hero-name { font-size: 20px; } .fp-kpi-row { grid-template-columns: repeat(2, 1fr); } .fp-kpi-val { font-size: 22px; } }
+@media (max-width: 480px)  { .fp-kpi-row { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Exam System</h2>
+      <p id="user-label">Loading...</p>
+    </div>
+    <nav class="nav-links" data-nav="faculty">
+      <a href="faculty_portal.html"      class="active"><i>&#128197;</i> My Duties</a>
+      <a href="faculty_attendance.html"            ><i>&#9989;</i> Digital Attendance</a>
+      <a href="faculty_replacement.html"           ><i>&#128260;</i> Replacement Requests</a>
+      <a href="faculty_profile.html"               ><i>&#128100;</i> My Profile</a>
+      <hr>
+      <a href="#" onclick="doLogout(); return false;"><i>&#128682;</i> Logout</a>
+    </nav>
+  </aside>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <main class="main-content">
+    <header class="top-bar">
+      <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('collapsed')" aria-label="Toggle sidebar">&#9776;</button>
+      <h1>My Duties</h1>
+      <div class="top-actions">
+        <button class="btn btn-secondary btn-sm" onclick="loadDuties()">&#8635; Refresh</button>
+      </div>
+    </header>
+
+    <div class="page-body">
+
+      <!-- Hero Banner -->
+      <div class="fp-hero">
+        <div class="fp-hero-top">
+          <div>
+            <div class="fp-hero-name" id="hero-name">Loading...</div>
+            <div class="fp-hero-meta">
+              <span>&#127963; <span id="hero-dept">&#8212;</span></span>
+              <span>&#127891; <span id="hero-desig">&#8212;</span></span>
+              <span>&#9993; <span id="hero-email">&#8212;</span></span>
+            </div>
+          </div>
+          <div class="fp-hero-badge" id="hero-badge">Faculty</div>
+        </div>
+        <div class="fp-kpi-row">
+          <div class="fp-kpi">
+            <div class="fp-kpi-val" id="kpi-duties">&#8212;</div>
+            <div class="fp-kpi-lbl">Total Duties</div>
+          </div>
+          <div class="fp-kpi">
+            <div class="fp-kpi-val" id="kpi-pending">&#8212;</div>
+            <div class="fp-kpi-lbl">Pending Replacements</div>
+          </div>
+          <div class="fp-kpi">
+            <div class="fp-kpi-val" id="kpi-approved">&#8212;</div>
+            <div class="fp-kpi-lbl">Approved Replacements</div>
+          </div>
+          <div class="fp-kpi">
+            <div class="fp-kpi-val" id="kpi-notifications">&#8212;</div>
+            <div class="fp-kpi-lbl">Exam Notifications</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-column: Duties + Notification Board -->
+      <div class="fp-two-col">
+
+        <!-- Duties Table -->
+        <div class="fp-card">
+          <div class="fp-card-header">
+            <h2>&#128203; My Invigilation Duties</h2>
+            <button class="btn btn-primary btn-sm" onclick="loadDuties()">&#8635; Refresh</button>
+          </div>
+          <div class="fp-card-body" style="padding:0; overflow-x:auto;">
+            <table class="data-table" id="duties-table">
+              <thead>
+                <tr>
+                  <th>Exam Name</th>
+                  <th>Date</th>
+                  <th>Session</th>
+                  <th>Room No</th>
+                  <th>Building</th>
+                  <th>Duty Type</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="duties-tbody">
+                <tr><td colspan="7" class="text-center text-muted" style="padding:32px;">Loading duties...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Exam Notification Board -->
+        <div class="fp-card">
+          <div class="fp-card-header">
+            <h2>&#128276; Exam Notifications</h2>
+          </div>
+          <div class="fp-card-body" style="padding:0;">
+            <div class="notif-scroll-box" id="notif-board">
+              <div class="text-muted" style="padding:20px;">Loading notifications...</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+<script src="../js/script.js"></script>
+<script>
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+async function doLogout() {
+  await fetch('../api/auth.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'logout' })
+  });
+  window.location.href = '../index.html';
+}
+
+// ── Summary / KPI ─────────────────────────────────────────────
+async function loadSummary() {
+  try {
+    var res  = await fetch('../api/faculty-portal.php?action=summary');
+    var data = await res.json();
+    if (data.success && data.data) {
+      var d = data.data;
+      document.getElementById('hero-name').textContent  = d.name        || 'Faculty';
+      document.getElementById('hero-dept').textContent  = d.department  || '—';
+      document.getElementById('hero-desig').textContent = d.designation || '—';
+      document.getElementById('hero-email').textContent = d.email       || '—';
+      document.getElementById('hero-badge').textContent = d.designation || 'Faculty';
+      document.getElementById('kpi-duties').textContent = d.total_duties != null ? d.total_duties : '0';
+    }
+  } catch(e) { console.error('loadSummary', e); }
+
+  try {
+    var rr = await fetch('../api/replacement.php?action=list');
+    var rd = await rr.json();
+    if (rd.success && Array.isArray(rd.data)) {
+      document.getElementById('kpi-pending').textContent  = rd.data.filter(function(r){ return r.status === 'Pending'; }).length;
+      document.getElementById('kpi-approved').textContent = rd.data.filter(function(r){ return r.status === 'Approved'; }).length;
+    }
+  } catch(e) {}
+}
+
+// ── Notification board + KPI count ───────────────────────────
+async function loadNotifications() {
+  var board = document.getElementById('notif-board');
+  try {
+    var res  = await fetch('../api/notifications.php?action=list');
+    var data = await res.json();
+    if (data.success && Array.isArray(data.data) && data.data.length) {
+      document.getElementById('kpi-notifications').textContent = data.data.length;
+      var items = data.data.map(function(n) {
+        return '<div class="notif-card-item">' +
+          '<h4>' + esc(n.title) + '</h4>' +
+          '<p>' + esc(n.body) + '</p>' +
+          '<div class="notif-card-meta">' +
+            '<span>' + esc(n.priority || 'Normal') + '</span>' +
+            '<span>' + esc((n.publish_date || (n.created_at || '').slice(0,10) || '')) + '</span>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+      // Duplicate for seamless infinite loop
+      board.innerHTML = '<div class="notif-scroll-inner" id="notif-inner">' + items + items + '</div>';
+      startNotifScroll(board);
+    } else {
+      document.getElementById('kpi-notifications').textContent = '0';
+      board.innerHTML = '<div class="text-muted" style="padding:20px 16px;">No exam notifications right now.</div>';
+    }
+  } catch(e) {
+    document.getElementById('kpi-notifications').textContent = '0';
+    board.innerHTML = '<div class="text-muted" style="padding:20px 16px;">Unable to load notifications.</div>';
+  }
+}
+
+function startNotifScroll(container) {
+  var inner = container.querySelector('#notif-inner');
+  if (!inner) return;
+  var pos = 0;
+  var speed = 0.5; // px per frame — smooth, decent pace
+  function tick() {
+    pos += speed;
+    var halfH = inner.scrollHeight / 2;
+    if (pos >= halfH) pos = 0; // seamless loop
+    inner.style.transform = 'translateY(-' + pos + 'px)';
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// ── Duties table ──────────────────────────────────────────────
+async function loadDuties() {
+  var tbody = document.getElementById('duties-tbody');
+  tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted" style="padding:32px;">Loading...</td></tr>';
+  try {
+    var res  = await fetch('../api/faculty-portal.php?action=duties');
+    var data = await res.json();
+    if (!data.success) {
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted" style="padding:32px;">Failed to load duties.</td></tr>';
+      return;
+    }
+    var rows = data.data || [];
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="7"><div class="fp-empty"><div class="fp-empty-icon">&#128203;</div><p>No invigilation duties assigned yet.</p></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(function(r) {
+      return '<tr>' +
+        '<td>' + esc(r.exam_name) + '</td>' +
+        '<td>' + esc(r.date) + '</td>' +
+        '<td>' + esc(r.session) + '</td>' +
+        '<td><strong>' + esc(r.room_no) + '</strong></td>' +
+        '<td>' + esc(r.building) + '</td>' +
+        '<td><span class="status-badge badge-blue">' + esc(r.duty_type || 'Invigilator') + '</span></td>' +
+        '<td>' +
+          '<a href="faculty_attendance.html?exam_id=' + Number(r.exam_id) + '&room_id=' + Number(r.room_id) + '" class="btn btn-primary btn-sm">&#10003; Mark Attendance</a>' +
+        '</td>' +
+        '</tr>';
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted" style="padding:32px;">Error loading duties.</td></tr>';
+  }
+}
+
+// ── Bootstrap ─────────────────────────────────────────────────
+(async function() {
+  try {
+    var res  = await fetch('../api/auth.php?action=check');
+    var auth = await res.json();
+    if (!auth.logged_in || auth.role !== 'faculty') {
+      window.location.href = '../index.html'; return;
+    }
+    document.getElementById('user-label').textContent = auth.username + ' (Faculty)';
+    addChatbotWidget('faculty');
+    await Promise.all([loadSummary(), loadDuties(), loadNotifications()]);
+  } catch(e) {
+    window.location.href = '../index.html';
+  }
+})();
+</script>
+</body>
+</html>

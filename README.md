@@ -203,11 +203,22 @@ The running web application does not depend on Node.js. A few utility scripts in
 - `config/` - Database connection setup
 - `css/` - Shared styling
 - `data/` - Source data used by import scripts
+<<<<<<< HEAD
 - `database/` - Schema and sample SQL seed files
+=======
+- `database/` - Database schema file
+>>>>>>> 5c0461a (Version 1.0)
 - `js/` - Shared front-end behavior
 - `modules/` - Admin and student-facing HTML pages
 - `scripts/` - Optional Node.js maintenance/import scripts
 - `README.md` - Project documentation
+<<<<<<< HEAD
+=======
+
+## Diagrams
+
+Project-specific Architecture, ER, Data Flow, Activity, and Client-Server diagrams are available in `DIAGRAMS.md`.
+>>>>>>> 5c0461a (Version 1.0)
 
 ## Troubleshooting
 
@@ -261,7 +272,6 @@ The running web application does not depend on Node.js. A few utility scripts in
 - Advanced analytics dashboard
 - Excel export functionality
 - Multi-language support
-- Dark mode theme
 
 ## Support
 

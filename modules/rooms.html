@@ -5,9 +5,362 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rooms | Exam Management</title>
 <link rel="stylesheet" href="../css/style.css">
+<style>
+  :root {
+    --room-ink: #14324f;
+    --room-muted: #607388;
+    --room-border: #d7e2ee;
+    --room-bg: #f3f8ff;
+    --room-card: #ffffff;
+    --room-accent: #1174d1;
+    --room-accent-soft: #e8f3ff;
+    --room-blocked: #f8e6e6;
+    --room-seat: #eef5ff;
+    --room-whiteboard: #eef8ea;
+  }
+
+  body {
+    background: radial-gradient(circle at top right, rgba(17, 116, 209, 0.08), transparent 28%), linear-gradient(180deg, #f8fbff 0%, #f1f6fc 100%);
+  }
+
+  .rooms-shell .main-content {
+    min-width: 0;
+  }
+
+  .rooms-hero {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+
+  .hero-pane {
+    background: linear-gradient(135deg, #173a67 0%, #1174d1 62%, #1ca8e1 100%);
+    color: #fff;
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 20px 44px rgba(22, 46, 78, 0.18);
+  }
+
+  .hero-pane h2 {
+    margin: 0 0 8px;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-pane p {
+    margin: 0;
+    opacity: 0.93;
+    line-height: 1.6;
+    max-width: 720px;
+  }
+
+  .hero-actions {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .stat-card {
+    background: var(--room-card);
+    border: 1px solid rgba(24, 63, 108, 0.08);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 12px 28px rgba(17, 34, 64, 0.08);
+  }
+
+  .stat-card .label {
+    color: #70849c;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .stat-card .value {
+    color: var(--room-ink);
+    font-size: 28px;
+    line-height: 1;
+    font-weight: 900;
+  }
+
+  .stat-card .hint {
+    margin-top: 6px;
+    color: #697f96;
+    font-size: 12px;
+  }
+
+  .toolbar-card {
+    background: var(--room-card);
+    border: 1px solid var(--room-border);
+    border-radius: 16px;
+    box-shadow: 0 12px 26px rgba(18, 38, 67, 0.08);
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+
+  .toolbar-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .actions-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .rooms-table-wrap {
+    border-radius: 16px;
+    border: 1px solid var(--room-border);
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 14px 30px rgba(16, 37, 70, 0.08);
+  }
+
+  .rooms-table-wrap .card-body {
+    padding: 0;
+  }
+
+  .rooms-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .rooms-table thead th {
+    background: #f7fbff;
+    color: #274967;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 12px;
+    border-bottom: 1px solid #e7eef7;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .rooms-table tbody td {
+    padding: 12px;
+    border-bottom: 1px solid #eef3f9;
+    color: #203954;
+    vertical-align: top;
+  }
+
+  .rooms-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .matrix-meta {
+    font-size: 12px;
+    color: var(--room-muted);
+    line-height: 1.45;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+  }
+
+  .badge-blue {
+    background: #e8f3ff;
+    color: #17508d;
+  }
+
+  .badge-muted {
+    background: #f1f4f7;
+    color: #4f6477;
+  }
+
+  .room-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .modal .modal-content {
+    width: min(1100px, calc(100vw - 20px));
+    max-height: calc(100vh - 20px);
+    overflow: auto;
+  }
+
+  .designer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 14px;
+    margin-top: 12px;
+  }
+
+  .designer-panel {
+    border: 1px solid var(--room-border);
+    border-radius: 14px;
+    background: #fff;
+    padding: 12px;
+  }
+
+  .designer-panel h3 {
+    margin: 0 0 8px;
+    color: var(--room-ink);
+    font-size: 16px;
+  }
+
+  .designer-panel p {
+    margin: 0 0 10px;
+    font-size: 12px;
+    color: var(--room-muted);
+  }
+
+  .whiteboard {
+    border-radius: 10px;
+    border: 1px dashed #a9cf9e;
+    background: var(--room-whiteboard);
+    color: #2c6a35;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .whiteboard.top,
+  .whiteboard.bottom {
+    height: 34px;
+    margin: 8px 0;
+  }
+
+  .room-layout-wrap {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .whiteboard.side {
+    width: 34px;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+
+  .seats-grid {
+    display: grid;
+    gap: 6px;
+    padding: 8px;
+    border: 1px solid #e4edf7;
+    border-radius: 10px;
+    background: var(--room-bg);
+    min-height: 120px;
+    overflow: auto;
+  }
+
+  .seat-btn {
+    border: 1px solid #c9d9eb;
+    border-radius: 7px;
+    background: var(--room-seat);
+    color: #1c466f;
+    min-height: 34px;
+    padding: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .08s ease, background .15s ease;
+  }
+
+  .seat-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .seat-btn.blocked {
+    background: var(--room-blocked);
+    border-color: #d9acac;
+    color: #8d3434;
+    text-decoration: line-through;
+  }
+
+  .legend {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #4f6477;
+  }
+
+  .legend .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .info-tile {
+    border: 1px solid #dbe7f3;
+    border-radius: 10px;
+    padding: 10px;
+    background: #f9fcff;
+  }
+
+  .info-tile .k {
+    color: #71849a;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  .info-tile .v {
+    color: var(--room-ink);
+    font-size: 18px;
+    font-weight: 900;
+  }
+
+  @media (max-width: 1100px) {
+    .rooms-hero,
+    .toolbar-row,
+    .designer-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .info-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
 </head>
 <body>
-<div class="app-wrapper">
+<div class="app-wrapper rooms-shell">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header"><h2>Exam System</h2><p id="user-label"></p></div>
     <nav class="nav-links">
@@ -16,8 +369,8 @@
       <a href="faculty.html"><i>👨‍🏫</i> Faculty</a>
       <a href="rooms.html" class="active"><i>🚪</i> Rooms</a>
       <a href="schedule.html"><i>📅</i> Schedule</a>
-      <a href="seating.html"><i>💺</i> Seating</a>
       <a href="invigilation.html"><i>📋</i> Invigilation</a>
+      <a href="seating.html"><i>💺</i> Seating</a>
       <a href="attendance.html"><i>✅</i> Attendance</a>
       <a href="replacement.html"><i>🔄</i> Replacement</a>
       <a href="reports.html"><i>📊</i> Reports</a>
@@ -25,30 +378,73 @@
       <a href="#" onclick="logout()"><i>🚪</i> Logout</a>
     </nav>
   </aside>
+
   <main class="main-content">
     <header class="top-bar">
       <button onclick="toggleSidebar()" class="menu-btn">☰</button>
       <h1>Room Management</h1>
-      <div class="top-actions">
-        <input type="text" id="search-input" placeholder="Search rooms..." oninput="filterTable()" class="search-box">
-        <button class="btn btn-primary" onclick="openModal('add')">+ Add Room</button>
-        <button class="btn btn-success" onclick="exportCSV()">⬇ Export</button>
-      </div>
+      <div class="top-actions"></div>
     </header>
+
     <div class="page-body">
-      <div class="stats-row mb-3" id="capacity-row"></div>
-      <div class="card">
+      <section class="rooms-hero">
+        <div class="hero-pane">
+          <h2>Design Room Seat Layouts With Precision</h2>
+          <p>Create room seating matrices by rows and columns, mark blocked seats, set whiteboard zone, and preview exact usable capacity before publishing.</p>
+          <div class="hero-actions">
+            <button class="btn btn-light" onclick="openModal('add')">Create Layout</button>
+            <button class="btn btn-light" onclick="exportCSV()">Export Rooms</button>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="label">Total Rooms</div>
+            <div class="value" id="stat-rooms">0</div>
+            <div class="hint">Rooms configured in the system</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Total Capacity</div>
+            <div class="value" id="stat-capacity">0</div>
+            <div class="hint">Usable seats across all rooms</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Mapped Matrices</div>
+            <div class="value" id="stat-matrix">0</div>
+            <div class="hint">Rooms with row/column layouts</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Blocked Seats</div>
+            <div class="value" id="stat-blocked">0</div>
+            <div class="hint">Total blocked seats in all matrices</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="toolbar-card">
+        <div class="toolbar-row">
+          <input type="text" id="search-input" class="search-box" placeholder="Search room no, building, whiteboard area..." oninput="filterTable()">
+          <div class="actions-row">
+            <button class="btn btn-secondary" onclick="loadRooms()">Refresh</button>
+            <button class="btn btn-success" onclick="exportCSV()">⬇ Export CSV</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="rooms-table-wrap card">
         <div class="card-body">
-          <table class="data-table" id="rooms-table">
+          <table class="rooms-table data-table" id="rooms-table">
             <thead>
               <tr>
                 <th onclick="sortTable(0)">Room No ↕</th>
                 <th onclick="sortTable(1)">Building ↕</th>
                 <th onclick="sortTable(2)">Capacity ↕</th>
+                <th>Seat Matrix</th>
+                <th>Whiteboard</th>
+                <th>Blocked</th>
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody id="rooms-tbody"><tr><td colspan="4" class="text-center">Loading...</td></tr></tbody>
+            <tbody id="rooms-tbody"><tr><td colspan="7" class="text-center">Loading...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -59,105 +455,414 @@
 <div id="room-modal" class="modal" style="display:none">
   <div class="modal-content">
     <div class="modal-header">
-      <h2 id="modal-title">Add Room</h2>
+      <h2 id="modal-title">Create Room Layout</h2>
       <span class="close-btn" onclick="closeModal()">&times;</span>
     </div>
+
     <form onsubmit="saveRoom(event)">
       <input type="hidden" id="edit-id">
-      <div class="form-group">
-        <label>Room Number</label>
-        <input type="text" id="f-room" required placeholder="e.g. 101">
+      <div class="modal-grid">
+        <div class="form-group">
+          <label>Room Number</label>
+          <input type="text" id="f-room" required placeholder="e.g. A-101">
+        </div>
+        <div class="form-group">
+          <label>Building</label>
+          <input type="text" id="f-building" required placeholder="e.g. Block A">
+        </div>
+        <div class="form-group">
+          <label>Matrix Rows</label>
+          <input type="number" id="f-rows" min="1" max="200" placeholder="e.g. 6" oninput="renderDesigner()">
+        </div>
+        <div class="form-group">
+          <label>Matrix Columns</label>
+          <input type="number" id="f-cols" min="1" max="200" placeholder="e.g. 8" oninput="renderDesigner()">
+        </div>
+        <div class="form-group">
+          <label>Whiteboard Area</label>
+          <select id="f-whiteboard" onchange="renderDesigner()">
+            <option value="front">Front</option>
+            <option value="back">Back</option>
+            <option value="left">Left</option>
+            <option value="right">Right</option>
+            <option value="none">None</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Capacity</label>
+          <input type="number" id="f-cap" min="1" max="2000" required readonly>
+        </div>
+        <div class="form-group full">
+          <label>Layout Notes</label>
+          <input type="text" id="f-notes" placeholder="Optional: entry gate on rear-left, projector in front-right...">
+        </div>
       </div>
-      <div class="form-group">
-        <label>Building</label>
-        <input type="text" id="f-building" required placeholder="e.g. Block A">
+
+      <div class="designer-grid">
+        <div class="designer-panel">
+          <h3>Room Information</h3>
+          <p>Capacity is auto-calculated as total seats minus blocked seats.</p>
+          <div class="info-grid">
+            <div class="info-tile"><div class="k">Rows</div><div class="v" id="info-rows">0</div></div>
+            <div class="info-tile"><div class="k">Columns</div><div class="v" id="info-cols">0</div></div>
+            <div class="info-tile"><div class="k">Total Seats</div><div class="v" id="info-total">0</div></div>
+            <div class="info-tile"><div class="k">Blocked</div><div class="v" id="info-blocked">0</div></div>
+            <div class="info-tile"><div class="k">Usable</div><div class="v" id="info-usable">0</div></div>
+            <div class="info-tile"><div class="k">Whiteboard</div><div class="v" id="info-whiteboard">Front</div></div>
+          </div>
+          <div class="legend">
+            <span><span class="dot" style="background:#eef5ff"></span>Usable Seat</span>
+            <span><span class="dot" style="background:#f8e6e6"></span>Blocked Seat</span>
+            <span><span class="dot" style="background:#eef8ea"></span>Whiteboard Zone</span>
+          </div>
+        </div>
+
+        <div class="designer-panel">
+          <h3>Seat Matrix Designer</h3>
+          <p>Click seats to block/unblock them. Seat IDs use R{row}C{column} format.</p>
+          <div id="whiteboard-top" class="whiteboard top" style="display:none">Whiteboard</div>
+          <div class="room-layout-wrap">
+            <div id="whiteboard-left" class="whiteboard side" style="display:none">Whiteboard</div>
+            <div id="seats-grid" class="seats-grid"></div>
+            <div id="whiteboard-right" class="whiteboard side" style="display:none">Whiteboard</div>
+          </div>
+          <div id="whiteboard-bottom" class="whiteboard bottom" style="display:none">Whiteboard</div>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Capacity</label>
-        <input type="number" id="f-cap" required min="1" max="200">
-      </div>
+
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="submit" class="btn btn-primary">Save Room Layout</button>
       </div>
     </form>
+  </div>
+</div>
+
+<div id="preview-modal" class="modal" style="display:none">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="preview-title">Room Preview</h2>
+      <span class="close-btn" onclick="closePreview()">&times;</span>
+    </div>
+    <div class="designer-panel">
+      <h3 id="preview-subtitle"></h3>
+      <p id="preview-meta"></p>
+      <div id="preview-whiteboard-top" class="whiteboard top" style="display:none">Whiteboard</div>
+      <div class="room-layout-wrap">
+        <div id="preview-whiteboard-left" class="whiteboard side" style="display:none">Whiteboard</div>
+        <div id="preview-seats-grid" class="seats-grid"></div>
+        <div id="preview-whiteboard-right" class="whiteboard side" style="display:none">Whiteboard</div>
+      </div>
+      <div id="preview-whiteboard-bottom" class="whiteboard bottom" style="display:none">Whiteboard</div>
+    </div>
   </div>
 </div>
 
 <div id="toast" class="toast"></div>
 <script src="../js/script.js"></script>
 <script>
-let editMode = false;
 const API = '../api/rooms.php';
+let editMode = false;
+let roomsData = [];
+let blockedSeatsSet = new Set();
 
 (async () => {
-  const res  = await fetch('../api/auth.php?action=check');
+  const res = await fetch('../api/auth.php?action=check');
   const auth = await res.json();
-  if (!auth.logged_in) { window.location.href = '../index.html'; return; }
+  if (!auth.logged_in) {
+    window.location.href = '../index.html';
+    return;
+  }
   document.getElementById('user-label').textContent = auth.username + ' (' + auth.role + ')';
-  loadRooms();
+  await loadRooms();
 })();
 
-async function loadRooms() {
-  const res  = await fetch(API + '?action=list');
-  const data = await res.json();
-  document.getElementById('capacity-row').innerHTML =
-    `<p class="stat-inline">Total Room Capacity: <strong>${data.total_capacity || 0}</strong></p>`;
-  const tbody = document.getElementById('rooms-tbody');
-  tbody.innerHTML = data.data && data.data.length
-    ? data.data.map(r => `
-        <tr>
-          <td>${r.room_no}</td><td>${r.building}</td><td>${r.capacity}</td>
-          <td>
-            <button class="btn btn-sm btn-warning" onclick='openModal("edit", ${JSON.stringify(r)})'>Edit</button>
-            <button class="btn btn-sm btn-danger" onclick="deleteRoom(${r.room_id})">Delete</button>
-          </td>
-        </tr>`).join('')
-    : '<tr><td colspan="4" class="text-center">No rooms found.</td></tr>';
+function seatId(row, col) {
+  return `R${row}C${col}`;
 }
 
-function openModal(mode, r = null) {
+function parsePositiveInt(value) {
+  const n = Number(value || 0);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
+}
+
+function normalizeWhiteboard(value) {
+  const v = String(value || 'front').toLowerCase();
+  return ['front', 'back', 'left', 'right', 'none'].includes(v) ? v : 'front';
+}
+
+function toggleWhiteboardAreas(prefix, area) {
+  const key = prefix ? `${prefix}-` : '';
+  const top = document.getElementById(`${key}whiteboard-top`);
+  const left = document.getElementById(`${key}whiteboard-left`);
+  const right = document.getElementById(`${key}whiteboard-right`);
+  const bottom = document.getElementById(`${key}whiteboard-bottom`);
+
+  [top, left, right, bottom].forEach((el) => {
+    if (el) el.style.display = 'none';
+  });
+
+  if (area === 'front' && top) top.style.display = 'flex';
+  if (area === 'back' && bottom) bottom.style.display = 'flex';
+  if (area === 'left' && left) left.style.display = 'flex';
+  if (area === 'right' && right) right.style.display = 'flex';
+}
+
+function updateDesignerInfo(rows, cols, blocked, whiteboardArea) {
+  const total = rows * cols;
+  const usable = Math.max(0, total - blocked);
+  document.getElementById('info-rows').textContent = String(rows);
+  document.getElementById('info-cols').textContent = String(cols);
+  document.getElementById('info-total').textContent = String(total);
+  document.getElementById('info-blocked').textContent = String(blocked);
+  document.getElementById('info-usable').textContent = String(usable);
+  document.getElementById('info-whiteboard').textContent = whiteboardArea.charAt(0).toUpperCase() + whiteboardArea.slice(1);
+  document.getElementById('f-cap').value = usable > 0 ? String(usable) : '';
+}
+
+function renderDesigner() {
+  const rows = parsePositiveInt(document.getElementById('f-rows').value);
+  const cols = parsePositiveInt(document.getElementById('f-cols').value);
+  const whiteboardArea = normalizeWhiteboard(document.getElementById('f-whiteboard').value);
+  const grid = document.getElementById('seats-grid');
+
+  toggleWhiteboardAreas('', whiteboardArea);
+  grid.innerHTML = '';
+
+  if (rows === 0 || cols === 0) {
+    grid.style.gridTemplateColumns = '1fr';
+    grid.innerHTML = '<div class="matrix-meta">Set both rows and columns to design seats.</div>';
+    updateDesignerInfo(0, 0, 0, whiteboardArea);
+    return;
+  }
+
+  const validBlocked = new Set();
+  grid.style.gridTemplateColumns = `repeat(${cols}, minmax(42px, 1fr))`;
+
+  for (let r = 1; r <= rows; r++) {
+    for (let c = 1; c <= cols; c++) {
+      const id = seatId(r, c);
+      const isBlocked = blockedSeatsSet.has(id);
+      if (isBlocked) validBlocked.add(id);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `seat-btn ${isBlocked ? 'blocked' : ''}`;
+      btn.textContent = id;
+      btn.addEventListener('click', () => {
+        if (blockedSeatsSet.has(id)) {
+          blockedSeatsSet.delete(id);
+        } else {
+          blockedSeatsSet.add(id);
+        }
+        renderDesigner();
+      });
+      grid.appendChild(btn);
+    }
+  }
+
+  blockedSeatsSet = validBlocked;
+  updateDesignerInfo(rows, cols, blockedSeatsSet.size, whiteboardArea);
+}
+
+async function loadRooms() {
+  const res = await fetch(`${API}?action=list`, { cache: 'no-store' });
+  const data = await res.json();
+  roomsData = Array.isArray(data.data) ? data.data : [];
+
+  const tbody = document.getElementById('rooms-tbody');
+  if (roomsData.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center">No rooms configured yet.</td></tr>';
+  } else {
+    tbody.innerHTML = roomsData.map((r) => {
+      const matrix = (r.matrix_rows > 0 && r.matrix_cols > 0)
+        ? `${r.matrix_rows} × ${r.matrix_cols} (${r.grid_total} seats)`
+        : 'Not configured';
+      const whiteboard = normalizeWhiteboard(r.whiteboard_area || 'front');
+      return `
+        <tr>
+          <td><strong>${escapeHtml(r.room_no)}</strong></td>
+          <td>${escapeHtml(r.building)}</td>
+          <td><span class="badge badge-blue">${r.capacity}</span></td>
+          <td><div class="matrix-meta">${escapeHtml(matrix)}</div></td>
+          <td><span class="badge badge-muted">${escapeHtml(whiteboard.charAt(0).toUpperCase() + whiteboard.slice(1))}</span></td>
+          <td>${r.blocked_count || 0}</td>
+          <td>
+            <div class="room-actions">
+              <button class="btn btn-sm btn-secondary" onclick="openPreview(${r.room_id})">Preview</button>
+              <button class="btn btn-sm btn-warning" onclick="openModal('edit', ${r.room_id})">Edit</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteRoom(${r.room_id})">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  const totalRooms = Number(data.rooms_count || roomsData.length || 0);
+  const totalCapacity = Number(data.total_capacity || 0);
+  const mapped = roomsData.filter((r) => Number(r.matrix_rows) > 0 && Number(r.matrix_cols) > 0).length;
+  const blockedTotal = roomsData.reduce((sum, r) => sum + Number(r.blocked_count || 0), 0);
+
+  document.getElementById('stat-rooms').textContent = String(totalRooms);
+  document.getElementById('stat-capacity').textContent = String(totalCapacity);
+  document.getElementById('stat-matrix').textContent = String(mapped);
+  document.getElementById('stat-blocked').textContent = String(blockedTotal);
+}
+
+function openModal(mode, roomId = null) {
   editMode = mode === 'edit';
-  document.getElementById('modal-title').textContent = editMode ? 'Edit Room' : 'Add Room';
-  document.getElementById('edit-id').value    = r ? r.room_id : '';
-  document.getElementById('f-room').value     = r ? r.room_no : '';
-  document.getElementById('f-building').value = r ? r.building : '';
-  document.getElementById('f-cap').value      = r ? r.capacity : '';
+  const room = roomsData.find((r) => Number(r.room_id) === Number(roomId)) || null;
+
+  document.getElementById('modal-title').textContent = editMode ? 'Edit Room Layout' : 'Create Room Layout';
+  document.getElementById('edit-id').value = room ? room.room_id : '';
+  document.getElementById('f-room').value = room ? room.room_no : '';
+  document.getElementById('f-building').value = room ? room.building : '';
+  document.getElementById('f-rows').value = room && room.matrix_rows ? room.matrix_rows : '';
+  document.getElementById('f-cols').value = room && room.matrix_cols ? room.matrix_cols : '';
+  document.getElementById('f-notes').value = room ? (room.layout_notes || '') : '';
+  document.getElementById('f-whiteboard').value = normalizeWhiteboard(room ? (room.whiteboard_area || 'front') : 'front');
+
+  blockedSeatsSet = new Set(Array.isArray(room?.blocked_seats) ? room.blocked_seats : []);
+  renderDesigner();
+
   document.getElementById('room-modal').style.display = 'flex';
 }
-function closeModal() { document.getElementById('room-modal').style.display = 'none'; }
 
-async function saveRoom(e) {
-  e.preventDefault();
+function closeModal() {
+  document.getElementById('room-modal').style.display = 'none';
+}
+
+async function saveRoom(event) {
+  event.preventDefault();
+
+  const rows = parsePositiveInt(document.getElementById('f-rows').value);
+  const cols = parsePositiveInt(document.getElementById('f-cols').value);
+  const usableCapacity = parsePositiveInt(document.getElementById('f-cap').value);
+
+  if (rows > 0 && cols > 0 && usableCapacity <= 0) {
+    showToast('Matrix leaves no usable seats. Unblock at least one seat.', 'error');
+    return;
+  }
+
   const payload = {
     action: editMode ? 'edit' : 'add',
-    room_id:  document.getElementById('edit-id').value,
-    room_no:  document.getElementById('f-room').value,
-    building: document.getElementById('f-building').value,
-    capacity: document.getElementById('f-cap').value,
+    room_id: document.getElementById('edit-id').value,
+    room_no: document.getElementById('f-room').value.trim(),
+    building: document.getElementById('f-building').value.trim(),
+    capacity: usableCapacity,
+    matrix_rows: rows,
+    matrix_cols: cols,
+    blocked_seats: Array.from(blockedSeatsSet),
+    whiteboard_area: normalizeWhiteboard(document.getElementById('f-whiteboard').value),
+    layout_notes: document.getElementById('f-notes').value.trim(),
   };
-  const res  = await fetch(API, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+
+  const res = await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
   const data = await res.json();
   showToast(data.message, data.success ? 'success' : 'error');
-  if (data.success) { closeModal(); loadRooms(); }
+  if (data.success) {
+    closeModal();
+    await loadRooms();
+  }
 }
 
-async function deleteRoom(id) {
-  if (!confirm('Delete this room?')) return;
-  const res  = await fetch(API, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'delete', room_id: id}) });
+function renderPreviewSeats(gridId, rows, cols, blockedSeats) {
+  const grid = document.getElementById(gridId);
+  grid.innerHTML = '';
+
+  if (rows <= 0 || cols <= 0) {
+    grid.style.gridTemplateColumns = '1fr';
+    grid.innerHTML = '<div class="matrix-meta">No matrix configured for this room.</div>';
+    return;
+  }
+
+  const blocked = new Set(blockedSeats || []);
+  grid.style.gridTemplateColumns = `repeat(${cols}, minmax(42px, 1fr))`;
+  for (let r = 1; r <= rows; r++) {
+    for (let c = 1; c <= cols; c++) {
+      const id = seatId(r, c);
+      const el = document.createElement('div');
+      el.className = `seat-btn ${blocked.has(id) ? 'blocked' : ''}`;
+      el.textContent = id;
+      grid.appendChild(el);
+    }
+  }
+}
+
+function openPreview(roomId) {
+  const room = roomsData.find((r) => Number(r.room_id) === Number(roomId));
+  if (!room) return;
+
+  const rows = Number(room.matrix_rows || 0);
+  const cols = Number(room.matrix_cols || 0);
+  const whiteboard = normalizeWhiteboard(room.whiteboard_area || 'front');
+
+  document.getElementById('preview-title').textContent = `Room ${room.room_no} Preview`;
+  document.getElementById('preview-subtitle').textContent = `${room.building}`;
+  document.getElementById('preview-meta').textContent = `Capacity: ${room.capacity} · Matrix: ${rows > 0 && cols > 0 ? `${rows} × ${cols}` : 'Not configured'} · Blocked: ${room.blocked_count || 0}`;
+
+  toggleWhiteboardAreas('preview', whiteboard);
+  renderPreviewSeats('preview-seats-grid', rows, cols, room.blocked_seats || []);
+
+  document.getElementById('preview-modal').style.display = 'flex';
+}
+
+function closePreview() {
+  document.getElementById('preview-modal').style.display = 'none';
+}
+
+async function deleteRoom(roomId) {
+  if (!confirm('Delete this room and its layout?')) return;
+
+  const res = await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'delete', room_id: roomId }),
+  });
   const data = await res.json();
   showToast(data.message, data.success ? 'success' : 'error');
-  if (data.success) loadRooms();
+  if (data.success) {
+    await loadRooms();
+  }
 }
 
-function exportCSV() { exportTableToCSV('rooms-table', 'rooms.csv'); }
-function filterTable() { filterTableFn('rooms-table', document.getElementById('search-input').value); }
-function sortTable(col) { sortTableFn('rooms-table', col); }
+function exportCSV() {
+  exportTableToCSV('rooms-table', 'rooms.csv');
+}
+
+function filterTable() {
+  filterTableFn('rooms-table', document.getElementById('search-input').value);
+}
+
+function sortTable(col) {
+  sortTableFn('rooms-table', col);
+}
+
 async function logout() {
-  await fetch('../api/auth.php', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'logout'}) });
+  await fetch('../api/auth.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'logout' })
+  });
   window.location.href = '../index.html';
 }
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 </script>
 </body>
 </html>

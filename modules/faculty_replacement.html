@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<title>Replacement Requests | Faculty Portal</title>
+<link rel="stylesheet" href="../css/style.css?v=2">
+<style>
+:root {
+  --fp-primary: #2563eb;
+  --fp-primary-light: #eff6ff;
+  --fp-bg: #f1f5f9;
+  --fp-card: #ffffff;
+  --fp-border: #e2e8f0;
+  --fp-text: #1e293b;
+  --fp-muted: #64748b;
+  --fp-radius: 12px;
+  --fp-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.06);
+}
+body { background: var(--fp-bg); color: var(--fp-text); }
+
+.fp-card {
+  background: var(--fp-card);
+  border-radius: var(--fp-radius);
+  box-shadow: var(--fp-shadow);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.fp-card-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--fp-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.fp-card-header h3 { font-size: 14px; font-weight: 600; color: var(--fp-text); margin: 0; }
+.fp-card-body { padding: 20px; }
+
+.repl-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.fp-empty { text-align: center; padding: 48px 20px; color: var(--fp-muted); }
+.fp-empty-icon { font-size: 44px; margin-bottom: 12px; }
+.fp-empty p { font-size: 14px; }
+
+.sidebar .nav-links a.active {
+  background: linear-gradient(90deg, rgba(37,99,235,0.28) 0%, rgba(37,99,235,0.10) 100%);
+  color: #fff;
+  border-left-color: #60a5fa;
+  font-weight: 600;
+}
+/* ── Force sidebar nav into strict vertical source order ── */
+.sidebar .nav-links {
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+}
+.sidebar .nav-links a,
+.sidebar .nav-links hr {
+  order: unset !important;
+  float: none !important;
+  position: static !important;
+}
+
+@media (max-width: 900px) {
+  .repl-layout { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Exam System</h2>
+      <p id="user-label">Loading...</p>
+    </div>
+    <nav class="nav-links" data-nav="faculty">
+      <a href="faculty_portal.html"><i>&#128197;</i> My Duties</a>
+      <a href="faculty_attendance.html"><i>&#9989;</i> Digital Attendance</a>
+      <a href="faculty_replacement.html" class="active"><i>&#128260;</i> Replacement Requests</a>
+      <a href="faculty_profile.html"><i>&#128100;</i> My Profile</a>
+      <hr>
+      <a href="#" onclick="doLogout(); return false;"><i>&#128682;</i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <header class="top-bar">
+      <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('collapsed')" aria-label="Toggle sidebar">&#9776;</button>
+      <h1>Replacement Requests</h1>
+      <div class="top-actions">
+        <button class="btn btn-secondary btn-sm" onclick="loadRequests()">&#8635; Refresh</button>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="repl-layout">
+
+        <!-- Submit form -->
+        <div class="fp-card">
+          <div class="fp-card-header"><h3>Submit New Request</h3></div>
+          <div class="fp-card-body">
+            <form onsubmit="submitRequest(event)">
+              <div class="form-group">
+                <label for="duty-select">Select Duty</label>
+                <select id="duty-select" class="form-control" required>
+                  <option value="">&#8212; Select a duty &#8212;</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="reason">Reason for Replacement</label>
+                <textarea id="reason" class="form-control" rows="5"
+                  placeholder="Explain why you need a replacement..." required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary btn-full">Submit Request</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- My requests table -->
+        <div class="fp-card">
+          <div class="fp-card-header"><h3>My Requests</h3></div>
+          <div class="fp-card-body" style="padding:0; overflow-x:auto;">
+            <table class="data-table" id="repl-table">
+              <thead>
+                <tr>
+                  <th>Exam</th>
+                  <th>Date</th>
+                  <th>Room</th>
+                  <th>Status</th>
+                  <th>Reason</th>
+                  <th>Requested On</th>
+                </tr>
+              </thead>
+              <tbody id="repl-tbody">
+                <tr><td colspan="6" class="text-center text-muted" style="padding:28px;">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+<script src="../js/script.js"></script>
+<script>
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+async function doLogout() {
+  await fetch('../api/auth.php', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'logout'}) });
+  window.location.href = '../index.html';
+}
+
+// ── Load duties into the select ───────────────────────────────
+async function loadDuties() {
+  var sel = document.getElementById('duty-select');
+  sel.innerHTML = '<option value="">Loading duties...</option>';
+  try {
+    var res  = await fetch('../api/replacement.php?action=my_duties');
+    var data = await res.json();
+    sel.innerHTML = '<option value="">&#8212; Select a duty &#8212;</option>';
+    if (data.success && data.data && data.data.length) {
+      data.data.forEach(function(r) {
+        var label = esc(r.exam_name) + ' | ' + esc(r.date) + ' ' + esc(r.session) + ' | Room ' + esc(r.room_no);
+        sel.innerHTML += '<option value="' + Number(r.exam_id) + ':' + Number(r.room_id) + '">' + label + '</option>';
+      });
+    } else {
+      sel.innerHTML = '<option value="">No duties found</option>';
+    }
+  } catch(e) {
+    sel.innerHTML = '<option value="">Error loading duties</option>';
+  }
+}
+
+// ── Submit replacement request ────────────────────────────────
+async function submitRequest(event) {
+  event.preventDefault();
+  var dutyVal = document.getElementById('duty-select').value;
+  var reason  = document.getElementById('reason').value.trim();
+  if (!dutyVal) { showToast('Please select a duty.', 'warning'); return; }
+  if (!reason)  { showToast('Please provide a reason.', 'warning'); return; }
+  var parts  = dutyVal.split(':');
+  var examId = parseInt(parts[0], 10);
+  var roomId = parseInt(parts[1], 10);
+  try {
+    var res  = await fetch('../api/replacement.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action:'request', exam_id:examId, room_id:roomId, reason:reason })
+    });
+    var data = await res.json();
+    showToast(data.message || (data.success ? 'Request submitted!' : 'Failed.'), data.success ? 'success' : 'error');
+    if (data.success) {
+      document.getElementById('duty-select').value = '';
+      document.getElementById('reason').value = '';
+      loadRequests();
+    }
+  } catch(e) {
+    showToast('Error submitting request.', 'error');
+  }
+}
+
+// ── Load my requests table ────────────────────────────────────
+async function loadRequests() {
+  var tbody = document.getElementById('repl-tbody');
+  tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted" style="padding:28px;">Loading...</td></tr>';
+  try {
+    var res  = await fetch('../api/replacement.php?action=list');
+    var data = await res.json();
+    if (!data.success) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted" style="padding:28px;">Failed to load requests.</td></tr>';
+      return;
+    }
+    var rows = data.data || [];
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="6"><div class="fp-empty"><div class="fp-empty-icon">&#8635;</div><p>No replacement requests yet.</p></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(function(r) {
+      var bc = r.status === 'Approved' ? 'badge-green' : (r.status === 'Rejected' ? 'badge-red' : 'badge-yellow');
+      var dt = r.requested_at ? r.requested_at.split(' ')[0] : '—';
+      return '<tr>' +
+        '<td>' + esc(r.exam_name) + '</td>' +
+        '<td>' + esc(r.date) + '</td>' +
+        '<td>' + esc(r.room_no) + '<br><small class="text-muted">' + esc(r.building) + '</small></td>' +
+        '<td><span class="status-badge ' + bc + '">' + esc(r.status) + '</span></td>' +
+        '<td style="max-width:220px;white-space:normal;">' + esc(r.reason) + '</td>' +
+        '<td>' + esc(dt) + '</td>' +
+        '</tr>';
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted" style="padding:28px;">Error loading requests.</td></tr>';
+  }
+}
+
+// ── Bootstrap ─────────────────────────────────────────────────
+(async function() {
+  try {
+    var res  = await fetch('../api/auth.php?action=check');
+    var auth = await res.json();
+    if (!auth.logged_in || auth.role !== 'faculty') {
+      window.location.href = '../index.html'; return;
+    }
+    document.getElementById('user-label').textContent = auth.username + ' (Faculty)';
+    await Promise.all([loadDuties(), loadRequests()]);
+  } catch(e) {
+    window.location.href = '../index.html';
+  }
+})();
+</script>
+</body>
+</html>
