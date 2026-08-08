@@ -110,17 +110,17 @@ $rules = [
         [
             'keywords'   => ['my duty', 'my duties', 'invigilation duty', 'assigned room', 'duty'],
             'response'   => 'Opening your Invigilation Duties.',
-            'action_url' => 'faculty/duties.php',
+            'action_url' => 'modules/faculty_portal.html?tab=duties',
         ],
         [
             'keywords'   => ['mark attendance', 'attendance', 'present', 'absent', 'late'],
             'response'   => 'Opening Digital Attendance.',
-            'action_url' => 'faculty/attendance.php',
+            'action_url' => 'modules/faculty_portal.html?tab=attendance',
         ],
         [
             'keywords'   => ['request replacement', 'replacement', 'leave', 'substitute', 'replace'],
             'response'   => 'Opening the Replacement Request form.',
-            'action_url' => 'faculty/replacement.php',
+            'action_url' => 'modules/faculty_portal.html?tab=replacements',
         ],
         [
             'keywords'   => ['dashboard', 'home'],

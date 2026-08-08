@@ -479,7 +479,7 @@ async function loadNotifications() {
         <p>${escapeHtml(n.body)}</p>
         <div class="notify-meta">
           <span>${escapeHtml(n.priority || 'Normal')}</span>
-          <span>${escapeHtml(n.publish_date || n.created_at || '-')}</span>
+          <span>${escapeHtml(toDisplayDate(n.publish_date || n.created_at || '-'))}</span>
         </div>
       </article>
     `).join('');

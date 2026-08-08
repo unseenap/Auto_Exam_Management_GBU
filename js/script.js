@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     initTooltips();
     initThemePreference();
+    initSelectSearches();
 
     // Mark active nav item
     const currentPath = window.location.pathname;
@@ -24,9 +25,9 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Boot chatbot on pages that don't do their own auth check.
-    // Pages that do their own auth check (dashboard.html, faculty pages, student_portal.html)
+    // Pages that do their own auth check (dashboard.html, faculty_portal.html, student_portal.html)
     // call addChatbotWidget(role) directly after auth, so we skip it here for those pages.
-    var skipChatbotPages = ['dashboard.html', 'faculty', 'student_portal.html',
+    var skipChatbotPages = ['dashboard.html', 'faculty_portal.html', 'student_portal.html',
                             'student_datesheet.html', 'student_seating_slip.html', 'student_admit_card.html'];
     var currentPage = window.location.pathname.split('/').pop() || '';
     var skipChatbot = skipChatbotPages.some(function (p) { return currentPage === p; });
@@ -73,6 +74,135 @@ function resetForm(formId) {
 function toggleElement(elementId) {
     const el = document.getElementById(elementId);
     if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function toDisplayDate(dateStr) {
+    if (!dateStr) return '-';
+    const normalized = String(dateStr).trim();
+    const isoDate = normalized.length >= 10 ? normalized.slice(0, 10) : normalized;
+    const d = new Date(isoDate + 'T00:00:00');
+    if (Number.isNaN(d.getTime())) return normalized;
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function setupNotificationAutoScroll(container) {
+    if (!container || container.dataset.autoScrollInit === '1') return;
+
+    let inner = container.querySelector('.notif-scroll-inner');
+    if (!inner) {
+        inner = document.createElement('div');
+        inner.className = 'notif-scroll-inner';
+        while (container.firstChild) {
+            inner.appendChild(container.firstChild);
+        }
+        container.appendChild(inner);
+    }
+
+    if (inner.dataset.autoScrollReady === '1') return;
+
+    const content = inner.innerHTML.trim();
+    if (!content) return;
+
+    if (inner.dataset.duplicated !== '1') {
+        inner.innerHTML = inner.innerHTML + inner.innerHTML;
+        inner.dataset.duplicated = '1';
+    }
+
+    container.style.overflow = 'hidden';
+    inner.style.display = 'flex';
+    inner.style.flexDirection = 'column';
+    inner.style.willChange = 'transform';
+
+    let position = 0;
+    const speed = 0.4;
+
+    function tick() {
+        if (!document.body.contains(inner)) return;
+        const halfHeight = inner.scrollHeight / 2;
+        if (halfHeight <= 0) {
+            requestAnimationFrame(tick);
+            return;
+        }
+        position += speed;
+        if (position >= halfHeight) position = 0;
+        inner.style.transform = 'translateY(-' + position + 'px)';
+        requestAnimationFrame(tick);
+    }
+
+    inner.dataset.autoScrollReady = '1';
+    container.dataset.autoScrollInit = '1';
+    requestAnimationFrame(tick);
+}
+
+function enhanceSelectSearch(select) {
+    if (!select || select.dataset.searchEnhanced === '1' || select.multiple) return;
+
+    const options = Array.from(select.options || []);
+    if (!options.length) return;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'select-search-wrap';
+
+    const search = document.createElement('input');
+    search.type = 'search';
+    search.className = 'select-search-input';
+    search.placeholder = 'Search options';
+    search.setAttribute('aria-label', 'Search options');
+
+    const parent = select.parentNode;
+    if (!parent) return;
+
+    parent.insertBefore(wrapper, select);
+    wrapper.appendChild(search);
+    wrapper.appendChild(select);
+    select.dataset.searchEnhanced = '1';
+
+    const placeholderOption = options.find(function (option) {
+        return option.value === '' || option.disabled;
+    }) || null;
+
+    function applyFilter() {
+        const query = search.value.trim().toLowerCase();
+        options.forEach(function (option, index) {
+            if (index === 0 && placeholderOption === option) {
+                option.hidden = false;
+                return;
+            }
+            const text = (option.textContent || '').toLowerCase();
+            option.hidden = !!query && !text.includes(query);
+        });
+    }
+
+    search.addEventListener('input', applyFilter);
+    select.addEventListener('change', function () {
+        if (!search.value) return;
+        applyFilter();
+    });
+}
+
+function initSelectSearches() {
+    document.querySelectorAll('select').forEach(function (select) {
+        enhanceSelectSearch(select);
+    });
+
+    if (window.__selectSearchObserver) return;
+
+    window.__selectSearchObserver = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            mutation.addedNodes.forEach(function (node) {
+                if (!node || node.nodeType !== 1) return;
+                if (node.tagName === 'SELECT') {
+                    enhanceSelectSearch(node);
+                    return;
+                }
+                node.querySelectorAll && node.querySelectorAll('select').forEach(function (select) {
+                    enhanceSelectSearch(select);
+                });
+            });
+        });
+    });
+
+    window.__selectSearchObserver.observe(document.body, { childList: true, subtree: true });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -296,10 +426,10 @@ function getChatbotReplies(role) {
             { keywords: ['help', 'what can you do', 'commands', 'options'], response: 'Available commands: seating generation, room allocation, invigilation, attendance reports, replacement requests, and exam scheduling.', action_url: null },
         ],
         faculty: [
-            { keywords: ['my duty', 'duty details', 'invigilation duty', 'assigned room'], response: 'Opening your Invigilation Duties.', action_url: 'faculty/duties.php' },
-            { keywords: ['mark attendance', 'attendance', 'present', 'absent', 'late'], response: 'Opening Attendance Marking.', action_url: 'faculty/attendance.php' },
-            { keywords: ['request replacement', 'replacement', 'substitute', 'replace'], response: 'Opening Replacement Requests.', action_url: 'faculty/replacement.php' },
-            { keywords: ['room assignment', 'assigned room', 'room number'], response: 'Opening your room assignment details.', action_url: 'faculty/duties.php' },
+            { keywords: ['my duty', 'duty details', 'invigilation duty', 'assigned room'], response: 'Opening your Invigilation Duties.', action_url: 'modules/faculty_portal.html?tab=duties' },
+            { keywords: ['mark attendance', 'attendance', 'present', 'absent', 'late'], response: 'Opening Attendance Marking.', action_url: 'modules/faculty_portal.html?tab=attendance' },
+            { keywords: ['request replacement', 'replacement', 'substitute', 'replace'], response: 'Opening Replacement Requests.', action_url: 'modules/faculty_portal.html?tab=replacements' },
+            { keywords: ['room assignment', 'assigned room', 'room number'], response: 'Opening your room assignment details.', action_url: 'modules/faculty_portal.html?tab=duties' },
             { keywords: ['help', 'what can you do', 'commands', 'options'], response: 'Available commands: my duty, mark attendance, request replacement, and room assignment.', action_url: null },
         ],
         student: [
@@ -532,80 +662,6 @@ function initTooltips() {
     });
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// NOTIFICATION AUTO-SCROLL (always-on, no stop on hover)
-// Call after rendering notification items into a container.
-// The container must have overflow:hidden and a fixed height.
-// Items are duplicated inside so the scroll loops seamlessly.
-// ═══════════════════════════════════════════════════════════════════════════
-
-/**
- * startAutoScroll(container, speed)
- * container — the overflow:hidden wrapper element
- * speed     — pixels per animation frame (default 0.5 — smooth, decent pace)
- *
- * Expects container to already have its items rendered.
- * Duplicates the inner content for seamless looping.
- */
-function startAutoScroll(container, speed) {
-    if (!container) return;
-    speed = speed || 0.5;
-
-    // Wrap existing children in a scrolling inner div if not already done
-    var inner = container.querySelector('.auto-scroll-inner');
-    if (!inner) {
-        inner = document.createElement('div');
-        inner.className = 'auto-scroll-inner';
-        inner.style.cssText = 'display:flex;flex-direction:column;';
-        // Move all children into inner
-        while (container.firstChild) {
-            inner.appendChild(container.firstChild);
-        }
-        container.appendChild(inner);
-    }
-
-    // Only scroll if content overflows
-    if (inner.scrollHeight <= container.clientHeight) return;
-
-    // Duplicate content for seamless loop
-    var clone = inner.cloneNode(true);
-    clone.setAttribute('aria-hidden', 'true');
-    container.appendChild(clone);
-
-    var pos = 0;
-    var halfH = inner.scrollHeight;
-
-    function tick() {
-        pos += speed;
-        if (pos >= halfH) pos = 0;
-        inner.style.transform = 'translateY(-' + pos + 'px)';
-        clone.style.transform = 'translateY(-' + pos + 'px)';
-        requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-}
-
-// Legacy alias — replaces the old hover-triggered version used in student_portal.html
-// and faculty_portal.html. Now always scrolls, never stops.
-function setupNotificationAutoScroll(element) {
-    if (!element) return;
-    // Only start if there's content to scroll
-    if (element.scrollHeight <= element.clientHeight) return;
-
-    var pos = 0;
-    var speed = 0.5;
-
-    function tick() {
-        pos += speed;
-        if (pos >= element.scrollHeight - element.clientHeight) {
-            pos = 0; // jump back to top seamlessly
-        }
-        element.scrollTop = pos;
-        requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-}
-
 // ── CommonJS export (for Node.js scripts) ────────────────────────────────────
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
@@ -613,7 +669,6 @@ if (typeof module !== 'undefined' && module.exports) {
         filterTable, sortTable, resetForm, toggleElement,
         showLoading, hideLoading, showToast,
         formatDate, formatTime, formatNumber,
-        debounce, throttle, isInViewport, scrollToElement, copyToClipboard, generateId,
-        startAutoScroll, setupNotificationAutoScroll
+        debounce, throttle, isInViewport, scrollToElement, copyToClipboard, generateId
     };
 }

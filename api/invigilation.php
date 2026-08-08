@@ -412,7 +412,7 @@ if($method === 'POST' && $act === 'allocate'){
                 continue;
             }
 
-            $dutyType = ($slot === 1) ? 'Chief Invigilator' : 'Invigilator';
+            $dutyType = ($slot === 1) ? 'Hall Invigilator' : 'Relief Invigilator (Reliever)';
             $insert->bind_param('iiis', $examId, $pickedFaculty, $roomId, $dutyType);
             if($insert->execute()){
                 $con->query('UPDATE faculty SET total_duties=total_duties+1 WHERE faculty_id=' . (int)$pickedFaculty);
@@ -516,8 +516,8 @@ if($method === 'POST' && $act === 'update_duties'){
         foreach($updates as $u){
             $dutyId = (int)$u['duty_id'];
             $newFaculty = (int)$u['faculty_id'];
-            $newType = trim((string)($u['duty_type'] ?? 'Invigilator'));
-            if($newType === '') $newType = 'Invigilator';
+            $newType = trim((string)($u['duty_type'] ?? 'Hall Invigilator'));
+            if($newType === '') $newType = 'Hall Invigilator';
 
             $oldFaculty = (int)$existingMap[$dutyId]['faculty_id'];
             $updStmt->bind_param('isii', $newFaculty, $newType, $dutyId, $examId);

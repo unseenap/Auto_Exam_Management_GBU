@@ -9,6 +9,41 @@
   .inv-shell {
     display: grid;
     gap: 16px;
+    --inv-panel: #ffffff;
+    --inv-panel-soft: #f8fbff;
+    --inv-panel-alt: #eef6ff;
+    --inv-border: #d7e6f8;
+    --inv-ink: #183f68;
+    --inv-ink-soft: #4e657e;
+    --inv-muted: #667b91;
+    --inv-hero-from: #173a67;
+    --inv-hero-mid: #1f6fb5;
+    --inv-hero-to: #38a3d1;
+    --inv-shadow: 0 16px 36px rgba(17, 47, 86, 0.2);
+    --inv-shadow-soft: 0 10px 24px rgba(18, 49, 98, 0.08);
+    --inv-warn: #a35900;
+    --inv-warn-soft: #fff3e0;
+    --inv-chip: #e8f1ff;
+    --inv-chip-ink: #1e548d;
+  }
+
+  body.theme-dark .inv-shell {
+    --inv-panel: #0f172a;
+    --inv-panel-soft: #111c33;
+    --inv-panel-alt: #16233d;
+    --inv-border: #25334a;
+    --inv-ink: #e5eef7;
+    --inv-ink-soft: #c7d5e4;
+    --inv-muted: #9db0c8;
+    --inv-hero-from: #0f2748;
+    --inv-hero-mid: #12497e;
+    --inv-hero-to: #1a6f95;
+    --inv-shadow: 0 16px 36px rgba(0, 0, 0, 0.34);
+    --inv-shadow-soft: 0 10px 24px rgba(0, 0, 0, 0.18);
+    --inv-warn: #f0b55a;
+    --inv-warn-soft: rgba(240, 181, 90, 0.12);
+    --inv-chip: #16233d;
+    --inv-chip-ink: #e5eef7;
   }
 
   .inv-hero {
@@ -21,8 +56,8 @@
     border-radius: 16px;
     padding: 20px;
     color: #fff;
-    background: linear-gradient(130deg, #173a67 0%, #1f6fb5 62%, #38a3d1 100%);
-    box-shadow: 0 16px 36px rgba(17, 47, 86, 0.2);
+    background: linear-gradient(130deg, var(--inv-hero-from) 0%, var(--inv-hero-mid) 62%, var(--inv-hero-to) 100%);
+    box-shadow: var(--inv-shadow);
   }
 
   .hero-main h2 {
@@ -39,23 +74,62 @@
 
   .hero-rules {
     border-radius: 16px;
-    border: 1px solid #d7e6f8;
-    background: #f8fbff;
+    border: 1px solid var(--inv-border);
+    background: var(--inv-panel-soft);
     padding: 16px;
-    box-shadow: 0 10px 24px rgba(18, 49, 98, 0.08);
+    box-shadow: var(--inv-shadow-soft);
   }
 
   .hero-rules h3 {
     margin: 0 0 8px;
     font-size: 15px;
-    color: #1b4d79;
+    color: var(--inv-ink);
   }
 
   .hero-rules p {
     margin: 0;
-    color: #4e657e;
+    color: var(--inv-ink-soft);
     font-size: 13px;
     line-height: 1.45;
+  }
+
+  .duty-guide {
+    display: grid;
+    gap: 10px;
+  }
+
+  .duty-guide p {
+    margin: 0;
+    color: var(--inv-ink-soft);
+  }
+
+  .duty-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .duty-list li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 11px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--inv-border);
+    background: var(--inv-panel);
+    color: var(--inv-ink);
+  }
+
+  .duty-bullet {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-top: 7px;
+    background: linear-gradient(135deg, var(--inv-hero-mid), var(--inv-hero-to));
+    flex: 0 0 auto;
   }
 
   .slot-stats {
@@ -65,8 +139,8 @@
   }
 
   .slot-card {
-    border: 1px solid #d7e6f8;
-    background: #fff;
+    border: 1px solid var(--inv-border);
+    background: var(--inv-panel);
     border-radius: 12px;
     padding: 12px;
   }
@@ -75,7 +149,7 @@
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #667b91;
+    color: var(--inv-muted);
     margin-bottom: 4px;
   }
 
@@ -83,7 +157,7 @@
     font-size: 24px;
     line-height: 1;
     font-weight: 800;
-    color: #183f68;
+    color: var(--inv-ink);
   }
 
   .toolbar-grid {
@@ -102,7 +176,7 @@
   }
 
   .duty-table td small {
-    color: #6a7f94;
+    color: var(--inv-muted);
     display: block;
     margin-top: 2px;
   }
@@ -110,11 +184,11 @@
   .table-note {
     margin-top: 10px;
     font-size: 12px;
-    color: #5e7288;
+    color: var(--inv-ink-soft);
   }
 
   .warn-text {
-    color: #a35900;
+    color: var(--inv-warn);
     font-weight: 600;
   }
 
@@ -161,6 +235,26 @@
           <div class="hero-rules">
             <h3>Conflict Guardrails</h3>
             <p>No faculty can be assigned to multiple rooms for the same exam/date/shift. Existing same-slot assignments in other exams are also blocked.</p>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header"><h2>Examination Duties</h2></div>
+          <div class="card-body duty-guide">
+            <p>Each teacher can be assigned one of the following roles:</p>
+            <ul class="duty-list">
+              <li><span class="duty-bullet"></span><span>Hall Invigilator</span></li>
+              <li><span class="duty-bullet"></span><span>Relief Invigilator (Reliever)</span></li>
+              <li><span class="duty-bullet"></span><span>Flying Squad</span></li>
+              <li><span class="duty-bullet"></span><span>Chief Superintendent</span></li>
+              <li><span class="duty-bullet"></span><span>Deputy Superintendent</span></li>
+              <li><span class="duty-bullet"></span><span>Control Room Staff</span></li>
+              <li><span class="duty-bullet"></span><span>Corridor Supervisor</span></li>
+              <li><span class="duty-bullet"></span><span>Reserve Teacher</span></li>
+              <li><span class="duty-bullet"></span><span>Attendance Verification Officer</span></li>
+              <li><span class="duty-bullet"></span><span>Question Paper Distribution Staff</span></li>
+              <li><span class="duty-bullet"></span><span>Answer Sheet Collection Staff</span></li>
+            </ul>
           </div>
         </section>
 
@@ -228,6 +322,20 @@
 <script src="../js/script.js"></script>
 <script>
 const API = '../api/invigilation.php';
+const EXAMINATION_DUTIES = [
+  'Hall Invigilator',
+  'Relief Invigilator (Reliever)',
+  'Flying Squad',
+  'Chief Superintendent',
+  'Deputy Superintendent',
+  'Control Room Staff',
+  'Corridor Supervisor',
+  'Reserve Teacher',
+  'Attendance Verification Officer',
+  'Question Paper Distribution Staff',
+  'Answer Sheet Collection Staff'
+];
+const LEGACY_DUTIES = ['Chief Invigilator', 'Invigilator'];
 let facultyList = [];
 let dutyRows = [];
 let availableDates = [];
@@ -398,6 +506,17 @@ function getFacultySelectOptions(selectedId) {
   ).join('');
 }
 
+function getDutyTypeOptions(selectedType) {
+  const dutySet = EXAMINATION_DUTIES.concat(LEGACY_DUTIES);
+  const selectedValue = String(selectedType || '').trim();
+  return ['<option value="">-- Select Duty --</option>'].concat(
+    dutySet.map((duty) => {
+      const selected = selectedValue === duty ? 'selected' : '';
+      return `<option value="${escapeHtml(duty)}" ${selected}>${escapeHtml(duty)}</option>`;
+    })
+  ).join('');
+}
+
 function renderStats(rows) {
   const host = document.getElementById('slot-stats');
   if (!rows.length) {
@@ -447,8 +566,7 @@ async function loadDuties() {
           <td>${escapeHtml(d.department || '-')}</td>
           <td>
             <select class="form-control compact-select duty-type" data-index="${idx}">
-              <option value="Chief Invigilator" ${d.duty_type === 'Chief Invigilator' ? 'selected' : ''}>Chief</option>
-              <option value="Invigilator" ${d.duty_type === 'Invigilator' ? 'selected' : ''}>Invigilator</option>
+              ${getDutyTypeOptions(d.duty_type)}
             </select>
           </td>
         </tr>`).join('')
@@ -499,8 +617,7 @@ function loadDutiesFromState() {
       <td>${escapeHtml(d.department || '-')}</td>
       <td>
         <select class="form-control compact-select duty-type" data-index="${idx}">
-          <option value="Chief Invigilator" ${d.duty_type === 'Chief Invigilator' ? 'selected' : ''}>Chief</option>
-          <option value="Invigilator" ${d.duty_type === 'Invigilator' ? 'selected' : ''}>Invigilator</option>
+          ${getDutyTypeOptions(d.duty_type)}
         </select>
       </td>
     </tr>

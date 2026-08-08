@@ -357,7 +357,7 @@ async function loadNotifications() {
           '<p>' + esc(n.body) + '</p>' +
           '<div class="notif-card-meta">' +
             '<span>' + esc(n.priority || 'Normal') + '</span>' +
-            '<span>' + esc((n.publish_date || (n.created_at || '').slice(0,10) || '')) + '</span>' +
+            '<span>' + esc(toDisplayDate(n.publish_date || (n.created_at || '').slice(0,10) || '')) + '</span>' +
           '</div>' +
         '</div>';
       }).join('');

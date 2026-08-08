@@ -52,6 +52,8 @@
         <div class="card-header row-flex">
           <h2>Attendance Sheet</h2>
           <div class="btn-group ml-auto">
+            <button class="btn btn-secondary" onclick="loadAbsenteeReport()">📄 Room-wise Absentees</button>
+            <button class="btn btn-secondary" onclick="exportAbsenteeReportCSV()">⬇ Absentee CSV</button>
             <button class="btn btn-success" onclick="saveAttendance()">💾 Save</button>
             <button class="btn btn-secondary" onclick="markAll('Present')">✅ Mark All Present</button>
             <button class="btn btn-secondary" onclick="markAll('Late')">⏰ Mark All Late</button>
@@ -73,6 +75,27 @@
           </table>
         </div>
       </div>
+
+      <div class="card mt-3" id="absentee-report-card" style="display:none;">
+        <div class="card-header row-flex">
+          <h2>Room-wise Absentee Report</h2>
+          <div class="btn-group ml-auto">
+            <button class="btn btn-secondary btn-sm" onclick="exportAbsenteeReportCSV()">⬇ Download CSV</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <table class="data-table" id="absentee-table">
+            <thead>
+              <tr>
+                <th>Room</th><th>Seat</th><th>Roll No</th><th>Name</th><th>Branch</th><th>Semester</th>
+              </tr>
+            </thead>
+            <tbody id="absentee-tbody">
+              <tr><td colspan="6" class="text-center">Load the absentee report to view room-wise absentees.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </main>
 </div>
@@ -82,6 +105,7 @@
 <script>
 const API = '../api/attendance.php';
 let sheetData = [];
+let absenteeReportRows = [];
 
 (async () => {
   const res  = await fetch('../api/auth.php?action=check');
@@ -130,6 +154,103 @@ async function loadSheet() {
   renderSheet();
 }
 
+async function readJsonResponse(response) {
+  const text = await response.text();
+  if (!text) return {};
+
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    const firstJsonStart = Math.min(
+      ...['{', '[']
+        .map((marker) => text.indexOf(marker))
+        .filter((index) => index >= 0)
+    );
+    if (Number.isFinite(firstJsonStart)) {
+      const trimmed = text.slice(firstJsonStart);
+      try {
+        return JSON.parse(trimmed);
+      } catch (secondErr) {}
+    }
+    throw new Error(text.slice(0, 240) || 'Invalid server response');
+  }
+}
+
+async function loadAbsenteeReport() {
+  const eid = document.getElementById('exam-select').value;
+  if (!eid) {
+    showToast('Select an exam first.', 'warning');
+    return [];
+  }
+
+  const card = document.getElementById('absentee-report-card');
+  const tbody = document.getElementById('absentee-tbody');
+  card.style.display = 'block';
+  tbody.innerHTML = '<tr><td colspan="6" class="text-center">Loading absentee report...</td></tr>';
+
+  try {
+    const res = await fetch(`${API}?action=get_absentees&exam_id=${encodeURIComponent(eid)}`, {
+      cache: 'no-store',
+      credentials: 'same-origin'
+    });
+    const data = await readJsonResponse(res);
+    if (!res.ok || !data.success) {
+      showToast(data.message || 'Failed to load absentee report.', 'error');
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center">Unable to load absentee report.</td></tr>';
+      return;
+    }
+
+    absenteeReportRows = Array.isArray(data.data) ? data.data : [];
+    renderAbsenteeReport();
+    showToast(absenteeReportRows.length ? 'Absentee report loaded.' : 'No absentees found.', absenteeReportRows.length ? 'success' : 'info');
+    return absenteeReportRows;
+  } catch (err) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center">Unable to load absentee report.</td></tr>';
+    showToast('Error loading absentee report.', 'error');
+    return [];
+  }
+}
+
+function renderAbsenteeReport() {
+  const tbody = document.getElementById('absentee-tbody');
+  const rows = Array.isArray(absenteeReportRows) ? absenteeReportRows : [];
+
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center">No absent students found for the selected exam.</td></tr>';
+    return;
+  }
+
+  const grouped = {};
+  rows.forEach((row) => {
+    const key = `${row.room_id || ''}`;
+    if (!grouped[key]) grouped[key] = { room_no: row.room_no || '-', building: row.building || '-', items: [] };
+    grouped[key].items.push(row);
+  });
+
+  const bodyRows = [];
+  Object.keys(grouped).sort((a, b) => {
+    const left = grouped[a].room_no || '';
+    const right = grouped[b].room_no || '';
+    return String(left).localeCompare(String(right), undefined, { numeric: true, sensitivity: 'base' });
+  }).forEach((roomKey) => {
+    const group = grouped[roomKey];
+    bodyRows.push(`<tr class="room-group-row"><td colspan="6"><strong>${escapeHtml(group.room_no)}</strong> ${group.building ? '(' + escapeHtml(group.building) + ')' : ''} - ${group.items.length} absent student(s)</td></tr>`);
+    group.items.forEach((item) => {
+      bodyRows.push(`
+        <tr>
+          <td>${escapeHtml(group.room_no)}</td>
+          <td>${escapeHtml(item.seat_no)}</td>
+          <td>${escapeHtml(item.roll_no)}</td>
+          <td>${escapeHtml(item.name)}</td>
+          <td>${escapeHtml(item.branch)}</td>
+          <td>${escapeHtml(item.semester)}</td>
+        </tr>`);
+    });
+  });
+
+  tbody.innerHTML = bodyRows.join('');
+}
+
 function renderSheet() {
   const tbody = document.getElementById('attendance-tbody');
   tbody.innerHTML = sheetData.length
@@ -165,6 +286,40 @@ async function saveAttendance() {
 }
 
 function exportCSV() { exportTableToCSV('attendance-table', 'attendance.csv'); }
+
+async function exportAbsenteeReportCSV() {
+  const eid = document.getElementById('exam-select').value;
+  if (!eid) {
+    showToast('Select an exam first.', 'warning');
+    return;
+  }
+
+  const url = `${API}?action=get_absentees_csv&exam_id=${encodeURIComponent(eid)}`;
+
+  try {
+    const res = await fetch(url, { credentials: 'same-origin', cache: 'no-store' });
+    const contentType = (res.headers.get('content-type') || '').toLowerCase();
+
+    if (!res.ok || contentType.includes('application/json')) {
+      const text = await res.text();
+      let payload = null;
+      try { payload = text ? JSON.parse(text) : null; } catch (err) {}
+      throw new Error((payload && payload.message) || 'Failed to download absentee CSV.');
+    }
+
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = objectUrl;
+    link.download = 'absentee_report.csv';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+  } catch (err) {
+    showToast(err.message || 'Failed to download absentee CSV.', 'error');
+  }
+}
 async function logout() {
   await fetch('../api/auth.php', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'logout'}) });
   window.location.href = '../index.html';

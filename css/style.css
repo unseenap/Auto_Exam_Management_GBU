@@ -343,6 +343,27 @@ body.login-page {
 
 .form-group.mb-0 { margin-bottom: 0; }
 
+.select-search-wrap {
+  display: grid;
+  gap: 6px;
+}
+
+.select-search-input {
+  width: 100%;
+  padding: 7px 11px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-size: 12px;
+  background: #fff;
+  color: #333;
+  outline: none;
+}
+
+.select-search-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(52,152,219,0.12);
+}
+
 /* =============================================
    BUTTONS
    ============================================= */
@@ -516,6 +537,66 @@ body.login-page {
 .fw-bold     { font-weight: 700; }
 
 .stats-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+/* =============================================
+   NOTIFICATION BOARDS
+   ============================================= */
+.notif-scroll-box,
+.notify-list {
+  max-height: 420px;
+  overflow: hidden;
+}
+
+.notif-scroll-inner,
+.notify-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.notif-card-item,
+.notify-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.notif-card-item:last-child,
+.notify-item:last-child {
+  border-bottom: none;
+}
+
+.notif-card-item h4,
+.notify-item .title {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--dark);
+}
+
+.notif-card-item p,
+.notify-item p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.notif-card-meta,
+.notify-item .meta,
+.notify-meta {
+  margin-top: 6px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.notify-empty {
+  padding: 20px 16px;
+  color: var(--muted);
+}
 
 /* =============================================
    SEATING SLIP (Student Portal)
@@ -898,6 +979,21 @@ body.theme-dark .form-group textarea {
 body.theme-dark .nav-links a { color: #c0d0e3; }
 body.theme-dark .nav-links a:hover,
 body.theme-dark .nav-links a.active { background: rgba(52, 152, 219, 0.12); color: #ffffff; }
+body.theme-dark .top-bar h1,
+body.theme-dark .card-header h2,
+body.theme-dark .card-header h3,
+body.theme-dark .form-group label,
+body.theme-dark .text-center,
+body.theme-dark .text-right,
+body.theme-dark .text-muted,
+body.theme-dark .stat-info h3,
+body.theme-dark .slip-field span,
+body.theme-dark .module-card h3,
+body.theme-dark .panel-head h2,
+body.theme-dark .panel-head h3 {
+  color: #e5eef7;
+}
+
 body.theme-dark .sidebar-header p,
 body.theme-dark .chatbot-head-info p,
 body.theme-dark .detail-value,
@@ -918,6 +1014,55 @@ body.theme-dark .chatbot-chips,
 body.theme-dark .table thead th,
 body.theme-dark .data-table thead th {
   background: #111c33;
+}
+
+body.theme-dark .data-table td {
+  color: #d7e2ee;
+  border-bottom-color: #203045;
+}
+
+body.theme-dark .data-table tbody tr:hover {
+  background: #101b30;
+}
+
+body.theme-dark .select-search-input {
+  background: #0f172a;
+  color: #e5eef7;
+  border-color: #25334a;
+}
+
+body.theme-dark .select-search-input::placeholder {
+  color: #8ca0b8;
+}
+
+body.theme-dark .select-search-wrap select,
+body.theme-dark .select-search-wrap .form-control {
+  width: 100%;
+}
+
+body.theme-dark .notif-card-item,
+body.theme-dark .notify-item {
+  border-bottom-color: #203045;
+}
+
+body.theme-dark .notif-card-item h4,
+body.theme-dark .notify-item .title,
+body.theme-dark .notify-item .meta,
+body.theme-dark .notify-meta,
+body.theme-dark .notif-card-meta {
+  color: #e5eef7;
+}
+
+body.theme-dark .notif-card-item p,
+body.theme-dark .notify-item p,
+body.theme-dark .notify-empty {
+  color: #c7d5e4;
+}
+
+body.theme-dark .form-control::placeholder,
+body.theme-dark .form-group input::placeholder,
+body.theme-dark .form-group textarea::placeholder {
+  color: #8ca0b8;
 }
 
 body.theme-dark .chatbot-panel,
