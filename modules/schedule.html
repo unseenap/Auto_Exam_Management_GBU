@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Datesheet | Exam Management</title>
-<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../assets/css/style.css">
 <style>
   :root {
     --sheet-bg: #f4f7fb;
@@ -552,7 +552,7 @@
     <header class="sheet-topbar">
       <div class="sheet-brand">
         <button onclick="toggleSidebar()" class="menu-btn" style="background:rgba(255,255,255,0.12);color:#fff;border-color:rgba(255,255,255,0.18)">☰</button>
-        <img src="../logo.jpeg" alt="University logo">
+        <img src="../assets/images/logo.jpeg" alt="University logo">
         <div>
           <h1>Datesheet</h1>
           <p>School, department, exam type and shifts in one screen.</p>
@@ -595,7 +595,7 @@
           </div>
 
           <div class="preview-card">
-            <img id="logo-preview" src="../logo.jpeg" alt="Logo preview">
+            <img id="logo-preview" src="../assets/images/logo.jpeg" alt="Logo preview">
             <div>
               <div class="preview-title" id="datesheet-title">Datesheet</div>
               <div class="preview-subtitle" id="datesheet-subtitle">Branch, year, semester and session-wise exam matrix.</div>
@@ -713,7 +713,7 @@
 
 <div id="toast" class="toast"></div>
 
-<script src="../js/script.js"></script>
+<script src="../assets/js/script.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 const API = '../api/schedule.php';
@@ -1331,7 +1331,7 @@ async function handleCsvUpload(event) {
 
 async function loadLogoDataUrl() {
   if (state.logoDataUrl) return state.logoDataUrl;
-  const res = await fetch('../logo.jpeg');
+  const res = await fetch('../assets/images/logo.jpeg');
   const blob = await res.blob();
   state.logoDataUrl = await new Promise((resolve, reject) => {
     const reader = new FileReader();

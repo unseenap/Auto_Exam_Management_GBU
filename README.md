@@ -201,24 +201,19 @@ The running web application does not depend on Node.js. A few utility scripts in
 
 - `api/` - PHP endpoints for authentication, students, seating, reports, and related modules
 - `config/` - Database connection setup
-- `css/` - Shared styling
+- `assets/css/` - Shared styling
+- `assets/js/` - Shared front-end behavior
+- `assets/images/` - Shared image assets
 - `data/` - Source data used by import scripts
-<<<<<<< HEAD
-- `database/` - Schema and sample SQL seed files
-=======
-- `database/` - Database schema file
->>>>>>> 5c0461a (Version 1.0)
-- `js/` - Shared front-end behavior
+- `database/` - Database schema and development seed files
+- `docs/` - Installation instructions and project diagrams
 - `modules/` - Admin and student-facing HTML pages
 - `scripts/` - Optional Node.js maintenance/import scripts
 - `README.md` - Project documentation
-<<<<<<< HEAD
-=======
 
 ## Diagrams
 
-Project-specific Architecture, ER, Data Flow, Activity, and Client-Server diagrams are available in `DIAGRAMS.md`.
->>>>>>> 5c0461a (Version 1.0)
+Project-specific Architecture, ER, Data Flow, Activity, and Client-Server diagrams are available in `docs/DIAGRAMS.md`.
 
 ## Troubleshooting
 

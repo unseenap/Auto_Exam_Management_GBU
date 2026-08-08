@@ -16,8 +16,8 @@ flowchart TB
         M1[modules - Admin Pages]
         M2[modules/faculty_portal.html]
         M3[modules/student_portal.html]
-        JS[js/script.js]
-        CSS[css/style.css]
+        JS[assets/js/script.js]
+        CSS[assets/css/style.css]
     end
 
     subgraph APP[Application Layer - PHP]

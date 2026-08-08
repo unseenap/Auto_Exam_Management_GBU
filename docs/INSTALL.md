@@ -10,13 +10,13 @@
 4. Start **Apache** and **MySQL** services
 
 #### Step 2: Copy Project Files
-1. Copy the entire folder "Automated Seating management" to:
+1. Copy the entire folder "Auto_Exam_Management_GBU" to:
    ```
    C:\xampp\htdocs\
    ```
 2. Final path should be:
    ```
-   C:\xampp\htdocs\Automated Seating management\
+   C:\xampp\htdocs\Auto_Exam_Management_GBU\
    ```
 
 #### Step 3: Create Database
@@ -31,20 +31,20 @@
 1. Click on the **exam_management** database (left sidebar)
 2. Click **Import** tab
 3. Click **Choose File**
-4. Navigate to: `C:\xampp\htdocs\Automated Seating management\database\schema.sql`
+4. Navigate to: `C:\xampp\htdocs\Auto_Exam_Management_GBU\database\schema.sql`
 5. Click **Go** button at the bottom
 6. Wait for success message
 
 #### Step 5: Access the System
 1. Open web browser
 2. Go to: http://localhost/Automated%20Seating%20management/
-   OR: http://localhost/Automated Seating management/
+   OR: http://localhost/Auto_Exam_Management_GBU/
 3. You should see the login page
 
 #### Step 5.1: Install PHP PDF Dependency (Required for Seating Plan PDF)
 1. Open terminal in project root:
    ```
-   C:\xampp\htdocs\Automated Seating management\
+   C:\xampp\htdocs\Auto_Exam_Management_GBU\
    ```
 2. Run:
    ```bash
@@ -177,7 +177,7 @@ chmod -R 777 /path/to/project/uploads (if needed)
 
 1. Delete project folder:
    ```
-   C:\xampp\htdocs\Automated Seating management\
+   C:\xampp\htdocs\Auto_Exam_Management_GBU\
    ```
 
 2. Drop database in phpMyAdmin:

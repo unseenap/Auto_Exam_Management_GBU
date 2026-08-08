@@ -11,11 +11,6 @@ composer.lock
 
 node_modules/
 
-DIAGRAMS.md
-INSTALL.md
-*.md
-!README.md
-
 .DS_Store
 Thumbs.db
 desktop.ini

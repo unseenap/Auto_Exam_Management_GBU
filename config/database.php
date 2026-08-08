@@ -2,11 +2,11 @@
 ini_set('display_errors','0');
 error_reporting(0);
 
-define('DB_HOST','localhost');
-define('DB_USER','root');
-define('DB_PASS','Password123');
-define('DB_NAME','exam_management');
-define('DB_PORT',3307);
+define('DB_HOST', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+define('DB_NAME', 'exam_management');
+define('DB_PORT', 3306);
 
 function getConnection(){
     $ports = array_values(array_unique([DB_PORT, 3306, 3307]));
